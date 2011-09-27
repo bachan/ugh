@@ -1,0 +1,73 @@
+error_log @CMAKE_INSTALL_PREFIX@/var/log/ugh.log info;
+listen 19454;
+#resolver 192.168.0.1;
+
+upstream ADVACTION {
+  server f10.advaction.ru;
+  server f11.advaction.ru:80;
+  backup f10.advaction.ru;
+}
+
+set $round_robin_var {
+  127.0.0.1/rr1;
+  127.0.0.1/rr2;
+  127.0.0.1/rr3;
+}
+
+map $cl_hash_arg_cid $subreq_addr {
+  0 127.0.0.1;
+  1 127.0.1.1;
+  2 127.0.2.1;
+  3 127.0.3.1;
+  4 127.0.4.1;
+  5 127.0.5.1;
+  6 127.0.6.1;
+  7 127.0.7.1;
+  8 127.0.8.1;
+  9 127.0.9.1;
+    127.1.0.1;
+}
+
+map $cl_hash_arg_cid $subreq_port {
+  0 15000;
+  1 15001;
+  2 15002;
+  3 15003;
+  4 15004;
+  5 15005;
+  6 15006;
+  7 15007;
+  8 15008;
+  9 15009;
+    15010;
+}
+
+proxy_next_upstream error timeout http_5xx http_4xx;
+
+subreq ADVACTION;
+#subreq 94.79.54.194;
+#subreq 94.79.55.206:15000;
+#subreq 127.0.0.1:19455;
+#subreq $subreq_uri;
+#subreq $subreq_uri/h;
+#subreq $subreq_uri/haha?a=T&b=P;
+#subreq 127.0.0.1:15010;
+#subreq 127.0.0.1:1502$cl_hash_arg_cid;
+#subreq yandex.ru;
+#subreq localhost:$subreq_port;
+#subreq $arg_u wait;
+#return localhost:$subreq_port=RESPONSE,arg_u=$arg_u;
+return <xml>;
+return subreq_addr=$subreq_addr,;
+return subreq_port=$subreq_port,;
+return </xml>;
+return $round_robin_var;
+#return "
+#'END'
+#";
+#return '
+#"END SINGLE QUOTES"
+#';
+#return "";
+#return $http_host,$http_user_agent;
+

@@ -1,0 +1,13 @@
+# vim:set ft=nginx:
+error_log @CMAKE_INSTALL_PREFIX@/var/log/ugh_example.log info;
+listen 19454;
+#resolver 192.168.0.1;
+
+import example "@CMAKE_INSTALL_PREFIX@/@LIBDIR@/ugh/libugh_example.so";
+
+example;
+example_session_host localhost;
+example_friends_host localhost;
+example_wall_host localhost;
+example_logger_host localhost;
+
