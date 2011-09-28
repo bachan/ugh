@@ -182,8 +182,6 @@ strp ugh_client_setvar(ugh_client_t *c, const char *data, size_t size, char *val
 
 strp ugh_client_cookie_get(ugh_client_t *c, const char *name, size_t size);
 
-/* TODO API which allows to send arbitrary headers */
-
 /* ### url ### */
 
 typedef struct ugh_url
@@ -307,6 +305,19 @@ struct ugh_subreq
 ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, ugh_subreq_handle_fp handle, int flags, char *body, size_t body_size);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
+
+
+#if 0
+ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags);
+
+int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
+int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
+
+int ugh_subreq_set_timeout(ugh_subreq_t *r, double t);
+
+int ugh_subreq_run(ugh_subreq_t *r);
+#endif
+
 
 #define UGH_UPSTREAM_FT_OFF            0x0000
 #define UGH_UPSTREAM_FT_ERROR          0x0001
