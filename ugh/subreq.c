@@ -211,7 +211,7 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	ev_io_init(&r->wev_recv, ugh_subreq_wcb_recv, sd, EV_READ);
 	ev_io_init(&r->wev_send, ugh_subreq_wcb_send, sd, EV_WRITE);
 	ev_io_init(&r->wev_connect, ugh_subreq_wcb_connect, sd, EV_READ | EV_WRITE);
-	ev_timer_init(&r->wev_timeout, ugh_subreq_wcb_timeout, 0, UGH_CONFIG_SUBREQ_TIMEOUT);
+	ev_timer_init(&r->wev_timeout, ugh_subreq_wcb_timeout, 0, r->timeout);
 	ev_timer_again(loop, &r->wev_timeout);
 	ev_io_start(loop, &r->wev_connect);
 
@@ -236,6 +236,8 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags)
 
 	r->flags = flags;
 	r->handle = NULL;
+
+	r->timeout = UGH_CONFIG_SUBREQ_TIMEOUT;
 
 	ugh_parser_url(&r->u, url, size);
 
@@ -269,9 +271,9 @@ int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size)
 	return 0;
 }
 
-int ugh_subreq_set_timeout(ugh_subreq_t *r, double t)
+int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout)
 {
-	/* TODO implement */
+	r->timeout = timeout;
 
 	return 0;
 }

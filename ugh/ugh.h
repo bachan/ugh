@@ -243,6 +243,7 @@ struct ugh_subreq
 	ev_io wev_send;
 	ev_io wev_connect;
 	ev_timer wev_timeout;
+	ev_tstamp timeout;
 
 	/* send */
 
@@ -298,7 +299,7 @@ struct ugh_subreq
 ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags);
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
 int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
-int ugh_subreq_set_timeout(ugh_subreq_t *r, double t);
+int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout);
 int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
