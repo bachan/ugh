@@ -14,7 +14,9 @@ int ugh_module_subreq_handle(ugh_client_t *c, void *data, strp body)
 
 	if (conf->wait)
 	{
-		ugh_subreq_t *r = ugh_subreq_add(c, tv->data, tv->size, NULL, UGH_SUBREQ_WAIT, NULL, 0);
+		/* ugh_subreq_t *r = ugh_subreq_add(c, tv->data, tv->size, NULL, UGH_SUBREQ_WAIT, NULL, 0); */
+		ugh_subreq_t *r = ugh_subreq_add(c, tv->data, tv->size, UGH_SUBREQ_WAIT);
+		ugh_subreq_run(r);
 		ugh_subreq_wait(c);
 
 		body->data = r->body.data;
@@ -22,7 +24,9 @@ int ugh_module_subreq_handle(ugh_client_t *c, void *data, strp body)
 	}
 	else
 	{
-		ugh_subreq_add(c, tv->data, tv->size, NULL, 0, NULL, 0);
+		/* ugh_subreq_add(c, tv->data, tv->size, NULL, 0, NULL, 0); */
+		ugh_subreq_t *r = ugh_subreq_add(c, tv->data, tv->size, 0);
+		ugh_subreq_run(r);
 	}
 
 	return UGH_HTTP_OK;
@@ -45,8 +49,8 @@ int ugh_command_subreq(ugh_config_t *cfg, int argc, char **argv)
 
 static ugh_command_t ugh_module_subreq_cmds [] =
 {
-	{ "subreq", ugh_command_subreq },
-	{ NULL, NULL }
+	ugh_make_command(subreq),
+	ugh_null_command
 };
 
 ugh_module_t ugh_module_subreq = 

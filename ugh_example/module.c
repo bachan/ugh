@@ -31,7 +31,10 @@ int ugh_module_example_handle(ugh_client_t *c, void *data, strp body)
 	/* order one session subrequest */
 
 	strp session_host = ugh_template_execute(&conf->session_host, c);
-	ugh_subreq_t *r_session = ugh_subreq_add(c, session_host->data, session_host->size, NULL, UGH_SUBREQ_WAIT, cookie_sid->data, cookie_sid->size);
+	/* ugh_subreq_t *r_session = ugh_subreq_add(c, session_host->data, session_host->size, NULL, UGH_SUBREQ_WAIT, cookie_sid->data, cookie_sid->size); */
+	ugh_subreq_t *r_session = ugh_subreq_add(c, session_host->data, session_host->size, UGH_SUBREQ_WAIT);
+	ugh_subreq_set_body(r_session, cookie_sid->data, cookie_sid->size);
+	ugh_subreq_run(r_session);
 
 	/* wait for it (do smth in different coroutine while it is being downloaded) */
 
@@ -55,17 +58,26 @@ int ugh_module_example_handle(ugh_client_t *c, void *data, strp body)
 	/* order friends subrequest */
 
 	strp friends_host = ugh_template_execute(&conf->friends_host, c);
-	ugh_subreq_t *r_friends = ugh_subreq_add(c, friends_host->data, friends_host->size, NULL, UGH_SUBREQ_WAIT, r_session->body.data, r_session->body.size);
+	/* ugh_subreq_t *r_friends = ugh_subreq_add(c, friends_host->data, friends_host->size, NULL, UGH_SUBREQ_WAIT, r_session->body.data, r_session->body.size); */
+	ugh_subreq_t *r_friends = ugh_subreq_add(c, friends_host->data, friends_host->size, UGH_SUBREQ_WAIT);
+	ugh_subreq_set_body(r_friends, r_session->body.data, r_session->body.size);
+	ugh_subreq_run(r_friends);
 
 	/* order wall subrequest */
 
 	strp wall_host = ugh_template_execute(&conf->wall_host, c);
-	ugh_subreq_t *r_wall = ugh_subreq_add(c, wall_host->data, wall_host->size, NULL, UGH_SUBREQ_WAIT, r_session->body.data, r_session->body.size);
+	/* ugh_subreq_t *r_wall = ugh_subreq_add(c, wall_host->data, wall_host->size, NULL, UGH_SUBREQ_WAIT, r_session->body.data, r_session->body.size); */
+	ugh_subreq_t *r_wall = ugh_subreq_add(c, wall_host->data, wall_host->size, UGH_SUBREQ_WAIT);
+	ugh_subreq_set_body(r_wall, r_session->body.data, r_session->body.size);
+	ugh_subreq_run(r_wall);
 
 	/* order logger subrequest, but tell ugh not to wait for its result */
 
 	strp logger_host = ugh_template_execute(&conf->logger_host, c);
-	ugh_subreq_add(c, logger_host->data, logger_host->size, NULL, 0, r_session->body.data, r_session->body.size);
+	/* ugh_subreq_add(c, logger_host->data, logger_host->size, NULL, 0, r_session->body.data, r_session->body.size); */
+	ugh_subreq_t *r_logger = ugh_subreq_add(c, logger_host->data, logger_host->size, 0);
+	ugh_subreq_set_body(r_logger, r_session->body.data, r_session->body.size);
+	ugh_subreq_run(r_logger);
 
 	/* wait for two ordered subrequests */
 

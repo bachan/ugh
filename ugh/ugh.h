@@ -295,29 +295,13 @@ struct ugh_subreq
 
 #define UGH_SUBREQ_WAIT 1
 
-/* 
- * ugh_subreq_add(.., NULL, 0) - will return immediately after add subreq to event loop
- * ugh_subreq_add(.., func, 0) - will call func with each subreq response buffer
- * ugh_subreq_add(.., NULL, UGH_SUBREQ_WAIT) - will return after subreq is complete
- * ugh_subreq_add(.., func, UGH_SUBREQ_WAIT) - will call func after subreq is complete
- */
-
-ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, ugh_subreq_handle_fp handle, int flags, char *body, size_t body_size);
-int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
-int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
-
-
-#if 0
 ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags);
-
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
 int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
-
 int ugh_subreq_set_timeout(ugh_subreq_t *r, double t);
-
 int ugh_subreq_run(ugh_subreq_t *r);
-#endif
-
+int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
+int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
 
 #define UGH_UPSTREAM_FT_OFF            0x0000
 #define UGH_UPSTREAM_FT_ERROR          0x0001

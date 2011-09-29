@@ -218,7 +218,7 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	return 0;
 }
 
-ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, ugh_subreq_handle_fp handle, int flags, char *body, size_t body_size)
+ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags)
 {
 	ugh_subreq_t *r;
 
@@ -235,10 +235,7 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, ugh_subreq
 	r->c = c;
 
 	r->flags = flags;
-	r->handle = handle;
-
-	r->request_body.data = body;
-	r->request_body.size = body_size;
+	r->handle = NULL;
 
 	ugh_parser_url(&r->u, url, size);
 
@@ -250,16 +247,45 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, ugh_subreq
 		(int) r->u.args.size, r->u.args.data
 	);
 
-	r->method = body ? UGH_HTTP_POST : c->method; /* TODO do smth if c->method = POST, but body == NULL */
+	r->method = c->method; /* TODO do smth if c->method = POST, but body == NULL */
 
+	return r;
+}
+
+int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size)
+{
+	/* TODO implement */
+
+	return 0;
+}
+
+int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size)
+{
+	r->method = UGH_HTTP_POST;
+
+	r->request_body.data = body;
+	r->request_body.size = body_size;
+
+	return 0;
+}
+
+int ugh_subreq_set_timeout(ugh_subreq_t *r, double t)
+{
+	/* TODO implement */
+
+	return 0;
+}
+
+int ugh_subreq_run(ugh_subreq_t *r)
+{
 	/* buffers */
 
-	r->buf_send_data = aux_pool_malloc(c->pool, UGH_SUBREQ_BUF);
+	r->buf_send_data = aux_pool_malloc(r->c->pool, UGH_SUBREQ_BUF);
 
 	if (NULL == r->buf_send_data)
 	{
-		aux_pool_free(c->pool);
-		return NULL;
+		aux_pool_free(r->c->pool);
+		return -1;
 	}
 
 	r->buf_send.data = r->buf_send_data;
@@ -268,8 +294,8 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, ugh_subreq
 
 	if (NULL == r->buf_recv_data)
 	{
-		aux_pool_free(c->pool);
-		return NULL;
+		aux_pool_free(r->c->pool);
+		return -1;
 	}
 
 	r->buf_recv.data = r->buf_recv_data;
@@ -279,7 +305,7 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, ugh_subreq
 
 	strp u_host = &r->u.host;
 
-	r->upstream = ugh_upstream_get(c->s->cfg, r->u.host.data, r->u.host.size);
+	r->upstream = ugh_upstream_get(r->c->s->cfg, r->u.host.data, r->u.host.size);
 
 	if (NULL != r->upstream)
 	{
@@ -299,12 +325,12 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, ugh_subreq
 
 	/* resolve host */
 
-	r->resolver_ctx = aux_pool_malloc(c->pool, sizeof(ugh_resolver_ctx_t));
+	r->resolver_ctx = aux_pool_malloc(r->c->pool, sizeof(ugh_resolver_ctx_t));
 
 	if (NULL == r->resolver_ctx)
 	{
-		aux_pool_free(c->pool);
-		return NULL;
+		aux_pool_free(r->c->pool);
+		return -1;
 	}
 
 	r->resolver_ctx->handle = ugh_subreq_connect;
@@ -315,10 +341,10 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, ugh_subreq
 		r->addr.sin_family = AF_INET;
 		r->addr.sin_port = r->upstream->values[r->upstream_current].port;
 
-		if (0 > ugh_resolver_addq(c->s->resolver, u_host->data, u_host->size, r->resolver_ctx))
+		if (0 > ugh_resolver_addq(r->c->s->resolver, u_host->data, u_host->size, r->resolver_ctx))
 		{
 			/* ugh_resolver_addq shall call ctx->handle with INADDR_NONE argument in all error cases */
-			return NULL;
+			return -1;
 		}
 	}
 	else
@@ -326,22 +352,19 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, ugh_subreq
 		r->addr.sin_family = AF_INET;
 		r->addr.sin_port = htons(strtoul(r->u.port.data, NULL, 10));
 
-		if (0 > ugh_resolver_addq(c->s->resolver, r->u.host.data, r->u.host.size, r->resolver_ctx))
+		if (0 > ugh_resolver_addq(r->c->s->resolver, r->u.host.data, r->u.host.size, r->resolver_ctx))
 		{
 			/* ugh_resolver_addq shall call ctx->handle with INADDR_NONE argument in all error cases */
-			return NULL;
+			return -1;
 		}
 	}
 
-#if 1 /* UGH_CORO */
-	if (/*NULL == r->handle &&*/ (r->flags & UGH_SUBREQ_WAIT))
+	if ((r->flags & UGH_SUBREQ_WAIT))
 	{
-		c->wait++;
-		/* coro_transfer(&c->ctx, &ctx_main); */
+		r->c->wait++;
 	}
-#endif
 
-	return r;
+	return 0;
 }
 
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
