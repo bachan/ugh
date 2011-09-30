@@ -256,7 +256,27 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags)
 
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size)
 {
+#if 0
 	/* TODO implement */
+
+	void **dest;
+	ugh_header_t *vptr;
+
+	dest = JudyLIns(&r->headers_out_hash, aux_hash_key_lc_header(data, size), PJE0);
+	if (PJERR == dest) return NULL;
+
+	vptr = aux_pool_malloc(r->c->pool, sizeof(*vptr));
+	if (NULL == vptr) return NULL;
+
+	*dest = vptr;
+
+	vptr->key.data = (char *) data;
+	vptr->key.size = size;
+	vptr->value.data = value_data;
+	vptr->value.size = value_size;
+
+	return vptr;
+#endif
 
 	return 0;
 }

@@ -252,6 +252,8 @@ struct ugh_subreq
 
 	ucht method;
 
+	/* void*headers_out_hash; */
+
 	char*buf_send_data;
 	strt buf_send; /* UGH_SUBREQ_BUF */
 
