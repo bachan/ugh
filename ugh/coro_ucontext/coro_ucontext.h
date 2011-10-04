@@ -10,7 +10,7 @@ void coro_create (coro_context *ctx, /* an uninitialised coro_context */
                   void *arg,         /* a single pointer passed to the coro */
                   void *sptr,        /* start of stack area */
                   long ssize,        /* size of stack area */
-				  coro_context *link);
+                  coro_context *link);
 
 #include <ucontext.h>
 

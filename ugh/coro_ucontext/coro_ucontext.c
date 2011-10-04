@@ -59,27 +59,27 @@ coro_context ctx_func;
 
 void func(void *arg)
 {
-	printf("func: switching to main\n");
-	coro_transfer(&ctx_func, &ctx_main);
+  printf("func: switching to main\n");
+  coro_transfer(&ctx_func, &ctx_main);
 
-	printf("func: returning\n");
+  printf("func: returning\n");
 }
 
 int main(int argc, char **argv)
 {
-	char stack [4096];
+  char stack [4096];
 
-	coro_create(&ctx_func, func, NULL, stack, 4096, &ctx_main);
+  coro_create(&ctx_func, func, NULL, stack, 4096, &ctx_main);
 
-	printf("main: switching to func\n");
-	coro_transfer(&ctx_main, &ctx_func);
+  printf("main: switching to func\n");
+  coro_transfer(&ctx_main, &ctx_func);
 
-	printf("main: switching to func\n");
-	coro_transfer(&ctx_main, &ctx_func);
+  printf("main: switching to func\n");
+  coro_transfer(&ctx_main, &ctx_func);
 
-	printf("main: returned\n");
+  printf("main: returned\n");
 
-	return 0;
+  return 0;
 }
 #endif
 
