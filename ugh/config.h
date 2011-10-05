@@ -58,13 +58,23 @@ typedef struct ugh_command
 struct ugh_command
 {
 	const char *name;
-	int (*handle)(ugh_config_t *cfg, int argc, char **argv);
+	int (*handle)(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
+
+	off_t offset;
 };
 
 ugh_command_t *ugh_command_get(ugh_config_t *cfg, const char *name);
 
-#define ugh_make_command(name) { #name, ugh_command_##name }
-#define ugh_null_command { NULL, NULL }
+#define ugh_make_command(name) { #name, ugh_command_##name, 0 }
+#define ugh_null_command { NULL, NULL, 0 }
+
+int ugh_config_set_flag_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
+int ugh_config_set_str_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
+int ugh_config_set_template_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
+
+#define ugh_make_command_flag(name, offset) { #name, ugh_config_set_flag_slot, offset }
+#define ugh_make_command_str(name, offset) { #name, ugh_config_set_flag_slot, offset }
+#define ugh_make_command_template(name, offset) { #name, ugh_config_set_flag_slot, offset }
 
 #ifdef __cplusplus
 }

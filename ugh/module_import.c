@@ -4,7 +4,7 @@
 /* TODO dlclose */
 
 static
-int ugh_command_import(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_import(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	char name [1024];
 	char pbuf [PATH_MAX], *path;
@@ -46,8 +46,8 @@ int ugh_command_import(ugh_config_t *cfg, int argc, char **argv)
 
 static ugh_command_t ugh_module_import_cmds [] =
 {
-	{ "import", ugh_command_import },
-	{ NULL, NULL }
+	ugh_make_command(import),
+	ugh_null_command
 };
 
 ugh_module_t ugh_module_import =

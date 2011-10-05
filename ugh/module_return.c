@@ -17,7 +17,7 @@ int ugh_module_return_handle(ugh_client_t *c, void *data, strp body)
 	return UGH_HTTP_OK;
 }
 
-int ugh_command_return(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_return(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	ugh_module_return_conf_t *conf;
 

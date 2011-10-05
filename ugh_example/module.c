@@ -97,7 +97,7 @@ int ugh_module_example_handle(ugh_client_t *c, void *data, strp body)
 	return UGH_HTTP_OK;
 }
 
-int ugh_command_example(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_example(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	ugh_module_example_conf_t *conf;
 	
@@ -109,45 +109,13 @@ int ugh_command_example(ugh_config_t *cfg, int argc, char **argv)
 	return 0;
 }
 
-int ugh_command_example_session_host(ugh_config_t *cfg, int argc, char **argv)
-{
-	ugh_module_example_conf_t *conf = ugh_module_configs[ugh_module_handles_size - 1];
-	ugh_template_compile(&conf->session_host, argv[1], strlen(argv[1]), cfg);
-
-	return 0;
-}
-
-int ugh_command_example_friends_host(ugh_config_t *cfg, int argc, char **argv)
-{
-	ugh_module_example_conf_t *conf = ugh_module_configs[ugh_module_handles_size - 1];
-	ugh_template_compile(&conf->friends_host, argv[1], strlen(argv[1]), cfg);
-
-	return 0;
-}
-
-int ugh_command_example_wall_host(ugh_config_t *cfg, int argc, char **argv)
-{
-	ugh_module_example_conf_t *conf = ugh_module_configs[ugh_module_handles_size - 1];
-	ugh_template_compile(&conf->wall_host, argv[1], strlen(argv[1]), cfg);
-
-	return 0;
-}
-
-int ugh_command_example_logger_host(ugh_config_t *cfg, int argc, char **argv)
-{
-	ugh_module_example_conf_t *conf = ugh_module_configs[ugh_module_handles_size - 1];
-	ugh_template_compile(&conf->logger_host, argv[1], strlen(argv[1]), cfg);
-
-	return 0;
-}
-
 static ugh_command_t ugh_module_example_cmds [] =
 {
 	ugh_make_command(example),
-	ugh_make_command(example_session_host),
-	ugh_make_command(example_friends_host),
-	ugh_make_command(example_wall_host),
-	ugh_make_command(example_logger_host),
+	ugh_make_command_template(example_session_host, offsetof(ugh_module_example_conf_t, session_host)),
+	ugh_make_command_template(example_friends_host, offsetof(ugh_module_example_conf_t, friends_host)),
+	ugh_make_command_template(example_wall_host, offsetof(ugh_module_example_conf_t, wall_host)),
+	ugh_make_command_template(example_logger_host, offsetof(ugh_module_example_conf_t, logger_host)),
 	ugh_null_command
 };
 

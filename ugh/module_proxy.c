@@ -3,7 +3,7 @@
 typedef struct
 {
 	ugh_template_t url;
-	unsigned nowait:1;
+	unsigned nowait;
 } ugh_module_proxy_conf_t;
 
 int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
@@ -30,7 +30,7 @@ int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
 	return UGH_HTTP_OK;
 }
 
-int ugh_command_proxy_pass(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_proxy_pass(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	ugh_module_proxy_conf_t *conf;
 	
@@ -44,7 +44,7 @@ int ugh_command_proxy_pass(ugh_config_t *cfg, int argc, char **argv)
 	return 0;
 }
 
-int ugh_command_proxy_nowait(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_proxy_nowait(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	ugh_module_proxy_conf_t *conf = ugh_module_config_get_last();
 
@@ -54,7 +54,7 @@ int ugh_command_proxy_nowait(ugh_config_t *cfg, int argc, char **argv)
 }
 
 static
-int ugh_command_proxy_next_upstream(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_proxy_next_upstream(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	int i;
 
@@ -112,7 +112,7 @@ int ugh_command_proxy_next_upstream(ugh_config_t *cfg, int argc, char **argv)
 static ugh_command_t ugh_module_subreq_cmds [] =
 {
 	ugh_make_command(proxy_pass),
-	ugh_make_command(proxy_nowait),
+	ugh_make_command_flag(proxy_nowait, offsetof(ugh_module_proxy_conf_t, nowait)),
 	ugh_make_command(proxy_next_upstream),
 	ugh_null_command
 };

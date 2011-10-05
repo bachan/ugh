@@ -41,7 +41,7 @@ int ugh_command_upstream_handle_line(ugh_config_t *cfg, int argc, char **argv)
 }
 
 static
-int ugh_command_upstream(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_upstream(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	ugh_upstream_t *upstream;
 

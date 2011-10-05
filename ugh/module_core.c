@@ -1,7 +1,7 @@
 #include "ugh.h"
 
 static
-int ugh_command_error_log(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_error_log(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	cfg->log_error = argv[1];
 	cfg->log_level = (3 > argc) ? "error" : argv[2];
@@ -10,7 +10,7 @@ int ugh_command_error_log(ugh_config_t *cfg, int argc, char **argv)
 }
 
 static
-int ugh_command_listen(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_listen(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	char *port = strchr(argv[1], ':');
 
@@ -31,7 +31,7 @@ int ugh_command_listen(ugh_config_t *cfg, int argc, char **argv)
 }
 
 static
-int ugh_command_resolver(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_resolver(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	cfg->resolver_host = argv[1];
 

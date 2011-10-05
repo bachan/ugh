@@ -38,7 +38,7 @@ strp ugh_variable_set_handle(ugh_client_t *c, const char *name, size_t size, voi
 }
 
 static
-int ugh_command_set(ugh_config_t *cfg, int argc, char **argv)
+int ugh_command_set(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	ugh_module_set_conf_t *conf;
 

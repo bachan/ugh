@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "config.h"
 #include "module.h"
+#include "ugh.h"
 
 #define UGH_CONFIG_ARGMAX 8
 
@@ -55,7 +56,7 @@ int ugh_config_option(ugh_config_t *cfg, int argc, char **argv)
 	ugh_command_t *cmd = ugh_command_get(cfg, argv[0]);
 	if (NULL == cmd) return -1;
 
-	return cmd->handle(cfg, argc, argv);
+	return cmd->handle(cfg, argc, argv, cmd);
 }
 
 int ugh_config_optset(ugh_config_t *cfg, int *argc, char **argv)
@@ -169,5 +170,39 @@ ugh_command_t *ugh_command_get(ugh_config_t *cfg, const char *name)
 	}
 
 	return NULL;
+}
+
+/* set_*_slot */
+
+int ugh_config_set_flag_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	char *p = ugh_module_config_get_last();
+
+	unsigned *bp = (unsigned *) (p + cmd->offset);
+
+	*bp = (0 == strcmp("on", argv[1]) ? 1 : 0);
+
+	return 0;
+}
+
+int ugh_config_set_str_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	char *p = ugh_module_config_get_last();
+	strp ep = (strp) (p + cmd->offset);
+
+	ep->data = argv[1];
+	ep->size = strlen(argv[1]);
+
+	return 0;
+}
+
+int ugh_config_set_template_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	char *p = ugh_module_config_get_last();
+	ugh_template_t *ep = (ugh_template_t *) (p + cmd->offset);
+
+	ugh_template_compile(ep, argv[1], strlen(argv[1]), cfg);
+
+	return 0;
 }
 
