@@ -44,18 +44,18 @@ map $cl_hash_arg_cid $subreq_port {
 
 proxy_next_upstream error timeout http_5xx http_4xx;
 
-subreq ADVACTION;
-#subreq 94.79.54.194;
-#subreq 94.79.55.206:15000;
-#subreq 127.0.0.1:19455;
-#subreq $subreq_uri;
-#subreq $subreq_uri/h;
-#subreq $subreq_uri/haha?a=T&b=P;
-#subreq 127.0.0.1:15010;
-#subreq 127.0.0.1:1502$cl_hash_arg_cid;
-#subreq yandex.ru;
-#subreq localhost:$subreq_port;
-#subreq $arg_u wait;
+proxy_pass ADVACTION;
+#proxy_pass 94.79.54.194;
+#proxy_pass 94.79.55.206:15000;
+#proxy_pass 127.0.0.1:19455;
+#proxy_pass $subreq_uri;
+#proxy_pass $subreq_uri/h;
+#proxy_pass $subreq_uri/haha?a=T&b=P;
+#proxy_pass 127.0.0.1:15010;
+#proxy_pass 127.0.0.1:1502$cl_hash_arg_cid;
+#proxy_pass yandex.ru;
+#proxy_pass localhost:$subreq_port;
+#proxy_pass $arg_u wait;
 #return localhost:$subreq_port=RESPONSE,arg_u=$arg_u;
 return <xml>;
 return subreq_addr=$subreq_addr,;

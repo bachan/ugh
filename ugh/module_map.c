@@ -14,7 +14,7 @@ int ugh_command_map_handle_line(ugh_config_t *cfg, int argc, char **argv)
 {
 /* msg("%s -> %s", argv[0], (2 > argc) ? "" : argv[1]); */
 
-	ugh_module_map_conf_t *conf = ugh_module_configs[ugh_module_handles_size - 1]; /* TODO make this API element */
+	ugh_module_map_conf_t *conf = ugh_module_config_get_last();
 
 	if (2 > argc)
 	{

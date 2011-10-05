@@ -12,7 +12,7 @@ typedef struct
 static
 int ugh_command_set_handle_line(ugh_config_t *cfg, int argc, char **argv)
 {
-	ugh_module_set_conf_t *conf = ugh_module_configs[ugh_module_handles_size - 1]; /* TODO make this API element */
+	ugh_module_set_conf_t *conf = ugh_module_config_get_last();
 
 	if (conf->size < UGH_MAX_SET_ELEMENTS)
 	{

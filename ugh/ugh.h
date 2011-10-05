@@ -392,6 +392,8 @@ extern size_t ugh_module_handles_size;
 	ugh_module_handles_size++
 
 int ugh_module_handle(ugh_client_t *c);
+
+#define ugh_module_config_get_last() ugh_module_configs[ugh_module_handles_size - 1]
 #endif
 
 #if 1
