@@ -4,6 +4,9 @@ typedef struct
 {
 	ugh_template_t url;
 	unsigned nowait;
+
+	double recv_timeout; /* TODO default timeout value */
+
 } ugh_module_proxy_conf_t;
 
 int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
@@ -15,11 +18,23 @@ int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
 	if (conf->nowait)
 	{
 		ugh_subreq_t *r = ugh_subreq_add(c, tv->data, tv->size, 0);
+
+		if (conf->recv_timeout > 0)
+		{
+			ugh_subreq_set_timeout(r, conf->recv_timeout);
+		}
+
 		ugh_subreq_run(r);
 	}
 	else
 	{
 		ugh_subreq_t *r = ugh_subreq_add(c, tv->data, tv->size, UGH_SUBREQ_WAIT);
+
+		if (conf->recv_timeout > 0)
+		{
+			ugh_subreq_set_timeout(r, conf->recv_timeout);
+		}
+
 		ugh_subreq_run(r);
 		ugh_subreq_wait(c);
 
@@ -112,7 +127,8 @@ int ugh_command_proxy_next_upstream(ugh_config_t *cfg, int argc, char **argv, ug
 static ugh_command_t ugh_module_subreq_cmds [] =
 {
 	ugh_make_command(proxy_pass),
-	ugh_make_command_flag(proxy_nowait, offsetof(ugh_module_proxy_conf_t, nowait)),
+	ugh_make_command_flag(proxy_nowait, ugh_module_proxy_conf_t, nowait),
+	ugh_make_command_time(proxy_recv_timeout, ugh_module_proxy_conf_t, recv_timeout),
 	ugh_make_command(proxy_next_upstream),
 	ugh_null_command
 };

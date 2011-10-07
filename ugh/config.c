@@ -177,10 +177,26 @@ ugh_command_t *ugh_command_get(ugh_config_t *cfg, const char *name)
 int ugh_config_set_flag_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	char *p = ugh_module_config_get_last();
+	unsigned *ep = (unsigned *) (p + cmd->offset);
 
-	unsigned *bp = (unsigned *) (p + cmd->offset);
+	*ep = (0 == strcmp("on", argv[1]) ? 1 : 0);
 
-	*bp = (0 == strcmp("on", argv[1]) ? 1 : 0);
+	return 0;
+}
+
+int ugh_config_set_time_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	char *p = ugh_module_config_get_last();
+	double *ep = (double *) (p + cmd->offset);
+
+	*ep = (double) strtoul(argv[1], &p, 10);
+
+	switch (*p)
+	{
+	case 'm': *ep /= 1000; break;
+	case 'u': *ep /= 1000000; break;
+	case 'n': *ep /= 1000000000; break;
+	}
 
 	return 0;
 }

@@ -112,10 +112,10 @@ int ugh_command_example(ugh_config_t *cfg, int argc, char **argv, ugh_command_t 
 static ugh_command_t ugh_module_example_cmds [] =
 {
 	ugh_make_command(example),
-	ugh_make_command_template(example_session_host, offsetof(ugh_module_example_conf_t, session_host)),
-	ugh_make_command_template(example_friends_host, offsetof(ugh_module_example_conf_t, friends_host)),
-	ugh_make_command_template(example_wall_host, offsetof(ugh_module_example_conf_t, wall_host)),
-	ugh_make_command_template(example_logger_host, offsetof(ugh_module_example_conf_t, logger_host)),
+	ugh_make_command_template(example_session_host, ugh_module_example_conf_t, session_host),
+	ugh_make_command_template(example_friends_host, ugh_module_example_conf_t, friends_host),
+	ugh_make_command_template(example_wall_host   , ugh_module_example_conf_t, wall_host),
+	ugh_make_command_template(example_logger_host , ugh_module_example_conf_t, logger_host),
 	ugh_null_command
 };
 
