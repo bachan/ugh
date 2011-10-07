@@ -174,6 +174,16 @@ ugh_command_t *ugh_command_get(ugh_config_t *cfg, const char *name)
 
 /* set_*_slot */
 
+int ugh_config_set_uint_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	char *p = ugh_module_config_get_last();
+	unsigned *ep = (unsigned *) (p + cmd->offset);
+
+	*ep = strtoul(argv[1], NULL, 10);
+
+	return 0;
+}
+
 int ugh_config_set_flag_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	char *p = ugh_module_config_get_last();

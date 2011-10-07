@@ -68,12 +68,14 @@ ugh_command_t *ugh_command_get(ugh_config_t *cfg, const char *name);
 #define ugh_make_command(name) { #name, ugh_command_##name, 0 }
 #define ugh_null_command { NULL, NULL, 0 }
 
+int ugh_config_set_uint_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
 int ugh_config_set_flag_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
 int ugh_config_set_time_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
 int ugh_config_set_char_p_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
 int ugh_config_set_str_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
 int ugh_config_set_template_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
 
+#define ugh_make_command_uint(name, type, number) { #name, ugh_config_set_uint_slot, offsetof(type, member) }
 #define ugh_make_command_flag(name, type, member) { #name, ugh_config_set_flag_slot, offsetof(type, member) }
 #define ugh_make_command_time(name, type, member) { #name, ugh_config_set_time_slot, offsetof(type, member) }
 #define ugh_make_command_char_p(name, type, member) { #name, ugh_config_set_char_p_slot, offsetof(type, member) }
