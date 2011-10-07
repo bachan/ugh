@@ -201,6 +201,16 @@ int ugh_config_set_time_slot(ugh_config_t *cfg, int argc, char **argv, ugh_comma
 	return 0;
 }
 
+int ugh_config_get_char_p_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	char *p = ugh_module_config_get_last();
+	char **ep = (char **) (p + cmd->offset);
+
+	*ep = argv[1];
+
+	return 0;
+}
+
 int ugh_config_set_str_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	char *p = ugh_module_config_get_last();

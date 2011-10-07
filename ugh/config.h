@@ -75,6 +75,7 @@ int ugh_config_set_template_slot(ugh_config_t *cfg, int argc, char **argv, ugh_c
 
 #define ugh_make_command_flag(name, type, member) { #name, ugh_config_set_flag_slot, offsetof(type, member) }
 #define ugh_make_command_time(name, type, member) { #name, ugh_config_set_time_slot, offsetof(type, member) }
+#define ugh_make_command_char_p(name, type, member) { #name, ugh_config_set_char_p_slot, offsetof(type, member) }
 #define ugh_make_command_str(name, type, member) { #name, ugh_config_set_flag_slot, offsetof(type, member) }
 #define ugh_make_command_template(name, type, member) { #name, ugh_config_set_flag_slot, offsetof(type, member) }
 
