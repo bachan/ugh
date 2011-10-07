@@ -70,6 +70,7 @@ ugh_command_t *ugh_command_get(ugh_config_t *cfg, const char *name);
 
 int ugh_config_set_flag_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
 int ugh_config_set_time_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
+int ugh_config_set_char_p_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
 int ugh_config_set_str_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
 int ugh_config_set_template_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd);
 
