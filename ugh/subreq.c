@@ -561,6 +561,7 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 		r->body.data = NULL;
 		r->body.size = 0;
 
+		r->buf_send.size += r->buf_send.data - r->buf_send_data;
 		r->buf_send.data = r->buf_send_data;
 		/* r->buf_send.size = 0; */
 
