@@ -482,30 +482,36 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 	switch (ft_type)
 	{
 	case UGH_UPSTREAM_FT_ERROR:
-		log_warn("connection or read/write error on upstream socket (%.*s:%.*s%.*s%s%.*s)"
+		log_warn("connection or read/write error on upstream socket (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
 			, (int) r->u.host.size, r->u.host.data
 			, (int) r->u.port.size, r->u.port.data
 			, (int) r->u.uri.size, r->u.uri.data
 			, r->u.args.size ? "?" : ""
 			, (int) r->u.args.size, r->u.args.data
+			, inet_ntoa(r->addr.sin_addr)
+			, ntohs(r->addr.sin_port)
 		);
 		break;
 	case UGH_UPSTREAM_FT_TIMEOUT:
-		log_warn("upstream timeout (%.*s:%.*s%.*s%s%.*s)"
+		log_warn("upstream timeout (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
 			, (int) r->u.host.size, r->u.host.data
 			, (int) r->u.port.size, r->u.port.data
 			, (int) r->u.uri.size, r->u.uri.data
 			, r->u.args.size ? "?" : ""
 			, (int) r->u.args.size, r->u.args.data
+			, inet_ntoa(r->addr.sin_addr)
+			, ntohs(r->addr.sin_port)
 		);
 		break;
 	case UGH_UPSTREAM_FT_INVALID_HEADER:
-		log_warn("invalid header in upstream response (%.*s:%.*s%.*s%s%.*s)"
+		log_warn("invalid header in upstream response (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
 			, (int) r->u.host.size, r->u.host.data
 			, (int) r->u.port.size, r->u.port.data
 			, (int) r->u.uri.size, r->u.uri.data
 			, r->u.args.size ? "?" : ""
 			, (int) r->u.args.size, r->u.args.data
+			, inet_ntoa(r->addr.sin_addr)
+			, ntohs(r->addr.sin_port)
 		);
 		break;
 	case UGH_UPSTREAM_FT_HTTP_500:
@@ -515,13 +521,15 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 	case UGH_UPSTREAM_FT_HTTP_404:
 	case UGH_UPSTREAM_FT_HTTP_5XX:
 	case UGH_UPSTREAM_FT_HTTP_4XX:
-		log_warn("error status %u in upstream response (%.*s:%.*s%.*s%s%.*s)"
+		log_warn("error status %u in upstream response (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
 			, r->status
 			, (int) r->u.host.size, r->u.host.data
 			, (int) r->u.port.size, r->u.port.data
 			, (int) r->u.uri.size, r->u.uri.data
 			, r->u.args.size ? "?" : ""
 			, (int) r->u.args.size, r->u.args.data
+			, inet_ntoa(r->addr.sin_addr)
+			, ntohs(r->addr.sin_port)
 		);
 		break;
 	}
