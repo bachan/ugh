@@ -268,6 +268,7 @@ int ugh_client_del(ugh_client_t *c)
 
 	JudyLFreeArray(&c->args_hash, PJE0);
 	JudyLFreeArray(&c->headers_hash, PJE0);
+	JudyLFreeArray(&c->headers_out_hash, PJE0);
 #if 1
 	JudyLFreeArray(&c->vars_hash, PJE0);
 #endif
