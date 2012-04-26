@@ -3,8 +3,8 @@
 struct ev_loop *loop;
 
 #if 1
-ugh_module_handle_fp ugh_module_handles [16];
-void * ugh_module_configs [16];
+ugh_module_handle_fp ugh_module_handles [UGH_MODULE_HANDLES_MAX];
+void * ugh_module_configs [UGH_MODULE_HANDLES_MAX];
 size_t ugh_module_handles_size = 0;
 
 int ugh_module_handle(ugh_client_t *c)

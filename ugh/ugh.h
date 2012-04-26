@@ -382,8 +382,10 @@ extern const char *ugh_status_header [UGH_HTTP_STATUS_MAX];
 #if 1
 typedef int (*ugh_module_handle_fp) (ugh_client_t *c, void *data, strp body);
 
-extern ugh_module_handle_fp ugh_module_handles [16];
-extern void * ugh_module_configs [16];
+#define	UGH_MODULE_HANDLES_MAX 1024
+
+extern ugh_module_handle_fp ugh_module_handles [UGH_MODULE_HANDLES_MAX];
+extern void * ugh_module_configs [UGH_MODULE_HANDLES_MAX];
 extern size_t ugh_module_handles_size;
 
 #define ugh_module_handle_add(handle, config) \
