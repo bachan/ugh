@@ -8,10 +8,10 @@
 #include "aux/string.h"
 
 #define UGH_CONFIG_LISTEN_BACKLOG 2048 /* TODO move to config */
-#define UGH_CONFIG_SOCKET_TIMEOUT 10.0 /* TODO move to config */
+#define UGH_CONFIG_SOCKET_TIMEOUT 60.0 /* TODO move to config */
 #define UGH_CONFIG_SUBREQ_TIMEOUT 1.0
 #define UGH_CONFIG_SILENT_TIMEOUT 1.0 /* TODO move to config */
-#define UGH_CONFIG_RESOLVER_TIMEOUT 1.0 /* TODO move to config */
+#define UGH_CONFIG_RESOLVER_TIMEOUT 0.1 /* TODO move to config */
 
 #ifdef __cplusplus
 extern "C" {

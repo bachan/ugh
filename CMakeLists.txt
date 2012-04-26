@@ -20,9 +20,9 @@ ADD_LIBRARY (coro_ucontext ugh/coro_ucontext/coro_ucontext.c)
 #TARGET_LINK_LIBRARIES (test_coro coro)
 #INSTALL (TARGETS test_coro DESTINATION bin)
 
-ADD_EXECUTABLE (test_resolver tmp/test_resolver.c)
-TARGET_LINK_LIBRARIES (test_resolver aux)
-INSTALL (TARGETS test_resolver DESTINATION bin)
+ADD_EXECUTABLE (ugh_test_resolver tmp/test_resolver.c)
+TARGET_LINK_LIBRARIES (ugh_test_resolver aux)
+INSTALL (TARGETS ugh_test_resolver DESTINATION bin)
 
 ADD_EXECUTABLE (test_pool tmp/test_pool.c)
 TARGET_LINK_LIBRARIES (test_pool aux)

@@ -199,7 +199,7 @@ int ugh_parser_url(ugh_url_t *u, char *data, size_t size);
 
 /* ### upstream ### */
 
-#define UGH_MAX_UPSTREAM_ELEMENTS 16
+#define UGH_MAX_UPSTREAM_ELEMENTS 1024
 
 typedef struct ugh_upstream_server
 	ugh_upstream_server_t;
