@@ -280,6 +280,9 @@ struct ugh_subreq
 
 	size_t content_length;
 
+	ev_tstamp response_time;
+	uint32_t ft_type;
+
 	/* done */
 
 	int flags;

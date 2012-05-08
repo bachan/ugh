@@ -30,6 +30,8 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_send, w);
 
+	r->response_time = ev_now(loop);
+
 	if (0 > (rc = aux_unix_send(w->fd, r->buf_send.data, r->buf_send.size)))
 	{
 		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
@@ -584,6 +586,9 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 	}
 
 ok:
+
+	r->ft_type = ft_type;
+	r->response_time = ev_now(loop) - r->response_time;
 
 	if (/* NULL == r->handle &&*/ (r->flags & UGH_SUBREQ_WAIT))
 	{
