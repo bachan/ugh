@@ -30,8 +30,6 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_send, w);
 
-	r->response_time = ev_now(loop);
-
 	if (0 > (rc = aux_unix_send(w->fd, r->buf_send.data, r->buf_send.size)))
 	{
 		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
@@ -216,6 +214,8 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	ev_timer_init(&r->wev_timeout, ugh_subreq_wcb_timeout, 0, r->timeout);
 	ev_timer_again(loop, &r->wev_timeout);
 	ev_io_start(loop, &r->wev_connect);
+
+	r->response_time = ev_now(loop);
 
 	return 0;
 }
