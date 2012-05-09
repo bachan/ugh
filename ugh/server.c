@@ -58,7 +58,12 @@ int ugh_server_listen(ugh_server_t *s, ugh_config_t *cfg, ugh_resolver_t *resolv
 	s->addr.sin_port = htons(cfg->listen_port);
 
 	rc = bind(sd, (struct sockaddr *) &s->addr, sizeof(s->addr));
-	if (0 > rc) return -1;
+
+	if (0 > rc)
+	{
+		log_emerg("Can't bind to address %s:%u (%d: %s)", cfg->listen_host, cfg->listen_port, errno, aux_strerror(errno));
+		return -1;
+	}
 
 	/*
 	 * TODO (optional)

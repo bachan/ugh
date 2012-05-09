@@ -18,7 +18,12 @@ int ugh_config_load(ugh_config_t *cfg, const char *filename)
 	strt data;
 
 	rc = aux_mmap_file(&data, filename);
-	if (0 != rc) return -1;
+
+	if (0 != rc)
+	{
+		log_emerg("Can't open %s (%d: %s)", filename, errno, aux_strerror(errno));
+		return -1;
+	}
 
 	cfg->pool = aux_pool_init(0);
 	if (NULL == cfg->pool) return -1;
@@ -54,7 +59,12 @@ int ugh_config_data(ugh_config_t *cfg, char *data, size_t size)
 int ugh_config_option(ugh_config_t *cfg, int argc, char **argv)
 {
 	ugh_command_t *cmd = ugh_command_get(cfg, argv[0]);
-	if (NULL == cmd) return -1;
+
+	if (NULL == cmd)
+	{
+		log_emerg("Bad directive in config file: %s", argv[0]);
+		return -1;
+	}
 
 	return cmd->handle(cfg, argc, argv, cmd);
 }

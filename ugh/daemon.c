@@ -63,12 +63,6 @@ int ugh_daemon_exec(const char *cfg_filename, unsigned daemon)
 	rc = ugh_config_load(&d.cfg, cfg_filename);
 	if (0 > rc) return -1;
 
-	if (daemon)
-	{
-		rc = log_create(d.cfg.log_error, log_levels(d.cfg.log_level));
-		if (0 > rc) return -1;
-	}
-
 	rc = ugh_resolver_init(&d.resolver, &d.cfg);
 	if (0 > rc) return -1;
 
@@ -85,6 +79,12 @@ int ugh_daemon_exec(const char *cfg_filename, unsigned daemon)
 
 	rc = ugh_server_listen(&d.srv, &d.cfg, &d.resolver);
 	if (0 > rc) return -1;
+
+	if (daemon)
+	{
+		rc = log_create(d.cfg.log_error, log_levels(d.cfg.log_level));
+		if (0 > rc) return -1;
+	}
 
 	ev_timer_init(&d.wev_silent, ugh_wcb_silent, 0, UGH_CONFIG_SILENT_TIMEOUT);
 	ev_timer_again(loop, &d.wev_silent);

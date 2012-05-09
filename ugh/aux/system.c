@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "logger.h"
 #include "system.h"
 
 int aux_fdopen(int fd, const char *path, int flags)
@@ -74,6 +75,12 @@ int aux_mkpidf(const char *path)
 {
 	int fd, nb;
 	char buf [32];
+
+	if (0 == access(path, R_OK))
+	{
+		log_emerg("pid-file %s exists", path);
+		return -1;
+	}
 
 	fd = open(path, O_CREAT|O_WRONLY|O_TRUNC, 0644);
 	if (0 > fd) return -1;

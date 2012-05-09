@@ -112,6 +112,7 @@ int ugh_resolver_init(ugh_resolver_t *r, ugh_config_t *cfg)
 
 		if (NULL == ns_b)
 		{
+			log_warn("couldn't find nameserver in /etc/resolv.conf file");
 			aux_umap(&resolv_conf);
 			return -1;
 		}
