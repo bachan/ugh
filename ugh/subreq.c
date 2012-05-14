@@ -57,6 +57,25 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 }
 
 static
+int ugh_subreq_copy_chunk(ugh_subreq_t *r, char *data, size_t size)
+{
+	if (r->chunk_body_size < r->body.size + size)
+	{
+		char *old_body = r->body.data;
+
+		r->chunk_body_size *= 2;
+		r->body.data = aux_pool_malloc(r->c->pool, r->chunk_body_size);
+
+		memcpy(r->body.data, old_body, r->body.size);
+	}
+
+	memcpy(r->body.data + r->body.size, data, size);
+	r->body.size += size;
+
+	return 0;
+}
+
+static
 void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 {
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_recv, w);
@@ -66,7 +85,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 	if (0 == nb)
 	{
 		log_info("subreq DONE (nb=%d, %d: %s)", nb, errno, aux_strerror(errno));
-		ugh_subreq_del(r, 0);
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
 		return;
 	}
 
@@ -103,65 +122,173 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 		}
 
 		ugh_header_t *hdr_content_length = ugh_subreq_header_get_nt(r, "Content-Length");
-		r->content_length = atoi(hdr_content_length->value.data);
 
-		if (r->content_length > (UGH_SUBREQ_BUF - (r->request_end - r->buf_recv_data)))
+		if (0 != hdr_content_length->value.size)
 		{
-			r->body.data = aux_pool_malloc(r->c->pool, r->content_length);
-			r->body.size = r->buf_recv.data - r->request_end;
+			r->content_length = atoi(hdr_content_length->value.data);
 
-			memcpy(r->body.data, r->request_end, r->body.size);
+			if (r->content_length > (UGH_SUBREQ_BUF - (r->request_end - r->buf_recv_data)))
+			{
+				r->body.data = aux_pool_malloc(r->c->pool, r->content_length);
+				r->body.size = r->buf_recv.data - r->request_end;
 
-			r->buf_recv.data = r->body.data + r->body.size;
-			r->buf_recv.size = r->content_length - r->body.size;
+				memcpy(r->body.data, r->request_end, r->body.size);
+
+				r->buf_recv.data = r->body.data + r->body.size;
+				r->buf_recv.size = r->content_length - r->body.size;
+			}
+			else
+			{
+				r->body.data = r->request_end;
+				r->body.size = r->buf_recv.data - r->request_end;
+			}
 		}
 		else
 		{
-			r->body.data = r->request_end;
-			r->body.size = r->buf_recv.data - r->request_end;
+			r->content_length = -1; /* Transfer-Encoding: chunked */
+
+			r->chunk_body_size = UGH_SUBREQ_BUF;
+			r->body.data = aux_pool_malloc(r->c->pool, r->chunk_body_size);
+			r->body.size = 0;
+
+			for (;;)
+			{
+				status = ugh_parser_chunks(r, r->request_end, r->buf_recv.data - r->request_end);
+
+				if (UGH_AGAIN == status)
+				{
+					r->buf_recv.size += r->buf_recv.data - r->request_end;
+					r->buf_recv.data = r->request_end;
+					r->chunk_start = 0;
+					return;
+				}
+
+				if (UGH_ERROR == status)
+				{
+					ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER);
+					return;
+				}
+
+				size_t recv_len = r->buf_recv.data - r->chunk_start;
+
+				if (r->chunk_size > recv_len)
+				{
+					ugh_subreq_copy_chunk(r, r->chunk_start, recv_len);
+
+					r->chunk_size -= recv_len;
+
+					r->buf_recv.size += r->buf_recv.data - r->request_end;
+					r->buf_recv.data = r->request_end;
+
+					r->chunk_start = r->buf_recv.data;
+
+					break;
+				}
+				else
+				{
+					ugh_subreq_copy_chunk(r, r->chunk_start, r->chunk_size);
+
+					r->chunk_size = 0;
+					r->chunk_start = 0;
+				}
+			}
+		}
+	}
+	else if (-1 == r->content_length)
+	{
+		for (;;)
+		{
+			char *next_chunk = r->buf_recv.data - nb;
+
+			if (r->chunk_start)
+			{
+				size_t recv_len = r->buf_recv.data - r->chunk_start;
+
+				if (r->chunk_size > recv_len)
+				{
+					ugh_subreq_copy_chunk(r, r->chunk_start, recv_len);
+
+					r->chunk_size -= recv_len;
+
+					r->buf_recv.data -= nb;
+					r->buf_recv.size += nb;
+
+					r->chunk_start = r->buf_recv.data;
+
+					break;
+				}
+				else
+				{
+					ugh_subreq_copy_chunk(r, r->chunk_start, r->chunk_size);
+
+					next_chunk = r->chunk_start + r->chunk_size;
+
+					r->chunk_size = 0;
+				}
+			}
+
+			int status = ugh_parser_chunks(r, next_chunk, r->buf_recv.data - next_chunk);
+
+			if (UGH_AGAIN == status)
+			{
+				r->buf_recv.data -= nb;
+				r->buf_recv.size += nb;
+				r->chunk_start = 0;
+				return;
+			}
+
+			if (UGH_ERROR == status)
+			{
+				ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER);
+				return;
+			}
+
+			if (0 == r->chunk_size)
+			{
+				ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
+			}
 		}
 	}
 	else
 	{
 		r->body.size += nb;
-	}
 
-	/* TODO XXX handle Transfer-Encoding: chunked case */
-	if (r->body.size == r->content_length)
-	{
-		uint32_t ft_type = UGH_UPSTREAM_FT_OFF;
-
-		switch (r->status)
+		if (r->body.size == r->content_length)
 		{
-		case 400: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 401: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 402: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 403: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 404: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX|UGH_UPSTREAM_FT_HTTP_404; break;
-		case 405: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 406: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 407: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 408: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 409: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 410: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 411: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 412: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 413: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 414: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 415: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 416: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 417: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 500: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_500; break;
-		case 501: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-		case 502: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_502; break;
-		case 503: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_503; break;
-		case 504: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_504; break;
-		case 505: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-		case 506: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-		case 507: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-		}
+			uint32_t ft_type = UGH_UPSTREAM_FT_OFF;
 
-		ugh_subreq_del(r, ft_type);
+			switch (r->status)
+			{
+			case 400: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 401: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 402: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 403: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 404: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX|UGH_UPSTREAM_FT_HTTP_404; break;
+			case 405: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 406: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 407: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 408: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 409: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 410: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 411: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 412: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 413: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 414: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 415: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 416: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 417: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+			case 500: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_500; break;
+			case 501: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
+			case 502: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_502; break;
+			case 503: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_503; break;
+			case 504: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_504; break;
+			case 505: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
+			case 506: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
+			case 507: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
+			}
+
+			ugh_subreq_del(r, ft_type);
+		}
 	}
 }
 

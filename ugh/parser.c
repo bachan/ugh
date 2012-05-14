@@ -247,6 +247,102 @@ final:
 	return UGH_OK;
 }
 
+#define S_CHUNKS_READY              0x00
+#define S_CHUNKS_VALUE              0x01
+#define S_CHUNKS_LAST               0x02
+
+/* TODO chunk extensions (see nginx) */
+
+int ugh_parser_chunks(ugh_subreq_t *r, char *data, size_t size)
+{
+	ucht state = r->state;
+	char *p = data;
+	char *e = data + size;
+
+	for (; p < e; ++p)
+	{
+		char ch = *p;
+
+		switch (state)
+		{
+		case S_CHUNKS_READY:
+			switch (ch)
+			{
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9': r->chunk_size = ch - '0'; state = S_CHUNKS_VALUE; break;
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F': r->chunk_size = ch - 'A' + 10; state = S_CHUNKS_VALUE; break;
+			case 'a':
+			case 'b':
+			case 'c':
+			case 'd':
+			case 'e':
+			case 'f': r->chunk_size = ch - 'a' + 10; state = S_CHUNKS_VALUE; break;
+			}
+			break;
+		case S_CHUNKS_VALUE:
+			switch (ch)
+			{
+			case CR : state = S_CHUNKS_LAST; break;
+			case LF : goto final;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9': r->chunk_size = r->chunk_size * 16 + ch - '0'; break;
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F': r->chunk_size = r->chunk_size * 16 + ch - 'A' + 10; break;
+			case 'a':
+			case 'b':
+			case 'c':
+			case 'd':
+			case 'e':
+			case 'f': r->chunk_size = r->chunk_size * 16 + ch - 'a' + 10; break;
+			default : return UGH_ERROR;
+			}
+			break;
+		case S_CHUNKS_LAST:
+			switch (ch)
+			{
+			case LF : goto final;
+			default : return UGH_ERROR;
+			}
+			break;
+		}
+	}
+
+	r->state = state;
+
+	return UGH_AGAIN;
+
+final:
+	r->chunk_start = p + 1;
+	r->state = S_CHUNKS_READY;
+
+	return UGH_OK;
+}
+
 #define S_SUBREQ_PROT               0x00
 #define S_SUBREQ_PROT_H             0x01
 #define S_SUBREQ_PROT_HT            0x02

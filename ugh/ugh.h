@@ -278,10 +278,16 @@ struct ugh_subreq
 	strt buf_recv; /* UGH_SUBREQ_BUF */
 	strt body;
 
-	size_t content_length;
+	size_t content_length; /* if content_length is -1, then transfer-encoding is chunked */
 
 	ev_tstamp response_time;
 	uint32_t ft_type;
+
+	/* chunks */
+
+	char*chunk_start;
+	size_t chunk_size;
+	size_t chunk_body_size;
 
 	/* done */
 
@@ -331,6 +337,7 @@ ugh_header_t *ugh_subreq_header_set(ugh_subreq_t *r, const char *data, size_t si
 
 int ugh_parser_client(ugh_client_t *c, char *data, size_t size);
 int ugh_parser_subreq(ugh_subreq_t *r, char *data, size_t size);
+int ugh_parser_chunks(ugh_subreq_t *r, char *data, size_t size);
 
 /* ### status ### */
 
