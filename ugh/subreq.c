@@ -599,7 +599,7 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 	return 0;
 }
 
-ugh_upstream_server_t *ugh_subreq_get_upstream(ugh_subreq_t *r)
+ugh_upstream_server_t *ugh_subreq_get_upstream_curr(ugh_subreq_t *r)
 {
 	if (!r->upstream)
 	{
