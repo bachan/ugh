@@ -606,7 +606,7 @@ ugh_upstream_server_t *ugh_subreq_get_upstream_curr(ugh_subreq_t *r)
 		return NULL;
 	}
 
-	if (r->upstream_tries < r->upstream->values_size)
+	if (r->upstream_tries <= r->upstream->values_size)
 	{
 		return &r->upstream->values[r->upstream_current];
 	}
