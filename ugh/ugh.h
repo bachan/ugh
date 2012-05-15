@@ -315,6 +315,8 @@ int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
 
+ugh_upstream_server_t *ugh_subreq_get_upstream_curr(ugh_subreq_t *r);
+
 #define UGH_UPSTREAM_FT_OFF            0x0000
 #define UGH_UPSTREAM_FT_ERROR          0x0001
 #define UGH_UPSTREAM_FT_TIMEOUT        0x0002

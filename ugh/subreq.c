@@ -599,6 +599,21 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 	return 0;
 }
 
+ugh_upstream_server_t *ugh_subreq_get_upstream(ugh_subreq_t *r)
+{
+	if (!r->upstream)
+	{
+		return NULL;
+	}
+
+	if (r->upstream_tries < r->upstream->values_size)
+	{
+		return &r->upstream->values[r->upstream_current];
+	}
+
+	return &r->upstream->backup_values[r->upstream->backup_values_curr];
+}
+
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 {
 	ev_io_stop(loop, &r->wev_recv);
