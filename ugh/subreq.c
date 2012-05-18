@@ -599,7 +599,37 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 	return 0;
 }
 
-ugh_upstream_server_t *ugh_subreq_get_upstream_curr(ugh_subreq_t *r)
+strp ugh_subreq_get_host(ugh_subreq_t *r)
+{
+	if (NULL == r->upstream)
+	{
+		return &r->u.host;
+	}
+
+	if (r->upstream_tries <= r->upstream->values_size)
+	{
+		return &r->upstream->values[r->upstream_current].host;
+	}
+
+	return &r->upstream->backup_values[r->upstream->backup_values_curr].host;
+}
+
+in_port_t ugh_subreq_get_port(ugh_subreq_t *r)
+{
+	if (NULL == r->upstream)
+	{
+		return atoi(r->u.port.data);
+	}
+
+	if (r->upstream_tries <= r->upstream->values_size)
+	{
+		return r->upstream->values[r->upstream_current].port;
+	}
+
+	return r->upstream->backup_values[r->upstream->backup_values_curr].port;
+}
+
+ugh_upstream_server_t *ugh_subreq_get_upstream_curr(ugh_subreq_t *r) /* deprecated */
 {
 	if (!r->upstream)
 	{

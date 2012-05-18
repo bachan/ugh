@@ -87,7 +87,7 @@ extern struct ev_loop *loop;
 extern const char *ugh_method_string [UGH_HTTP_MAX];
 extern const char *ugh_version_string [UGH_HTTP_VERSION_MAX];
 
-#define UGH_HDRBUF 4096 /* XXX this is temporary upper header buffer size limit to simplify things */
+#define UGH_HDRBUF 8192 /* XXX this is temporary upper header buffer size limit to simplify things */
 #define UGH_SUBREQ_BUF (32768)
 #define UGH_CORO_STACK (32768 * 16)
 
@@ -315,7 +315,10 @@ int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
 
-ugh_upstream_server_t *ugh_subreq_get_upstream_curr(ugh_subreq_t *r);
+ugh_upstream_server_t *ugh_subreq_get_upstream_curr(ugh_subreq_t *r); /* deprecated */
+
+strp ugh_subreq_get_host(ugh_subreq_t *r);
+in_port_t ugh_subreq_get_port(ugh_subreq_t *r);
 
 #define UGH_UPSTREAM_FT_OFF            0x0000
 #define UGH_UPSTREAM_FT_ERROR          0x0001
