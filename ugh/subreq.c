@@ -14,7 +14,7 @@ void ugh_subreq_wcb_connect(EV_P_ ev_io *w, int tev)
 
 	if (EV_READ & tev)
 	{
-		/* log_warn("connection error (tev=%d, r=%p)", tev, (void *) r); */
+		log_warn("conn error %.*s%s%.*s (%d: %s)", (int) r->u.uri.size, r->u.uri.data, r->u.args.size ? "?" : "", (int) r->u.args.size, r->u.args.data, errno, aux_strerror(errno));
 		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
 		return;
 	}
@@ -30,8 +30,11 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_send, w);
 
+	/* errno = 0; */
+
 	if (0 > (rc = aux_unix_send(w->fd, r->buf_send.data, r->buf_send.size)))
 	{
+		log_warn("send error %.*s%s%.*s (%d: %s)", (int) r->u.uri.size, r->u.uri.data, r->u.args.size ? "?" : "", (int) r->u.args.size, r->u.args.data, errno, aux_strerror(errno));
 		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
 		return;
 	}
@@ -80,6 +83,8 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 {
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_recv, w);
 
+	/* errno = 0; */
+
 	int nb = aux_unix_recv(w->fd, r->buf_recv.data, r->buf_recv.size);
 
 	if (0 == nb)
@@ -97,6 +102,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 			return;
 		}
 
+		log_warn("recv error %.*s%s%.*s (%d: %s)", (int) r->u.uri.size, r->u.uri.data, r->u.args.size ? "?" : "", (int) r->u.args.size, r->u.args.data, errno, aux_strerror(errno));
 		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
 		return;
 	}
@@ -334,6 +340,8 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 		aux_pool_free(r->c->pool);
 		return -1;
 	}
+
+	/* errno = 0; */
 
 	ev_io_init(&r->wev_recv, ugh_subreq_wcb_recv, sd, EV_READ);
 	ev_io_init(&r->wev_send, ugh_subreq_wcb_send, sd, EV_WRITE);
