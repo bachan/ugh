@@ -157,9 +157,11 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 			r->body.data = aux_pool_malloc(r->c->pool, r->chunk_body_size);
 			r->body.size = 0;
 
+			char *next_chunk = r->request_end;
+
 			for (;;)
 			{
-				status = ugh_parser_chunks(r, r->request_end, r->buf_recv.data - r->request_end);
+				status = ugh_parser_chunks(r, next_chunk, r->buf_recv.data - next_chunk);
 
 				if (UGH_AGAIN == status)
 				{
@@ -172,6 +174,12 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 				if (UGH_ERROR == status)
 				{
 					ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER);
+					return;
+				}
+
+				if (0 == r->chunk_size)
+				{
+					ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
 					return;
 				}
 
@@ -193,6 +201,8 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 				else
 				{
 					ugh_subreq_copy_chunk(r, r->chunk_start, r->chunk_size);
+
+					next_chunk = r->chunk_start + r->chunk_size;
 
 					r->chunk_size = 0;
 					r->chunk_start = 0;
@@ -258,43 +268,43 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 	else
 	{
 		r->body.size += nb;
+	}
 
-		if (r->body.size == r->content_length)
+	if (r->body.size == r->content_length)
+	{
+		uint32_t ft_type = UGH_UPSTREAM_FT_OFF;
+
+		switch (r->status)
 		{
-			uint32_t ft_type = UGH_UPSTREAM_FT_OFF;
-
-			switch (r->status)
-			{
-			case 400: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 401: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 402: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 403: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 404: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX|UGH_UPSTREAM_FT_HTTP_404; break;
-			case 405: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 406: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 407: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 408: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 409: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 410: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 411: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 412: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 413: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 414: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 415: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 416: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 417: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-			case 500: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_500; break;
-			case 501: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-			case 502: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_502; break;
-			case 503: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_503; break;
-			case 504: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_504; break;
-			case 505: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-			case 506: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-			case 507: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-			}
-
-			ugh_subreq_del(r, ft_type);
+		case 400: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 401: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 402: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 403: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 404: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX|UGH_UPSTREAM_FT_HTTP_404; break;
+		case 405: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 406: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 407: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 408: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 409: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 410: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 411: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 412: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 413: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 414: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 415: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 416: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 417: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 500: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_500; break;
+		case 501: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
+		case 502: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_502; break;
+		case 503: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_503; break;
+		case 504: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_504; break;
+		case 505: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
+		case 506: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
+		case 507: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
 		}
+
+		ugh_subreq_del(r, ft_type);
 	}
 }
 
