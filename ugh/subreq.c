@@ -133,7 +133,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 		{
 			r->content_length = atoi(hdr_content_length->value.data);
 
-			if (r->content_length > (UGH_SUBREQ_BUF - (r->request_end - r->buf_recv_data)))
+			if (r->content_length > r->buf_recv.size + (r->buf_recv.data - r->request_end))
 			{
 				r->body.data = aux_pool_malloc(r->c->pool, r->content_length);
 				r->body.size = r->buf_recv.data - r->request_end;
@@ -396,9 +396,25 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags)
 		(int) r->u.args.size, r->u.args.data
 	);
 
-	r->method = c->method; /* TODO do smth if c->method = POST, but body == NULL */
+	r->method = c->method;
+
+	r->request_body.data = c->body.data;
+	r->request_body.size = c->body.size;
 
 	return r;
+}
+
+int ugh_subreq_set_method(ugh_subreq_t *r, ucht method)
+{
+	r->method = method;
+
+	if (method != UGH_HTTP_POST);
+	{
+		r->request_body.data = NULL;
+		r->request_body.size = 0;
+	}
+
+	return 0;
 }
 
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size)
@@ -596,10 +612,13 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 		}
 	}
 
-	if (NULL != r->request_body.data) /* TODO check if Content-Length header was in original request (and its method was POST) */
+	if (NULL != r->request_body.data)
 	{
-		r->buf_send.size += snprintf(r->buf_send.data + r->buf_send.size, UGH_SUBREQ_BUF - r->buf_send.size,
-			"Content-Length: %"PRIuMAX CRLF, (uintmax_t) r->request_body.size);
+		if (r->c->method != UGH_HTTP_POST) /* don't write new Content-Length if it was in original request */
+		{
+			r->buf_send.size += snprintf(r->buf_send.data + r->buf_send.size, UGH_SUBREQ_BUF - r->buf_send.size,
+				"Content-Length: %"PRIuMAX CRLF, (uintmax_t) r->request_body.size);
+		}
 
 		/* TODO Content-Type */
 

@@ -120,19 +120,57 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 
 	ev_timer_again(loop, &c->wev_timeout);
 
-	int status = ugh_parser_client(c, c->buf_recv.data - nb, nb);
-
-	if (UGH_AGAIN == status)
+	if (NULL == c->request_end)
 	{
-		return;
+		int status = ugh_parser_client(c, c->buf_recv.data - nb, nb);
+
+		if (UGH_AGAIN == status)
+		{
+			return;
+		}
+
+		ev_io_stop(loop, &c->wev_recv);
+
+		if (UGH_HTTP_BAD_REQUEST <= status)
+		{
+			ugh_client_send(c, status);
+			return;
+		}
+
+		if (UGH_HTTP_POST == c->method)
+		{
+			ugh_header_t *hdr_content_length = ugh_client_header_get_nt(c, "Content-Length");
+
+			if (0 != hdr_content_length->value.size)
+			{
+				c->content_length = atoi(hdr_content_length->value.data);
+
+				if (c->content_length > (c->buf_recv.size + (c->buf_recv.data - c->request_end)))
+				{
+					c->body.data = aux_pool_malloc(c->pool, c->content_length);
+					c->body.size = c->buf_recv.data - c->request_end;
+
+					memcpy(c->body.data, c->request_end, c->body.size);
+
+					c->buf_recv.data = c->body.data + c->body.size;
+					c->buf_recv.size = c->content_length - c->body.size;
+				}
+				else
+				{
+					c->body.data = c->request_end;
+					c->body.size = c->buf_recv.data - c->request_end;
+				}
+			}
+		}
 	}
-
-	ev_io_stop(loop, &c->wev_recv);
-
-	if (UGH_HTTP_BAD_REQUEST <= status)
+	else if (UGH_HTTP_POST == c->method)
 	{
-		ugh_client_send(c, status);
-		return;
+		c->body.size += nb;
+
+		if (c->body.size < c->content_length)
+		{
+			return;
+		}
 	}
 
 #if 1 /* UGH_CORO ENABLE */

@@ -131,6 +131,9 @@ struct ugh_client
 	void*vars_hash;
 #endif
 
+	strt body;
+	size_t content_length;
+
 	/* response */
 
 	void*headers_out_hash;
@@ -308,6 +311,7 @@ struct ugh_subreq
 #define UGH_SUBREQ_WAIT 1
 
 ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags);
+int ugh_subreq_set_method(ugh_subreq_t *r, ucht method);
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
 int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
 int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout);
