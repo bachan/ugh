@@ -47,12 +47,12 @@ void ugh_client_wcb_send(EV_P_ ev_io *w, int tev)
 
 	if (0 > rc)
 	{
-		log_info("err writev(%d,%d) (%d: %s)", w->fd, rc, errno, aux_strerror(errno));
+		log_warn("err writev(%d,%d) (%d: %s)", w->fd, rc, errno, aux_strerror(errno));
 		ugh_client_del(c);
 		return;
 	}
 
-	/* log_info("end writev(%d,%d)", w->fd, rc); */
+	/* log_debug("end writev(%d,%d)", w->fd, rc); */
 
 	if (0 == rc)
 	{

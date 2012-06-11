@@ -39,7 +39,7 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 		return;
 	}
 
-	/* log_info("send %d bytes", rc); */
+	/* log_debug("send %d bytes", rc); */
 
 	if (0 == rc)
 	{
@@ -89,7 +89,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 
 	if (0 == nb)
 	{
-		log_info("subreq DONE (nb=%d, %d: %s)", nb, errno, aux_strerror(errno));
+		log_warn("subreq DONE (nb=%d, %d: %s)", nb, errno, aux_strerror(errno));
 		ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
 		return;
 	}
@@ -315,14 +315,14 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 
 	if (INADDR_NONE == addr)
 	{
-		log_info("ugh_subreq_connect(INADDR_NONE)");
+		log_debug("ugh_subreq_connect(INADDR_NONE)");
 		aux_pool_free(r->c->pool);
 		return -1;
 	}
 
 	r->addr.sin_addr.s_addr = addr;
 
-	log_info("ugh_subreq_connect(%s:%u)", inet_ntoa(r->addr.sin_addr), ntohs(r->addr.sin_port));
+	log_debug("ugh_subreq_connect(%s:%u)", inet_ntoa(r->addr.sin_addr), ntohs(r->addr.sin_port));
 
 	int sd, rc;
 
@@ -388,7 +388,7 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags)
 
 	ugh_parser_url(&r->u, url, size);
 
-	log_info("ugh_subreq_add(%.*s -> host=%.*s, port=%.*s, uri=%.*s, args=%.*s)",
+	log_debug("ugh_subreq_add(%.*s -> host=%.*s, port=%.*s, uri=%.*s, args=%.*s)",
 		(int) size, url,
 		(int) r->u.host.size, r->u.host.data,
 		(int) r->u.port.size, r->u.port.data,
@@ -631,7 +631,7 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 		r->buf_send.size += snprintf(r->buf_send.data + r->buf_send.size, UGH_SUBREQ_BUF - r->buf_send.size, CRLF);
 	}
 
-	/* log_info("ugh_subreq(%.*s)", (int) r->buf_send.size, r->buf_send.data); */
+	/* log_debug("ugh_subreq(%.*s)", (int) r->buf_send.size, r->buf_send.data); */
 
 	return 0;
 }

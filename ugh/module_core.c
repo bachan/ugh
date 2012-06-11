@@ -38,11 +38,22 @@ int ugh_command_resolver(ugh_config_t *cfg, int argc, char **argv, ugh_command_t
 	return 0;
 }
 
+#if 0
+static
+int ugh_command_worker_threads(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	cfg->worker_threads = strtoul(argv[1], NULL, 10);
+
+	return 0;
+}
+#endif
+
 static ugh_command_t ugh_module_core_cmds [] =
 {
 	ugh_make_command(error_log),
 	ugh_make_command(listen),
 	ugh_make_command(resolver),
+	/* ugh_make_command(worker_threads), */
 	ugh_null_command
 };
 

@@ -40,6 +40,8 @@ struct ugh_config
 	unsigned int listen_port;
 
 	const char *resolver_host;
+
+	/* unsigned worker_threads; */
 };
 
 int ugh_config_load(ugh_config_t *cfg, const char *filename);
