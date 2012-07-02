@@ -1,0 +1,81 @@
+MAIN PURPOSE
+
+Ugh is HTTP server, for which it's very simple to write module, which goes to
+different backends simultaneously, then does something with their response,
+then goes again to some other backends et cetera.
+
+This is achieved by using coroutines mechanism. Each request is handled in a
+separate coroutine and the main coroutine is for server's event loop. That's
+why you could ask for several subrequests, then just call ugh_subreq_wait() to
+wait for their results and then, just after ugh_subreq_wait() is returned, you
+could use all the results from subrequest, like it was synchronous code.
+
+You could do simultaneous subrequests even without writing your own module, but
+ugh is much more flexible and powerful if you're using its API, not only
+configuration.
+
+CONFIGURATION
+
+Configuration of ugh tries to be like nginx. Actually it's much simpler, cause
+ugh doesn't support most of nginx's features, and does only its specific kind
+of job (simultaneous subrequests with non-trivial logic of handling their
+responses).
+
+Example of config file is included in repository and is self-explanatory.
+Possible directives include:
+
+error_log file [debug | info | notice | warn | error | crit | alert | emerg];
+  Log errors into file (with optional severity argument).
+
+listen [address:]port;
+  What address:port to listen to.
+
+resolver host;
+  Use specific DNS-server to resolve hosts of subrequest URLs.
+
+import module_name [path/to/module.so];
+  Import third-party module from .so-library. By default ugh searches inside
+  PREFIX/LIBDIR/ugh/ for library named libugh_module_name.so.
+
+map { ... }
+  Just like nginx's map (doesn't support hostnames flag, though).
+
+upstream { ... }
+  Just like nginx's upstream, but doesn't support server's options and backup
+  is not an option, but is different directive. See config example.
+
+proxy_pass url;
+  Just like nginx's proxy_pass, but do not use scheme in its argument.
+
+proxy_nowait on | off;
+  Wait or don't wait for response of the latest previous proxy_pass in config.
+
+proxy_recv_timeout timeout;
+  Just like nginx's one, affects only latest previous proxy_pass in config.
+
+proxy_next_upstream type;
+  Just like nginx's one, affects only latest previous proxy_pass in config.
+
+return data;
+  Return some data with 200 OK.
+
+One more note about configuration is that you could use variables and templates
+(strings with variables inside) like in nginx. There are some built-in
+variables. You can make your own with map directive. Directives return and
+proxy_pass support variables in their arguments. The list of built-in
+variables:
+
+$arg_... - GET-argument with "..." name.
+$http_... - HTTP header with "..." name.
+$cookie_... - HTTP cookie with "..." name.
+$hash_... - hash of value of variable with "..." name.
+$c0_... - first char of value of variable with "..." name.
+$cl_... - last char of value of variable with "..." name.
+
+$var_... - value of custom variable with "..." name (can be set by module, this
+might be removed in later versions in favor of more flexible mechanism).
+
+WRITING MODULES
+
+See module example in repository.
+
