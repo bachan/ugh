@@ -130,6 +130,7 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 		}
 
 		ev_io_stop(loop, &c->wev_recv);
+		ev_timer_stop(loop, &c->wev_timeout);
 
 		if (UGH_HTTP_BAD_REQUEST <= status)
 		{
