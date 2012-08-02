@@ -605,6 +605,10 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 			r->buf_send.size += snprintf(r->buf_send.data + r->buf_send.size, UGH_SUBREQ_BUF - r->buf_send.size,
 				"Host: %.*s" CRLF, (int) u_host->size, u_host->data);
 		}
+		else if (14 == h->key.size && aux_hash_key_lc_header("Content-Length", 14) == aux_hash_key_lc_header(h->key.data, h->key.size) && r->method == UGH_HTTP_GET)
+		{
+			continue; /* remove Content-Length header if it was in original request, but this request is GET */
+		}
 		else
 		{
 			r->buf_send.size += snprintf(r->buf_send.data + r->buf_send.size, UGH_SUBREQ_BUF - r->buf_send.size,
