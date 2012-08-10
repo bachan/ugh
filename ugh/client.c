@@ -129,9 +129,6 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 			return;
 		}
 
-		ev_io_stop(loop, &c->wev_recv);
-		ev_timer_stop(loop, &c->wev_timeout);
-
 		if (UGH_HTTP_BAD_REQUEST <= status)
 		{
 			ugh_client_send(c, status);
@@ -161,6 +158,11 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 					c->body.data = c->request_end;
 					c->body.size = c->buf_recv.data - c->request_end;
 				}
+
+				if (c->body.size < c->content_length)
+				{
+					return;
+				}
 			}
 		}
 	}
@@ -173,6 +175,9 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 			return;
 		}
 	}
+
+	ev_io_stop(loop, &c->wev_recv);
+	ev_timer_stop(loop, &c->wev_timeout);
 
 #if 1 /* UGH_CORO ENABLE */
 	c->stack = aux_pool_malloc(c->pool, UGH_CORO_STACK);
