@@ -247,6 +247,10 @@ int ugh_client_send(ugh_client_t *c, int status)
 
 	c->buf_send.size += snprintf(c->buf_send.data + c->buf_send.size, UGH_HDRBUF - c->buf_send.size, CRLF);
 
+	log_notice("access %s '%.*s%s%.*s' %.*s %"PRIuMAX, inet_ntoa(c->addr.sin_addr), (int) c->uri.size, c->uri.data,
+		c->args.size ? "?" : "", (int) c->args.size, c->args.data, 3, ugh_status_header[status],
+		(uintmax_t) c->bufs_sumlen);
+
 	ev_io_start(loop, &c->wev_send);
 
 	return 0;
