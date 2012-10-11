@@ -162,9 +162,9 @@ int ugh_resolver_init(ugh_resolver_t *r, ugh_config_t *cfg)
 
 	rc = connect(sd, (struct sockaddr *) &addr, sizeof(addr));
 
-	if (0 > rc)
+	if (0 > rc) /* TODO support EINPROGRESS here */
 	{
-		log_error("connect(%d, ...) (%d: %s)", sd, errno, aux_strerror(errno));
+		log_error("connect(%d, %s) (%d: %s)", sd, cfg->resolver_host, errno, aux_strerror(errno));
 		close(sd);
 		return -1;
 	}
