@@ -108,7 +108,7 @@ int ugh_resolver_init(ugh_resolver_t *r, ugh_config_t *cfg)
 		if (0 > rc) return -1;
 
 		/* TODO use normal resolv.conf parser (which reads comments) */
-		char *ns_b = aux_strnstr(resolv_conf.data, "nameserver ", resolv_conf.size);
+		char *ns_b = aux_strnstr(resolv_conf.data, "nameserver", resolv_conf.size);
 
 		if (NULL == ns_b)
 		{
@@ -117,7 +117,12 @@ int ugh_resolver_init(ugh_resolver_t *r, ugh_config_t *cfg)
 			return -1;
 		}
 
-		ns_b += sizeof("nameserver ") - 1;
+		ns_b += sizeof("nameserver") - 1;
+
+		for (; ns_b - resolv_conf.data < resolv_conf.size; ++ns_b)
+		{
+			if (!isspace(*ns_b)) break;
+		}
 
 		char *ns_e = memchr(ns_b, '\n', resolv_conf.data + resolv_conf.size - ns_b);
 
@@ -162,7 +167,7 @@ int ugh_resolver_init(ugh_resolver_t *r, ugh_config_t *cfg)
 
 	rc = connect(sd, (struct sockaddr *) &addr, sizeof(addr));
 
-	if (0 > rc) /* TODO support EINPROGRESS here */
+	if (0 > rc)
 	{
 		log_error("connect(%d, %s) (%d: %s)", sd, cfg->resolver_host, errno, aux_strerror(errno));
 		close(sd);
