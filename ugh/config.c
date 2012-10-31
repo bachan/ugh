@@ -221,6 +221,23 @@ int ugh_config_set_time_slot(ugh_config_t *cfg, int argc, char **argv, ugh_comma
 	return 0;
 }
 
+int ugh_config_set_size_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	char *p = ugh_module_config_get_last();
+	size_t *ep = (size_t *) (p + cmd->offset);
+
+	*ep = (size_t) strtoul(argv[1], &p, 10);
+
+	switch (*p)
+	{
+	case 'k': *ep *= 1024; break;
+	case 'm': *ep *= 1024 * 1024; break;
+	case 'g': *ep *= 1024 * 1024 * 1024; break;
+	}
+
+	return 0;
+}
+
 int ugh_config_set_char_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	char *p = ugh_module_config_get_last();
