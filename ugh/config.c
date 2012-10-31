@@ -230,9 +230,12 @@ int ugh_config_set_size_slot(ugh_config_t *cfg, int argc, char **argv, ugh_comma
 
 	switch (*p)
 	{
-	case 'k': *ep *= 1024; break;
-	case 'm': *ep *= 1024 * 1024; break;
-	case 'g': *ep *= 1024 * 1024 * 1024; break;
+	case 'k':
+	case 'K': *ep *= 1024; break;
+	case 'm':
+	case 'M': *ep *= 1024 * 1024; break;
+	case 'g':
+	case 'G': *ep *= 1024 * 1024 * 1024; break;
 	}
 
 	return 0;
