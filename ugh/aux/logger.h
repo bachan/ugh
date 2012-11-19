@@ -53,7 +53,7 @@ extern "C" {
     {                                                                       \
         struct tm tmloc;                                                    \
 		time_t ts = time(NULL);                                             \
-        aux_gmtime(&ts, &tmloc);                                            \
+        localtime_r(&ts, &tmloc);                                           \
                                                                             \
         fprintf(fp, LOG_FORMAT(lvstr,fmt),                                  \
             LOG_VALUES(tmloc,##__VA_ARGS__));                               \
