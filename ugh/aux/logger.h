@@ -44,18 +44,19 @@ extern "C" {
 #endif /* NDEBUG */
 
 #define LOG_FORMAT(lvstr,fmt) "%04u-%02u-%02u %02u:%02u:%02u "lvstr" "fmt"\n"
-#define LOG_VALUES(tmgmt,...) tmgmt.tm_year, tmgmt.tm_mon, tmgmt.tm_mday, \
-    tmgmt.tm_hour, tmgmt.tm_min, tmgmt.tm_sec, ##__VA_ARGS__
+#define LOG_VALUES(tmloc,...) tmloc.tm_year + 1900, tmloc.tm_mon + 1, tmloc.tm_mday, \
+    tmloc.tm_hour, tmloc.tm_min, tmloc.tm_sec, ##__VA_ARGS__
 
 #define log_fmt(fp,level,lvstr,fmt,...) do {                                \
                                                                             \
     if (level <= log_level)                                                 \
     {                                                                       \
-        struct tm tmgmt;                                                    \
-        aux_gmtime(time(NULL), &tmgmt);                                     \
+        struct tm tmloc;                                                    \
+		time_t ts = time(NULL);                                             \
+        aux_gmtime(&ts, &tmloc);                                            \
                                                                             \
         fprintf(fp, LOG_FORMAT(lvstr,fmt),                                  \
-            LOG_VALUES(tmgmt,##__VA_ARGS__));                               \
+            LOG_VALUES(tmloc,##__VA_ARGS__));                               \
     }                                                                       \
                                                                             \
 } while (0)
