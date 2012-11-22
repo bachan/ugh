@@ -196,7 +196,6 @@ int process_response(char *data, size_t size, in_addr_t *addrs, strp name)
 
 	uint a;
 	in_addr_t addr = 0;
-	char *cname = NULL;
 	int naddrs = 0;
 
 	for (a = 0; a < nan; ++a)
@@ -255,7 +254,7 @@ int process_response(char *data, size_t size, in_addr_t *addrs, strp name)
 		}
 		else if (AUX_RESOLVE_CNAME == qtype)
 		{
-			/* cname = &data[i] + sizeof(aux_resolver_an_t); */
+			/* char *cname = &data[i] + sizeof(aux_resolver_an_t); */
 			i += sizeof(aux_resolver_an_t) + len;
 
 			/* printf("cname %u (%p)\n", (unsigned int) len, cname); [> \6yandex\2ru\0 <] */
