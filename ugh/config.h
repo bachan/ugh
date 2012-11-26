@@ -40,6 +40,8 @@ struct ugh_config
 	unsigned int listen_port;
 
 	const char *resolver_host;
+	double      resolver_timeout;
+	unsigned    resolver_cache;
 
 	/* unsigned worker_threads; */
 };

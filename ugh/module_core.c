@@ -38,6 +38,31 @@ int ugh_command_resolver(ugh_config_t *cfg, int argc, char **argv, ugh_command_t
 	return 0;
 }
 
+static
+int ugh_command_resolver_timeout(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	char *p;
+
+	cfg->resolver_timeout = (double) strtoul(argv[1], &p, 10);
+
+	switch (*p)
+	{
+	case 'm': cfg->resolver_timeout /= 1000; break;
+	case 'u': cfg->resolver_timeout /= 1000000; break;
+	case 'n': cfg->resolver_timeout /= 1000000000; break;
+	}
+
+	return 0;
+}
+
+static
+int ugh_command_resolver_cache(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	cfg->resolver_cache = (0 == strcmp("on", argv[1]) ? 1 : 0);
+
+	return 0;
+}
+
 #if 0
 static
 int ugh_command_worker_threads(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
@@ -53,6 +78,8 @@ static ugh_command_t ugh_module_core_cmds [] =
 	ugh_make_command(error_log),
 	ugh_make_command(listen),
 	ugh_make_command(resolver),
+	ugh_make_command(resolver_timeout),
+	ugh_make_command(resolver_cache),
 	/* ugh_make_command(worker_threads), */
 	ugh_null_command
 };

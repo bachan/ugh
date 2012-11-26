@@ -59,15 +59,6 @@ int ugh_command_proxy_pass(ugh_config_t *cfg, int argc, char **argv, ugh_command
 	return 0;
 }
 
-int ugh_command_proxy_nowait(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
-{
-	ugh_module_proxy_conf_t *conf = ugh_module_config_get_last();
-
-	conf->nowait = (0 == strcmp(argv[1], "on") ? 1 : 0);
-
-	return 0;
-}
-
 static
 int ugh_command_proxy_next_upstream(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
