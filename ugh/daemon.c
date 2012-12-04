@@ -60,6 +60,13 @@ int ugh_daemon_exec(const char *cfg_filename, unsigned daemon)
 
 	loop = ev_default_loop(0);
 
+	/* TODO make it possible to set default values for each module config and
+	 * global config via ugh_make_command macro (by setting all this at
+	 * module_handle_add stage)
+	 */
+	rc = ugh_config_init(&d.cfg);
+	if (0 > rc) return -1;
+
 	rc = ugh_config_load(&d.cfg, cfg_filename);
 	if (0 > rc) return -1;
 

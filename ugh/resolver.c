@@ -99,51 +99,6 @@ int ugh_resolver_init(ugh_resolver_t *r, ugh_config_t *cfg)
 {
 	int sd, rc;
 
-#if 1 /* TODO move ugh_resolver_init operation to config_init callback */
-	if (NULL == cfg->resolver_host)
-	{
-		strt resolv_conf;
-
-		rc = aux_mmap_file(&resolv_conf, "/etc/resolv.conf");
-		if (0 > rc) return -1;
-
-		/* TODO use normal resolv.conf parser (which reads comments) */
-		char *ns_b = aux_strnstr(resolv_conf.data, "nameserver", resolv_conf.size);
-
-		if (NULL == ns_b)
-		{
-			log_warn("couldn't find nameserver in /etc/resolv.conf file");
-			aux_umap(&resolv_conf);
-			return -1;
-		}
-
-		ns_b += sizeof("nameserver") - 1;
-
-		for (; ns_b - resolv_conf.data < resolv_conf.size; ++ns_b)
-		{
-			if (!isspace(*ns_b)) break;
-		}
-
-		char *ns_e = memchr(ns_b, '\n', resolv_conf.data + resolv_conf.size - ns_b);
-
-		char *ns = aux_pool_malloc(cfg->pool, ns_e - ns_b + 1);
-
-		if (NULL == ns)
-		{
-			aux_umap(&resolv_conf);
-			return -1;
-		}
-
-		memcpy(ns, ns_b, ns_e - ns_b);
-		ns[ns_e - ns_b] = 0;
-
-		cfg->resolver_host = ns;
-
-		rc = aux_umap(&resolv_conf);
-		if (0 > rc) return -1;
-	}
-#endif
-
 	r->pool = aux_pool_init(0);
 	if (NULL == r->pool) return -1;
 

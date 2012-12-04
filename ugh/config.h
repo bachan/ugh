@@ -37,7 +37,7 @@ struct ugh_config
 	const char *log_level;
 
 	const char *listen_host;
-	unsigned int listen_port;
+	unsigned    listen_port;
 
 	const char *resolver_host;
 	double      resolver_timeout;
@@ -46,6 +46,7 @@ struct ugh_config
 	/* unsigned worker_threads; */
 };
 
+int ugh_config_init(ugh_config_t *cfg); /* set default values here */
 int ugh_config_load(ugh_config_t *cfg, const char *filename);
 int ugh_config_data(ugh_config_t *cfg, char *data, size_t size);
 int ugh_config_free(ugh_config_t *cfg);

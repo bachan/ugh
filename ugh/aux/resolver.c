@@ -272,3 +272,46 @@ int process_response(char *data, size_t size, in_addr_t *addrs, strp name)
 	return naddrs;
 }
 
+const char *parse_resolv_conf(aux_pool_t *pool)
+{
+	strt resolv_conf;
+
+	int rc = aux_mmap_file(&resolv_conf, "/etc/resolv.conf");
+	if (0 > rc) return NULL;
+
+	/* TODO use normal resolv.conf parser (which reads comments) */
+	char *ns_b = aux_strnstr(resolv_conf.data, "nameserver", resolv_conf.size);
+
+	if (NULL == ns_b)
+	{
+		/* log_warn("couldn't find nameserver in /etc/resolv.conf file"); */
+		aux_umap(&resolv_conf);
+		return NULL;
+	}
+
+	ns_b += sizeof("nameserver") - 1;
+
+	for (; ns_b - resolv_conf.data < resolv_conf.size; ++ns_b)
+	{
+		if (!isspace(*ns_b)) break;
+	}
+
+	char *ns_e = memchr(ns_b, '\n', resolv_conf.data + resolv_conf.size - ns_b);
+
+	char *ns = aux_pool_malloc(pool, ns_e - ns_b + 1);
+
+	if (NULL == ns)
+	{
+		aux_umap(&resolv_conf);
+		return NULL;
+	}
+
+	memcpy(ns, ns_b, ns_e - ns_b);
+	ns[ns_e - ns_b] = 0;
+
+	rc = aux_umap(&resolv_conf);
+	if (0 > rc) return NULL;
+
+	return ns;
+}
+

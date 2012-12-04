@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "aux/resolver.h"
 #include "config.h"
 #include "module.h"
 #include "ugh.h"
@@ -11,6 +12,26 @@
 #define S_NORMAL 1
 #define S_IGNORE 2
 #define S_QUOTES 3
+
+int ugh_config_init(ugh_config_t *cfg)
+{
+	cfg->pool = aux_pool_init(0);
+	if (NULL == cfg->pool) return -1;
+
+	cfg->next_upstream = UGH_UPSTREAM_FT_ERROR | UGH_UPSTREAM_FT_TIMEOUT | UGH_UPSTREAM_FT_HTTP_4XX | UGH_UPSTREAM_FT_HTTP_5XX;
+
+	cfg->log_error = "ugh.log";
+	cfg->log_level = "info";
+
+	cfg->listen_host = "0.0.0.0";
+	cfg->listen_port = 80;
+
+	cfg->resolver_host = parse_resolv_conf(cfg->pool);
+	cfg->resolver_timeout = UGH_CONFIG_RESOLVER_TIMEOUT;
+	cfg->resolver_cache = 1;
+
+	return 0;
+}
 
 int ugh_config_load(ugh_config_t *cfg, const char *filename)
 {
@@ -25,9 +46,6 @@ int ugh_config_load(ugh_config_t *cfg, const char *filename)
 		return -1;
 	}
 
-	cfg->pool = aux_pool_init(0);
-	if (NULL == cfg->pool) return -1;
-
 	rc = ugh_config_data(cfg, data.data, data.size);
 	if (0 != rc) return -1;
 
@@ -39,6 +57,7 @@ int ugh_config_load(ugh_config_t *cfg, const char *filename)
 
 int ugh_config_free(ugh_config_t *cfg)
 {
+	JudyLFreeArray(&cfg->upstreams_hash, PJE0);
 	JudyLFreeArray(&cfg->vars_hash, PJE0);
 	aux_pool_free(cfg->pool);
 
