@@ -524,7 +524,7 @@ int ugh_subreq_run(ugh_subreq_t *r)
 	if (NULL != r->upstream)
 	{
 		r->addr.sin_family = AF_INET;
-		r->addr.sin_port = r->upstream->values[r->upstream_current].port;
+		r->addr.sin_port = htons(r->upstream->values[r->upstream_current].port);
 
 		if (0 > ugh_resolver_addq(r->c->s->resolver, u_host->data, u_host->size, r->resolver_ctx))
 		{
@@ -761,7 +761,7 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 			r->upstream_tries++;
 
 			r->addr.sin_family = AF_INET;
-			r->addr.sin_port = r->upstream->values[r->upstream_current].port;
+			r->addr.sin_port = htons(r->upstream->values[r->upstream_current].port);
 
 			u_host = &r->upstream->values[r->upstream_current].host;
 		}
@@ -772,7 +772,7 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 			r->upstream_tries++;
 
 			r->addr.sin_family = AF_INET;
-			r->addr.sin_port = r->upstream->backup_values[r->upstream->backup_values_curr].port;
+			r->addr.sin_port = htons(r->upstream->backup_values[r->upstream->backup_values_curr].port);
 
 			u_host = &r->upstream->backup_values[r->upstream->backup_values_curr].host;
 		}

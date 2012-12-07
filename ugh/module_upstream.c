@@ -14,7 +14,7 @@ int ugh_command_upstream_handle_line(ugh_config_t *cfg, int argc, char **argv)
 
 			upstream->values[upstream->values_size].host.data = u.host.data;
 			upstream->values[upstream->values_size].host.size = u.host.size;
-			upstream->values[upstream->values_size].port = htons(strtoul(u.port.data, NULL, 10));
+			upstream->values[upstream->values_size].port = strtoul(u.port.data, NULL, 10);
 
 			upstream->values_size++;
 			upstream->values_curr = upstream->values_size - 1;
@@ -30,7 +30,7 @@ int ugh_command_upstream_handle_line(ugh_config_t *cfg, int argc, char **argv)
 
 			upstream->backup_values[upstream->backup_values_size].host.data = u.host.data;
 			upstream->backup_values[upstream->backup_values_size].host.size = u.host.size;
-			upstream->backup_values[upstream->backup_values_size].port = htons(strtoul(u.port.data, NULL, 10));
+			upstream->backup_values[upstream->backup_values_size].port = strtoul(u.port.data, NULL, 10);
 
 			upstream->backup_values_size++;
 			upstream->backup_values_curr = upstream->backup_values_size - 1;
