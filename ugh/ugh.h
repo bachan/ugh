@@ -237,6 +237,9 @@ typedef struct ugh_subreq
 
 typedef int (*ugh_subreq_handle_fp)(ugh_subreq_t *r, char *data, size_t size);
 
+#define UGH_TIMEOUT_ONCE 0
+#define UGH_TIMEOUT_FULL 1
+
 struct ugh_subreq
 {
 	ugh_client_t *c;
@@ -247,6 +250,7 @@ struct ugh_subreq
 	ev_io wev_connect;
 	ev_timer wev_timeout;
 	ev_tstamp timeout;
+	int timeout_type;
 
 	/* send */
 
@@ -314,7 +318,7 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags)
 int ugh_subreq_set_method(ugh_subreq_t *r, ucht method);
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
 int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
-int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout);
+int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type);
 int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);

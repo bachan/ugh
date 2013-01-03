@@ -21,7 +21,7 @@ int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
 
 		if (conf->recv_timeout > 0)
 		{
-			ugh_subreq_set_timeout(r, conf->recv_timeout);
+			ugh_subreq_set_timeout(r, conf->recv_timeout, UGH_TIMEOUT_ONCE);
 		}
 
 		ugh_subreq_run(r);
@@ -32,7 +32,7 @@ int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
 
 		if (conf->recv_timeout > 0)
 		{
-			ugh_subreq_set_timeout(r, conf->recv_timeout);
+			ugh_subreq_set_timeout(r, conf->recv_timeout, UGH_TIMEOUT_ONCE);
 		}
 
 		ugh_subreq_run(r);

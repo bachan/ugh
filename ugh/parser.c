@@ -523,14 +523,14 @@ int ugh_parser_subreq(ugh_subreq_t *r, char *data, size_t size)
 			{
 			case LF : ugh_subreq_header_set(r, r->key_b, r->key_e - r->key_b, r->val_b, r->val_e - r->val_b); state = S_HEADER_READY; break; /* insert header */
 			case CR : break;
-			default : return UGH_HTTP_BAD_REQUEST;
+			default : return UGH_ERROR;
 			}
 			break;
 		case S_HEADER_BLOCK_FINAL:
 			switch (ch)
 			{
 			case LF : goto final;
-			default : return UGH_HTTP_BAD_REQUEST;
+			default : return UGH_ERROR;
 			}
 			break;
 		}

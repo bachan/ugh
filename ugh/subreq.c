@@ -46,7 +46,10 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 		return;
 	}
 
-	ev_timer_again(loop, &r->wev_timeout);
+	if (UGH_TIMEOUT_ONCE == r->timeout_type)
+	{
+		ev_timer_again(loop, &r->wev_timeout);
+	}
 
 	r->buf_send.data += rc;
 	r->buf_send.size -= rc;
@@ -98,7 +101,11 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 	{
 		if (EAGAIN == errno)
 		{
-			ev_timer_again(loop, &r->wev_timeout);
+			if (UGH_TIMEOUT_ONCE == r->timeout_type)
+			{
+				ev_timer_again(loop, &r->wev_timeout);
+			}
+
 			return;
 		}
 
@@ -110,7 +117,10 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 	r->buf_recv.data += nb;
 	r->buf_recv.size -= nb;
 
-	ev_timer_again(loop, &r->wev_timeout);
+	if (UGH_TIMEOUT_ONCE == r->timeout_type)
+	{
+		ev_timer_again(loop, &r->wev_timeout);
+	}
 
 	if (NULL == r->body.data)
 	{
@@ -454,9 +464,10 @@ int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size)
 	return 0;
 }
 
-int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout)
+int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type)
 {
 	r->timeout = timeout;
+	r->timeout_type = timeout_type;
 
 	return 0;
 }
