@@ -423,6 +423,7 @@ int ugh_module_handle(ugh_client_t *c);
 
 #if 1
 extern coro_context ctx_main;
+extern unsigned char is_main_coro;
 #endif
 
 /* ### variables ### */

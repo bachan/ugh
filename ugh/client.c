@@ -189,7 +189,9 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 	}
 
 	coro_create(&c->ctx, ugh_client_ccb_handle, c, c->stack, UGH_CORO_STACK, &ctx_main);
+	is_main_coro = 0;
 	coro_transfer(&ctx_main, &c->ctx);
+	is_main_coro = 1;
 #endif
 
 #if 0 /* UGH_CORO DISABLE */

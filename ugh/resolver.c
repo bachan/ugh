@@ -175,6 +175,31 @@ int ugh_resolver_addq(ugh_resolver_t *r, char *name, size_t size, ugh_resolver_c
 
 	ugh_resolver_rec_t *rec = *dest;
 
+	if (0 == r->cfg->resolver_cache)
+	{
+		if (NULL == rec)
+		{
+			rec = (ugh_resolver_rec_t *) aux_pool_calloc(r->pool, sizeof(*rec));
+			if (NULL == rec) return -1;
+
+			rec->name.data = (char *) aux_pool_malloc(r->pool, size);
+			if (NULL == rec->name.data) return -1;
+
+			rec->name.size = aux_cpymsz(rec->name.data, name, size);
+
+			*dest = rec;
+		}
+
+		ev_io_init(&rec->wev_send, ugh_resolver_wcb_send, r->wev_recv.fd, EV_WRITE);
+		ev_timer_init(&rec->wev_timeout, ugh_resolver_wcb_timeout, 0, r->cfg->resolver_timeout);
+		ev_timer_again(loop, &rec->wev_timeout);
+		ev_io_start(loop, &rec->wev_send);
+
+		Judy1Set(&rec->wait_hash, (uintptr_t) ctx, PJE0); /* add wait */
+
+		return 0;
+	}
+
 	if (NULL != rec)
 	{
 		if (0 < rec->naddrs) /* result is not empty */
@@ -200,12 +225,12 @@ int ugh_resolver_addq(ugh_resolver_t *r, char *name, size_t size, ugh_resolver_c
 
 		rec->name.size = aux_cpymsz(rec->name.data, name, size);
 
+		*dest = rec;
+
 		ev_io_init(&rec->wev_send, ugh_resolver_wcb_send, r->wev_recv.fd, EV_WRITE);
 		ev_timer_init(&rec->wev_timeout, ugh_resolver_wcb_timeout, 0, r->cfg->resolver_timeout);
 		ev_timer_again(loop, &rec->wev_timeout);
 		ev_io_start(loop, &rec->wev_send);
-
-		*dest = rec;
 
 		Judy1Set(&rec->wait_hash, (uintptr_t) ctx, PJE0); /* add wait */
 	}

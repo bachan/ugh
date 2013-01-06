@@ -25,6 +25,7 @@ int ugh_module_handle(ugh_client_t *c)
 
 #if 1
 coro_context ctx_main;
+unsigned char is_main_coro = 1;
 #endif
 
 void ugh_wcb_silent(EV_P_ ev_timer *w, int tev)

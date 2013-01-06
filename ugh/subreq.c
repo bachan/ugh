@@ -539,6 +539,11 @@ int ugh_subreq_run(ugh_subreq_t *r)
 		return -1;
 	}
 
+	if ((r->flags & UGH_SUBREQ_WAIT))
+	{
+		r->c->wait++;
+	}
+
 	r->resolver_ctx->handle = ugh_subreq_connect;
 	r->resolver_ctx->data = r;
 
@@ -563,11 +568,6 @@ int ugh_subreq_run(ugh_subreq_t *r)
 			/* ugh_resolver_addq shall call ctx->handle with INADDR_NONE argument in all error cases */
 			return -1;
 		}
-	}
-
-	if ((r->flags & UGH_SUBREQ_WAIT))
-	{
-		r->c->wait++;
 	}
 
 	return 0;
@@ -828,9 +828,16 @@ ok:
 	{
 		r->c->wait--;
 
-		if (0 == r->c->wait)
+		/* We check is_main_coro here, because we could possibly call
+		 * ugh_subreq_del from module coroutine (e.g. when IP-address of
+		 * subrequest was definitely mallformed) and in this case we don't need
+		 * to call coro_transfer
+		 */
+		if (0 == r->c->wait && is_main_coro)
 		{
+			is_main_coro = 0;
 			coro_transfer(&ctx_main, &r->c->ctx);
+			is_main_coro = 1;
 		}
 
 		/* coro_transfer(&ctx_main, &r->c->ctx); */
@@ -847,7 +854,9 @@ void ugh_subreq_wait(ugh_client_t *c)
 {
 	if (0 < c->wait)
 	{
+		is_main_coro = 1;
 		coro_transfer(&c->ctx, &ctx_main);
+		is_main_coro = 0;
 	}
 }
 
