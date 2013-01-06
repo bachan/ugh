@@ -207,7 +207,7 @@ int ugh_resolver_addq(ugh_resolver_t *r, char *name, size_t size, ugh_resolver_c
 
 		*dest = rec;
 
-		Judy1Set(&rec->wait_hash, (Word_t) ctx, PJE0); /* add wait */
+		Judy1Set(&rec->wait_hash, (uintptr_t) ctx, PJE0); /* add wait */
 	}
 
 	return 0;
