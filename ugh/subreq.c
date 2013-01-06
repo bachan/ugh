@@ -323,10 +323,17 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 {
 	ugh_subreq_t *r = (ugh_subreq_t *) data;
 
+	/* XXX this is needed temporarily, so if we del this subrequest due to
+	 * resov error, we will not close any valid file descriptor inside
+	 * ugh_subreq_del routine
+	 */
+	r->wev_recv.fd = -1;
+
 	if (INADDR_NONE == addr)
 	{
 		log_debug("ugh_subreq_connect(INADDR_NONE)");
-		aux_pool_free(r->c->pool);
+		/* aux_pool_free(r->c->pool); */
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
 		return -1;
 	}
 
@@ -339,7 +346,8 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	if (0 > (sd = socket(AF_INET, SOCK_STREAM, 0)))
 	{
 		log_error("socket(AF_INET, SOCK_STREAM, 0) (%d: %s)", errno, aux_strerror(errno));
-		aux_pool_free(r->c->pool);
+		/* aux_pool_free(r->c->pool); */
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
 		return -1;
 	}
 
@@ -347,7 +355,8 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	{
 		log_error("aux_set_nonblk(%d, 1) (%d: %s)", sd, errno, aux_strerror(errno));
 		close(sd);
-		aux_pool_free(r->c->pool);
+		/* aux_pool_free(r->c->pool); */
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
 		return -1;
 	}
 
@@ -357,7 +366,8 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	{
 		log_error("connect(%d, ...) (%d: %s)", sd, errno, aux_strerror(errno));
 		close(sd);
-		aux_pool_free(r->c->pool);
+		/* aux_pool_free(r->c->pool); */
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
 		return -1;
 	}
 

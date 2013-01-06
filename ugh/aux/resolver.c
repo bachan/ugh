@@ -272,45 +272,131 @@ int process_response(char *data, size_t size, in_addr_t *addrs, strp name)
 	return naddrs;
 }
 
+#define S_RESOLV_CONF_BEGIN 0
+#define S_RESOLV_CONF_PARAM 1
+#define S_RESOLV_CONF_VALUE_BEGIN 2
+#define S_RESOLV_CONF_VALUE 3
+#define S_RESOLV_CONF_VALUE_SPACE 4
+#define S_RESOLV_CONF_SHARP 5
+
 const char *parse_resolv_conf(aux_pool_t *pool)
 {
 	strt resolv_conf;
+	char *ns;
 
 	int rc = aux_mmap_file(&resolv_conf, "/etc/resolv.conf");
 	if (0 > rc) return NULL;
 
-	/* TODO use normal resolv.conf parser (which reads comments) */
-	char *ns_b = aux_strnstr(resolv_conf.data, "nameserver", resolv_conf.size);
+	int state = S_RESOLV_CONF_BEGIN;
+	char *p = resolv_conf.data;
+	char *e = resolv_conf.data + resolv_conf.size;
 
-	if (NULL == ns_b)
+	char *param_b = NULL;
+	char *param_e = NULL;
+	char *value_b = NULL;
+	char *value_e = NULL;
+
+	for (; p < e; ++p)
 	{
-		/* log_warn("couldn't find nameserver in /etc/resolv.conf file"); */
-		aux_umap(&resolv_conf);
-		return NULL;
+		char ch = *p;
+
+		switch (state)
+		{
+		case S_RESOLV_CONF_BEGIN:
+			if (value_e)
+			{
+				if (0 == strncmp(param_b, "nameserver", param_e - param_b))
+				{
+					goto found;
+				}
+
+				param_b = NULL;
+				param_e = NULL;
+				value_b = NULL;
+				value_e = NULL;
+			}
+
+			switch (ch)
+			{
+			case '#': state = S_RESOLV_CONF_SHARP; break;
+			case ' ':
+			case CR :
+			case LF : break;
+			default : param_b = p; state = S_RESOLV_CONF_PARAM; break;
+			}
+			break;
+		case S_RESOLV_CONF_PARAM:
+			switch (ch)
+			{
+			case '#': state = S_RESOLV_CONF_SHARP; break;
+			case ' ': param_e = p; state = S_RESOLV_CONF_VALUE_BEGIN; break;
+			case CR :
+			case LF : state = S_RESOLV_CONF_BEGIN; break;
+			}
+			break;
+		case S_RESOLV_CONF_VALUE_BEGIN:
+			switch (ch)
+			{
+			case '#': state = S_RESOLV_CONF_SHARP; break;
+			case ' ': break;
+			case CR :
+			case LF : state = S_RESOLV_CONF_BEGIN; break;
+			default : value_b = p; state = S_RESOLV_CONF_VALUE; break;
+			}
+			break;
+		case S_RESOLV_CONF_VALUE:
+			switch (ch)
+			{
+			case '#': value_e = p; state = S_RESOLV_CONF_SHARP; break;
+			case ' ': value_e = p; state = S_RESOLV_CONF_VALUE_SPACE; break;
+			case CR :
+			case LF : value_e = p; state = S_RESOLV_CONF_BEGIN; break;
+			}
+			break;
+		case S_RESOLV_CONF_VALUE_SPACE:
+			switch (ch)
+			{
+			case '#': state = S_RESOLV_CONF_SHARP; break;
+			case ' ': break;
+			case CR :
+			case LF : state = S_RESOLV_CONF_BEGIN; break;
+			default : state = S_RESOLV_CONF_VALUE; break;
+			}
+			break;
+		case S_RESOLV_CONF_SHARP:
+			switch (ch)
+			{
+			case CR :
+			case LF : state = S_RESOLV_CONF_BEGIN; break;
+			}
+			break;
+		}
 	}
 
-	ns_b += sizeof("nameserver") - 1;
-
-	for (; ns_b - resolv_conf.data < resolv_conf.size; ++ns_b)
+	if (value_e)
 	{
-		if (!isspace(*ns_b)) break;
+		if (0 == strncmp(param_b, "nameserver", param_e - param_b))
+		{
+			goto found;
+		}
 	}
 
-	char *ns_e = memchr(ns_b, '\n', resolv_conf.data + resolv_conf.size - ns_b);
+	return "127.0.0.1";
 
-	char *ns = aux_pool_malloc(pool, ns_e - ns_b + 1);
+found:
+
+	ns = aux_pool_malloc(pool, value_e - value_b + 1);
 
 	if (NULL == ns)
 	{
 		aux_umap(&resolv_conf);
-		return NULL;
+		return "127.0.0.1";
 	}
 
-	memcpy(ns, ns_b, ns_e - ns_b);
-	ns[ns_e - ns_b] = 0;
+	memcpy(ns, value_b, value_e - value_b);
+	ns[value_e - value_b] = 0;
 
-	rc = aux_umap(&resolv_conf);
-	if (0 > rc) return NULL;
+	aux_umap(&resolv_conf);
 
 	return ns;
 }

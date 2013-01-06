@@ -11,7 +11,7 @@
 #define UGH_CONFIG_SOCKET_TIMEOUT 60.0 /* TODO move to config */
 #define UGH_CONFIG_SUBREQ_TIMEOUT 1.0
 #define UGH_CONFIG_SILENT_TIMEOUT 1.0 /* TODO move to config */
-#define UGH_CONFIG_RESOLVER_TIMEOUT 1.0 /* TODO move to config */
+#define UGH_CONFIG_RESOLVER_TIMEOUT 1.0
 
 #ifdef __cplusplus
 extern "C" {

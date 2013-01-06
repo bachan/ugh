@@ -99,6 +99,8 @@ int ugh_resolver_init(ugh_resolver_t *r, ugh_config_t *cfg)
 {
 	int sd, rc;
 
+	r->cfg = cfg;
+
 	r->pool = aux_pool_init(0);
 	if (NULL == r->pool) return -1;
 
@@ -199,7 +201,7 @@ int ugh_resolver_addq(ugh_resolver_t *r, char *name, size_t size, ugh_resolver_c
 		rec->name.size = aux_cpymsz(rec->name.data, name, size);
 
 		ev_io_init(&rec->wev_send, ugh_resolver_wcb_send, r->wev_recv.fd, EV_WRITE);
-		ev_timer_init(&rec->wev_timeout, ugh_resolver_wcb_timeout, 0, UGH_CONFIG_RESOLVER_TIMEOUT);
+		ev_timer_init(&rec->wev_timeout, ugh_resolver_wcb_timeout, 0, r->cfg->resolver_timeout);
 		ev_timer_again(loop, &rec->wev_timeout);
 		ev_io_start(loop, &rec->wev_send);
 

@@ -43,6 +43,7 @@ typedef struct ugh_resolver
 
 struct ugh_resolver
 {
+	ugh_config_t *cfg;
 	aux_pool_t *pool;
 	ev_io wev_recv;
 	void *name_hash; /* Judy (domain -> ugh_resolver_rec_t *) */
