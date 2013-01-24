@@ -329,6 +329,9 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	 */
 	r->wev_recv.fd = -1;
 
+	/* start calculating response_time from this point */
+	r->response_time = ev_now(loop);
+
 	if (INADDR_NONE == addr)
 	{
 		log_debug("ugh_subreq_connect(INADDR_NONE)");
@@ -379,8 +382,6 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	ev_timer_init(&r->wev_timeout, ugh_subreq_wcb_timeout, 0, r->timeout);
 	ev_timer_again(loop, &r->wev_timeout);
 	ev_io_start(loop, &r->wev_connect);
-
-	r->response_time = ev_now(loop);
 
 	return 0;
 }
