@@ -20,9 +20,9 @@ extern "C" {
 #define LOG_debug   8  /* DBG: debug message                     */
 
 #define log_msg(lev,fmt,...) log_fmt(stderr,LOG_##lev,#lev,fmt,##__VA_ARGS__)
-#define log_err(err,fmt,...) log_msg(error,fmt " (%d: %s)", ##__VA_ARGS__, err, aux_strerror(err))
-#define log_ret(err,fmt,...) log_msg(error,fmt " (%d: %s)", ##__VA_ARGS__, err, aux_strerror(err)), err
-#define log_die(err,fmt,...) log_msg(emerg,fmt " (%d: %s)", ##__VA_ARGS__, err, aux_strerror(err)); exit(EXIT_FAILURE)
+#define log_err(err,fmt,...) log_msg(error,fmt " (%d: %s)\n", ##__VA_ARGS__, err, aux_strerror(err))
+#define log_ret(err,fmt,...) log_msg(error,fmt " (%d: %s)\n", ##__VA_ARGS__, err, aux_strerror(err)), err
+#define log_die(err,fmt,...) log_msg(emerg,fmt " (%d: %s)\n", ##__VA_ARGS__, err, aux_strerror(err)); exit(EXIT_FAILURE)
 
 #define msg(fmt,...)     fprintf(stderr, fmt          "\n", ##__VA_ARGS__)
 #define err(err,fmt,...) fprintf(stderr, fmt " (%d: %s)\n", ##__VA_ARGS__, err, aux_strerror(err))
@@ -52,7 +52,7 @@ extern "C" {
     if (level <= log_level)                                                 \
     {                                                                       \
         struct tm tmloc;                                                    \
-		time_t ts = time(NULL);                                             \
+        time_t ts = time(NULL);                                             \
         localtime_r(&ts, &tmloc);                                           \
                                                                             \
         fprintf(fp, LOG_FORMAT(lvstr,fmt),                                  \
