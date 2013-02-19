@@ -26,7 +26,7 @@ int aux_mkpidf(const char *path);
 int aux_mmap(strp area, int prot_flags, int mmap_flags, const char *filename);
 
 #define aux_umap(area) munmap((area)->data, (area)->size)
-#define aux_mmap_file(a,p) aux_mmap(aux_clrptr(a), PROT_READ, MAP_PRIVATE, p)
+#define aux_mmap_file(a,p) aux_mmap((strp) aux_clrptr(a), PROT_READ, MAP_PRIVATE, p)
 
 #ifdef __cplusplus
 }
