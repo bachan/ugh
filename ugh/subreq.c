@@ -14,7 +14,15 @@ void ugh_subreq_wcb_connect(EV_P_ ev_io *w, int tev)
 
 	if (EV_READ & tev)
 	{
-		log_warn("conn error %.*s%s%.*s (%d: %s)", (int) r->u.uri.size, r->u.uri.data, r->u.args.size ? "?" : "", (int) r->u.args.size, r->u.args.data, errno, aux_strerror(errno));
+		int optval = 0;
+		socklen_t optlen = sizeof(optval);
+
+		if (0 > getsockopt(w->fd, SOL_SOCKET, SO_ERROR, &optval, &optlen))
+		{
+			optval = errno;
+		}
+
+		log_warn("conn error %.*s%s%.*s (%d: %s)", (int) r->u.uri.size, r->u.uri.data, r->u.args.size ? "?" : "", (int) r->u.args.size, r->u.args.data, optval, aux_strerror(optval));
 		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
 		return;
 	}
