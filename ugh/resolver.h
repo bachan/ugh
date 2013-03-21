@@ -10,6 +10,8 @@
 #include "aux/socket.h"
 #include "config.h"
 
+#define UGH_RESOLVER_ADDRS_LEN 8
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,7 +32,7 @@ struct ugh_resolver_rec
 {
 	strt name;
 	int naddrs;
-	in_addr_t addrs [8];
+	in_addr_t addrs [UGH_RESOLVER_ADDRS_LEN];
 
 	ev_io wev_send;
 	ev_timer wev_timeout;

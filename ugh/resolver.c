@@ -66,14 +66,14 @@ void ugh_resolver_wcb_recv(EV_P_ ev_io *w, int tev)
 	len = aux_unix_recv(w->fd, buf, 1024);
 	if (0 > len) return;
 
-	in_addr_t addrs [8];
-	int naddrs;
+	in_addr_t addrs [UGH_RESOLVER_ADDRS_LEN];
+	int naddrs = UGH_RESOLVER_ADDRS_LEN;
 
 	strt name;
 	char name_data [1024];
 	name.data = name_data;
 
-	naddrs = process_response(buf, len, addrs, &name);
+	naddrs = process_response(buf, len, addrs, naddrs, &name);
 
 	void **dest;
 

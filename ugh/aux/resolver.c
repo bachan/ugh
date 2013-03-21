@@ -114,7 +114,7 @@ int create_name_query(char *p, char *name, size_t size)
 	return qlen;
 }
 
-int process_response(char *data, size_t size, in_addr_t *addrs, strp name)
+int process_response(char *data, size_t size, in_addr_t *addrs, int addrs_len, strp name)
 {
 	aux_resolver_query_t *q = (aux_resolver_query_t *) data;
 
@@ -249,6 +249,11 @@ int process_response(char *data, size_t size, in_addr_t *addrs, strp name)
 				((unsigned char) data[i+3])
 			);
 			addrs[naddrs++] = addr;
+
+			if (naddrs >= addrs_len)
+			{
+				break;
+			}
 
 			i += len;
 		}

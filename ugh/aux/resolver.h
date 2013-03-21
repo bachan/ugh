@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 int create_name_query(char *p, char *name, size_t size);
-int process_response(char *data, size_t size, in_addr_t *addrs, strp name);
+int process_response(char *data, size_t size, in_addr_t *addrs, int addrs_len, strp name);
 
 const char *parse_resolv_conf(aux_pool_t *pool);
 

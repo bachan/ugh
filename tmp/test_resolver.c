@@ -45,13 +45,14 @@ int main(int argc, char **argv)
 		/* write(1, a, rc); */
 
 		in_addr_t addrs [8];
-		int naddrs, j;
+		int naddrs = 8;
+		int j;
 
 		strt name;
 		char name_data [1024];
 		name.data = name_data;
 
-		naddrs = process_response(a, rc, addrs, &name);
+		naddrs = process_response(a, rc, addrs, naddrs, &name);
 #if 1
 		printf("%s (name=%.*s):\n", argv[i], (int) name.size, name.data);
 
