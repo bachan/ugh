@@ -11,6 +11,7 @@
 #include "config.h"
 
 #define UGH_RESOLVER_ADDRS_LEN 8
+#define UGH_RESOLVER_MAX_TRIES 2
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,6 +39,8 @@ struct ugh_resolver_rec
 	ev_timer wev_timeout;
 
 	void *wait_hash; /* Judy (ugh_resolver_ctx_t *) */
+
+	unsigned tries;
 };
 
 typedef struct ugh_resolver

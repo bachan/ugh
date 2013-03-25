@@ -49,6 +49,21 @@ static
 void ugh_resolver_wcb_timeout(EV_P_ ev_timer *w, int tev)
 {
 	ugh_resolver_rec_t *rec = aux_memberof(ugh_resolver_rec_t, wev_timeout, w);
+
+	if (rec->tries < UGH_RESOLVER_MAX_TRIES - 1)
+	{
+		log_warn("resolver timeout %.*s, trying again", (int) rec->name.size, rec->name.data);
+
+		rec->tries++;
+
+		ev_io_start(loop, &rec->wev_send);
+		ev_timer_again(loop, &rec->wev_timeout);
+
+		return;
+	}
+
+	log_warn("resolver timeout %.*s, out of tries", (int) rec->name.size, rec->name.data);
+
 	ugh_resolver_rec_call_waiters(rec, INADDR_NONE);
 
 	ev_io_stop(loop, &rec->wev_send);
