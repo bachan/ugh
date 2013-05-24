@@ -48,7 +48,7 @@ int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
 int ugh_command_proxy_pass(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	ugh_module_proxy_conf_t *conf;
-	
+
 	conf = aux_pool_malloc(cfg->pool, sizeof(*conf));
 	if (NULL == conf) return -1;
 
@@ -115,7 +115,7 @@ int ugh_command_proxy_next_upstream(ugh_config_t *cfg, int argc, char **argv, ug
 	return 0;
 }
 
-static ugh_command_t ugh_module_subreq_cmds [] =
+static ugh_command_t ugh_module_proxy_cmds [] =
 {
 	ugh_make_command(proxy_pass),
 	ugh_make_command_flag(proxy_nowait, ugh_module_proxy_conf_t, nowait),
@@ -124,9 +124,9 @@ static ugh_command_t ugh_module_subreq_cmds [] =
 	ugh_null_command
 };
 
-ugh_module_t ugh_module_subreq = 
+ugh_module_t ugh_module_proxy =
 {
-	ugh_module_subreq_cmds,
+	ugh_module_proxy_cmds,
 	NULL,
 	NULL
 };

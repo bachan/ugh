@@ -5,7 +5,7 @@ extern ugh_module_t ugh_module_import;
 extern ugh_module_t ugh_module_map;
 extern ugh_module_t ugh_module_set;
 extern ugh_module_t ugh_module_return;
-extern ugh_module_t ugh_module_subreq;
+extern ugh_module_t ugh_module_proxy;
 extern ugh_module_t ugh_module_upstream;
 
 ugh_module_t *ugh_modules [UGH_MODULES_MAX] = {
@@ -14,7 +14,7 @@ ugh_module_t *ugh_modules [UGH_MODULES_MAX] = {
 	&ugh_module_map,
 	&ugh_module_set,
 	&ugh_module_return,
-	&ugh_module_subreq,
+	&ugh_module_proxy,
 	&ugh_module_upstream,
 	NULL,
 	NULL,
