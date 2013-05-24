@@ -87,7 +87,7 @@ extern struct ev_loop *loop;
 extern const char *ugh_method_string [UGH_HTTP_MAX];
 extern const char *ugh_version_string [UGH_HTTP_VERSION_MAX];
 
-#define UGH_HDRBUF 32768 /* XXX this is temporary upper header buffer size limit to simplify things */
+#define UGH_HEADER_BUF (32768) /* XXX this is temporary upper header buffer size limit to simplify things */
 #define UGH_SUBREQ_BUF (32768 * 4) /* XXX make this dynamically allocated also */
 #define UGH_CORO_STACK (32768 * 16)
 
@@ -105,7 +105,7 @@ struct ugh_client
 
 	aux_pool_t *pool;
 
-	strt buf_recv; /* UGH_HDRBUF */
+	strt buf_recv; /* UGH_HEADER_BUF */
 	strt buf_send;
 
 	/* request */

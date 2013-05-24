@@ -216,8 +216,8 @@ int ugh_client_send(ugh_client_t *c, int status)
 		c->bufs_sumlen += c->bufs[i].size;
 	}
 
-	c->buf_send.data = (char *) aux_pool_malloc(c->pool, UGH_HDRBUF);
-	c->buf_send.size = snprintf(c->buf_send.data, UGH_HDRBUF,
+	c->buf_send.data = (char *) aux_pool_malloc(c->pool, UGH_HEADER_BUF);
+	c->buf_send.size = snprintf(c->buf_send.data, UGH_HEADER_BUF,
 		"HTTP/1.1 %s"              CRLF
 		"Server: ugh/"UGH_VERSION  CRLF
 		"Content-Length: %"PRIuMAX CRLF
@@ -235,19 +235,19 @@ int ugh_client_send(ugh_client_t *c, int status)
 	{
 		ugh_header_t *h = *vptr;
 
-		c->buf_send.size += snprintf(c->buf_send.data + c->buf_send.size, UGH_HDRBUF - c->buf_send.size,
+		c->buf_send.size += snprintf(c->buf_send.data + c->buf_send.size, UGH_HEADER_BUF - c->buf_send.size,
 			"%.*s: %.*s" CRLF, (int) h->key.size, h->key.data, (int) h->value.size, h->value.data);
 	}
 
 #if 0
 	if (0 != c->location.size)
 	{
-		c->buf_send.size += snprintf(c->buf_send.data + c->buf_send.size, UGH_HDRBUF - c->buf_send.size,
+		c->buf_send.size += snprintf(c->buf_send.data + c->buf_send.size, UGH_HEADER_BUF - c->buf_send.size,
 			"Location: %.*s" CRLF, (int) c->location.size, c->location.data);
 	}
 #endif
 
-	c->buf_send.size += snprintf(c->buf_send.data + c->buf_send.size, UGH_HDRBUF - c->buf_send.size, CRLF);
+	c->buf_send.size += snprintf(c->buf_send.data + c->buf_send.size, UGH_HEADER_BUF - c->buf_send.size, CRLF);
 
 	log_notice("access %s '%.*s%s%.*s' %.*s %"PRIuMAX, inet_ntoa(c->addr.sin_addr), (int) c->uri.size, c->uri.data,
 		c->args.size ? "?" : "", (int) c->args.size, c->args.data, 3, ugh_status_header[status],
@@ -282,8 +282,8 @@ int ugh_client_add(ugh_server_t *s, int sd, struct sockaddr_in *addr)
 
 	c->pool = pool;
 
-	c->buf_recv.size = UGH_HDRBUF;
-	c->buf_recv.data = aux_pool_malloc(pool, UGH_HDRBUF);
+	c->buf_recv.size = UGH_HEADER_BUF;
+	c->buf_recv.data = aux_pool_malloc(pool, UGH_HEADER_BUF);
 
 	if (NULL == c->buf_recv.data)
 	{
