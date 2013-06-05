@@ -2,27 +2,28 @@
 
 #define S_CLIENT_READY              0x00    /* INITIAL */
 #define S_CLIENT_METHOD             0x01    /* REQUEST */
-#define S_CLIENT_SPACES             0x02
-#define S_CLIENT_URI                0x03
-#define S_CLIENT_ARGS               0x04
-#define S_CLIENT_ARGS_VALUE         0x05
-#define S_CLIENT_PROT               0x06
-#define S_CLIENT_PROT_H             0x07
-#define S_CLIENT_PROT_HT            0x08
-#define S_CLIENT_PROT_HTT           0x09
-#define S_CLIENT_PROT_HTTP          0x0A
-#define S_CLIENT_PROT_MAJOR         0x0B
-#define S_CLIENT_PROT_MINOR         0x0C
-#define S_CLIENT_PROT_FINAL         0x0D
-#define S_CLIENT_LAST               0x0E
-#define S_HEADER_FIRST              0x0F    /* HEADERS */
-#define S_HEADER_READY              0x10
-#define S_HEADER_PARAM              0x11
-#define S_HEADER_VALUE_BEGIN        0x12
-#define S_HEADER_VALUE              0x13
-#define S_HEADER_VALUE_SPACE        0x14
-#define S_HEADER_VALUE_FINAL        0x15
-#define S_HEADER_BLOCK_FINAL        0x16
+#define S_CLIENT_POST_OR_PUT        0x02
+#define S_CLIENT_SPACES             0x03
+#define S_CLIENT_URI                0x04
+#define S_CLIENT_ARGS               0x05
+#define S_CLIENT_ARGS_VALUE         0x06
+#define S_CLIENT_PROT               0x07
+#define S_CLIENT_PROT_H             0x08
+#define S_CLIENT_PROT_HT            0x09
+#define S_CLIENT_PROT_HTT           0x0A
+#define S_CLIENT_PROT_HTTP          0x0B
+#define S_CLIENT_PROT_MAJOR         0x0C
+#define S_CLIENT_PROT_MINOR         0x0D
+#define S_CLIENT_PROT_FINAL         0x0E
+#define S_CLIENT_LAST               0x0F
+#define S_HEADER_FIRST              0x10    /* HEADERS */
+#define S_HEADER_READY              0x11
+#define S_HEADER_PARAM              0x12
+#define S_HEADER_VALUE_BEGIN        0x13
+#define S_HEADER_VALUE              0x14
+#define S_HEADER_VALUE_SPACE        0x15
+#define S_HEADER_VALUE_FINAL        0x16
+#define S_HEADER_BLOCK_FINAL        0x17
 
 int ugh_parser_client(ugh_client_t *c, char *data, size_t size)
 {
@@ -41,9 +42,18 @@ int ugh_parser_client(ugh_client_t *c, char *data, size_t size)
 			{
 			case CR : 
 			case LF : break;
-			case 'G': c->request_beg = p; c->method = UGH_HTTP_GET;  state = S_CLIENT_METHOD; break;
+			case 'G': c->request_beg = p; c->method = UGH_HTTP_GET; state = S_CLIENT_METHOD; break;
 			case 'H': c->request_beg = p; c->method = UGH_HTTP_HEAD; state = S_CLIENT_METHOD; break;
-			case 'P': c->request_beg = p; c->method = UGH_HTTP_POST; state = S_CLIENT_METHOD; break;
+			case 'P': c->request_beg = p; state = S_CLIENT_POST_OR_PUT; break;
+			case 'D': c->request_beg = p; c->method = UGH_HTTP_DELETE; state = S_CLIENT_METHOD; break;
+			default : return UGH_HTTP_BAD_REQUEST;
+			}
+			break;
+		case S_CLIENT_POST_OR_PUT:
+			switch (ch)
+			{
+			case 'O': c->method = UGH_HTTP_POST; state = S_CLIENT_METHOD; break;
+			case 'U': c->method = UGH_HTTP_PUT; state = S_CLIENT_METHOD; break;
 			default : return UGH_HTTP_BAD_REQUEST;
 			}
 			break;

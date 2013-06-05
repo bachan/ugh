@@ -7,6 +7,9 @@ extern ugh_module_t ugh_module_set;
 extern ugh_module_t ugh_module_return;
 extern ugh_module_t ugh_module_proxy;
 extern ugh_module_t ugh_module_upstream;
+extern ugh_module_t ugh_module_push_subscriber;
+extern ugh_module_t ugh_module_push_publisher;
+extern ugh_module_t ugh_module_push_pass;
 
 ugh_module_t *ugh_modules [UGH_MODULES_MAX] = {
 	&ugh_module_core,
@@ -16,9 +19,9 @@ ugh_module_t *ugh_modules [UGH_MODULES_MAX] = {
 	&ugh_module_return,
 	&ugh_module_proxy,
 	&ugh_module_upstream,
-	NULL,
-	NULL,
-	NULL,
+	&ugh_module_push_subscriber,
+	&ugh_module_push_publisher,
+	&ugh_module_push_pass,
 	NULL,
 	NULL,
 	NULL,
@@ -27,7 +30,7 @@ ugh_module_t *ugh_modules [UGH_MODULES_MAX] = {
 	NULL
 };
 
-size_t ugh_modules_size = 7;
+size_t ugh_modules_size = 10;
 
 int ugh_module_add(ugh_module_t *m)
 {

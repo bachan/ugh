@@ -16,7 +16,14 @@ int ugh_module_handle(ugh_client_t *c)
 	{
 		if (NULL == ugh_module_handles[i]) continue;
 
-		status = ugh_module_handles[i](c, ugh_module_configs[i], &c->bufs[i]);
+		int tmp_status = ugh_module_handles[i](c, ugh_module_configs[i], &c->bufs[i]);
+
+#if 1 /* XXX UGH_AGAIN means here, that module was not supposed to be called */
+		if (tmp_status != UGH_AGAIN)
+		{
+			status = tmp_status;
+		}
+#endif
 	}
 
 	return status;

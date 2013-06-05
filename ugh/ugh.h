@@ -45,6 +45,7 @@ struct ugh_server
 	ugh_resolver_t *resolver;
 	struct sockaddr_in addr;
 	ev_io wev_accept;
+	void *channels_hash; /* JudyL (channel_id -> ugh_channel_t *) */
 };
 
 int ugh_server_listen(ugh_server_t *s, ugh_config_t *cfg, ugh_resolver_t *resolver);
@@ -74,10 +75,12 @@ extern struct ev_loop *loop;
 #define UGH_ERROR -1
 #define UGH_AGAIN -2
 
-#define UGH_HTTP_GET  0
-#define UGH_HTTP_HEAD 1
-#define UGH_HTTP_POST 2
-#define UGH_HTTP_MAX  3
+#define UGH_HTTP_GET    0
+#define UGH_HTTP_HEAD   1
+#define UGH_HTTP_POST   2
+#define UGH_HTTP_PUT    3
+#define UGH_HTTP_DELETE 4
+#define UGH_HTTP_MAX    5
 
 #define UGH_HTTP_VERSION_0_9 0
 #define UGH_HTTP_VERSION_1_0 1
@@ -351,6 +354,49 @@ ugh_header_t *ugh_subreq_header_set(ugh_subreq_t *r, const char *data, size_t si
 int ugh_parser_client(ugh_client_t *c, char *data, size_t size);
 int ugh_parser_subreq(ugh_subreq_t *r, char *data, size_t size);
 int ugh_parser_chunks(ugh_subreq_t *r, char *data, size_t size);
+
+/* ### channel ### */
+
+#define UGH_CHANNEL_LONG_POLL 0
+#define UGH_CHANNEL_INTERVAL_POLL 1
+
+#define UGH_CHANNEL_WORKING 0
+#define UGH_CHANNEL_DELETED 1
+
+typedef struct ugh_channel
+	ugh_channel_t;
+
+struct ugh_channel
+{
+	ugh_server_t *s;
+	aux_pool_t *pool;
+
+	ev_async wev_message;
+
+	void *messages_hash; /* JudyL (etag -> ugh_channel_message_t *) */
+	/* TODO last-modified / if-modified-since mechanism */
+
+	void *clients_hash; /* Judy1 (ugh_client_t *) */ /* XXX Judy is not required here */
+	size_t clients_size; /* XXX we can use plain array with this size variable */
+
+	unsigned status:1;
+};
+
+ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id);
+ugh_channel_t *ugh_channel_get(ugh_server_t *s, strp channel_id);
+int ugh_channel_del(ugh_server_t *s, strp channel_id);
+
+int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type);
+int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned type);
+
+typedef struct ugh_channel_message
+	ugh_channel_message_t;
+
+struct ugh_channel_message
+{
+	strt content_type;
+	strt body;
+};
 
 /* ### status ### */
 
