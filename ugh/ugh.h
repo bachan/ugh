@@ -122,9 +122,9 @@ struct ugh_client
 	char*headers_beg;
 	char*request_end;
 
-	ucht state;
-	ucht method;
-	ucht version;
+	unsigned char state;
+	unsigned char method;
+	unsigned char version;
 
 	strt uri;
 	strt args;
@@ -263,7 +263,7 @@ struct ugh_subreq
 	ugh_url_t u;
 	strt request_body;
 
-	ucht method;
+	unsigned char method;
 
 	/* void*headers_out_hash; */
 
@@ -281,8 +281,8 @@ struct ugh_subreq
 	char*headers_beg;
 	char*request_end;
 
-	ucht state;
-	ucht version;
+	unsigned char state;
+	unsigned char version;
 	unsigned int status;
 
 	void*headers_hash;
@@ -326,7 +326,7 @@ struct ugh_subreq
 #define UGH_SUBREQ_PUSH 2
 
 ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags);
-int ugh_subreq_set_method(ugh_subreq_t *r, ucht method);
+int ugh_subreq_set_method(ugh_subreq_t *r, unsigned char method);
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
 int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
 int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type);

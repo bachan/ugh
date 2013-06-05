@@ -10,7 +10,7 @@ int ugh_template_compile(ugh_template_t *t, char *data, size_t size, ugh_config_
 	char *p = data;
 	char *e = data + size;
 
-	ucht state = S_STR;
+	unsigned char state = S_STR;
 
 	strt chunks [UGH_TEMPLATE_MAX_CHUNKS];
 	size_t chunks_size = 0;

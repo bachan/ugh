@@ -11,9 +11,6 @@ extern "C" {
 #endif
 
 #if 1
-typedef char scht, *schp;
-typedef unsigned char ucht, *uchp;
-typedef unsigned int uint;
 typedef struct { size_t size; char *data; } strt, *strp;
 
 #define aux_string(s) { sizeof(s) - 1, s }
@@ -42,7 +39,7 @@ extern strt aux_empty_string;
 #define aux_bitsof(x)       (sizeof(x) * 8)
 #define aux_rowsof(x)       (sizeof(x)/sizeof((x)[0]))
 #define aux_member(t,n)     (((t*)0)->(n))
-#define aux_memberof(t,n,p) (((t*)(((uchp)(p))-offsetof(t,n))))
+#define aux_memberof(t,n,p) (((t*)(((unsigned char *)(p))-offsetof(t,n))))
 #define aux_mebitsof(t,n)   (aux_bitsof(aux_member(t,n)))
 #define aux_mesizeof(t,n)   (sizeof(aux_member(t,n)))
 #define aux_metypeof(t,n)   (typeof(aux_member(t,n)))
@@ -65,11 +62,11 @@ const char* aux_strerror_r(int err, char* data, size_t size)
 
 /* ----------------- */
 
-extern const ucht aux_ctypes_table [UCHAR_MAX + 1];
-extern const ucht aux_ch2dig_table [UCHAR_MAX + 1];
+extern const unsigned char aux_ctypes_table [UCHAR_MAX + 1];
+extern const unsigned char aux_ch2dig_table [UCHAR_MAX + 1];
 
-#define aux_ctypes(c) aux_ctypes_table[(ucht) (c)]
-#define aux_ch2dig(c) aux_ch2dig_table[(ucht) (c)]
+#define aux_ctypes(c) aux_ctypes_table[(unsigned char) (c)]
+#define aux_ch2dig(c) aux_ch2dig_table[(unsigned char) (c)]
 
 #define AUX_SPACE 0x01 /* space */
 #define AUX_OCTAL 0x02 /* octal */
@@ -89,17 +86,15 @@ extern const ucht aux_ch2dig_table [UCHAR_MAX + 1];
 #define aux_islower(c) (aux_ctypes(c) & (AUX_HEXLO|AUX_LOWER))
 #define aux_isalpha(c) (aux_ctypes(c) & (AUX_HEXUP|AUX_HEXLO|AUX_UPPER|AUX_LOWER))
 #define aux_isalnum(c) (aux_ctypes(c) & (AUX_OCTAL|AUX_DECAL|AUX_HEXUP|AUX_HEXLO|AUX_UPPER|AUX_LOWER))
-#define aux_tolower(c) ((ucht) (((c) >= 'A' && (c) <= 'Z') ? ((c) |  0x20) : (c)))
-#define aux_toupper(c) ((ucht) (((c) >= 'a' && (c) <= 'z') ? ((c) & ~0x20) : (c)))
+#define aux_tolower(c) ((unsigned char) (((c) >= 'A' && (c) <= 'Z') ? ((c) |  0x20) : (c)))
+#define aux_toupper(c) ((unsigned char) (((c) >= 'a' && (c) <= 'z') ? ((c) & ~0x20) : (c)))
 
-#define hex_hi(x) "0123456789abcdef" [((ucht) (x)) >>  4]
-#define hex_lo(x) "0123456789abcdef" [((ucht) (x)) & 0xf]
-#define HEX_hi(x) "0123456789ABCDEF" [((ucht) (x)) >>  4]
-#define HEX_lo(x) "0123456789ABCDEF" [((ucht) (x)) & 0xf]
+#define hex_hi(x) "0123456789abcdef" [((unsigned char) (x)) >>  4]
+#define hex_lo(x) "0123456789abcdef" [((unsigned char) (x)) & 0xf]
+#define HEX_hi(x) "0123456789ABCDEF" [((unsigned char) (x)) >>  4]
+#define HEX_lo(x) "0123456789ABCDEF" [((unsigned char) (x)) & 0xf]
 #define hex_pk(l,r) ((*l++ = hex_hi(r)), (*l++ = hex_lo(r)))
 #define HEX_pk(l,r) ((*l++ = HEX_hi(r)), (*l++ = HEX_lo(r)))
-/* #define hex_pk(l,r) do { *l++ = hex_hi(r); *l++ = hex_lo(r); } while (0) */
-/* #define HEX_pk(l,r) do { *l++ = HEX_hi(r); *l++ = HEX_lo(r); } while (0) */
 
 static inline
 int aux_bin2str(char *dest, const char *data, size_t size)
@@ -115,7 +110,7 @@ int aux_bin2str(char *dest, const char *data, size_t size)
 static inline
 int aux_str2bin(char *dest, const char *data, size_t size)
 {
-	ucht dig;
+	unsigned char dig;
 
 	for (;; ++dest)
 	{
@@ -164,240 +159,6 @@ char *aux_memmem(const char *m, size_t sz_m, const char *n, size_t sz_n)
 
 	return NULL;
 }
-
-/* --- */
-
-#define AUX_IFELSE(b,y,n) CONCAT_DATA(AUX_IFELSE_, AUX_TOBOOL(b))(y,n)
-#define AUX_IFELSE_0(y,n) n
-#define AUX_IFELSE_1(y,n) y
-
-#define AUX_TOBOOL(b) CONCAT_DATA(AUX_TOBOOL_, b)
-/* AUX_TOBOOL_ {{{ */
-#define AUX_TOBOOL_0  0
-#define AUX_TOBOOL_1  1
-#define AUX_TOBOOL_2  1
-#define AUX_TOBOOL_3  1
-#define AUX_TOBOOL_4  1
-#define AUX_TOBOOL_5  1
-#define AUX_TOBOOL_6  1
-#define AUX_TOBOOL_7  1
-#define AUX_TOBOOL_8  1
-#define AUX_TOBOOL_9  1
-#define AUX_TOBOOL_10 1
-#define AUX_TOBOOL_11 1
-#define AUX_TOBOOL_12 1
-#define AUX_TOBOOL_13 1
-#define AUX_TOBOOL_14 1
-#define AUX_TOBOOL_15 1
-#define AUX_TOBOOL_16 1
-#define AUX_TOBOOL_17 1
-#define AUX_TOBOOL_18 1
-#define AUX_TOBOOL_19 1
-#define AUX_TOBOOL_20 1
-#define AUX_TOBOOL_21 1
-#define AUX_TOBOOL_22 1
-#define AUX_TOBOOL_23 1
-#define AUX_TOBOOL_24 1
-#define AUX_TOBOOL_25 1
-#define AUX_TOBOOL_26 1
-#define AUX_TOBOOL_27 1
-#define AUX_TOBOOL_28 1
-#define AUX_TOBOOL_29 1
-#define AUX_TOBOOL_30 1
-#define AUX_TOBOOL_31 1
-#define AUX_TOBOOL_32 1
-#define AUX_TOBOOL_33 1
-#define AUX_TOBOOL_34 1
-#define AUX_TOBOOL_35 1
-#define AUX_TOBOOL_36 1
-#define AUX_TOBOOL_37 1
-#define AUX_TOBOOL_38 1
-#define AUX_TOBOOL_39 1
-#define AUX_TOBOOL_40 1
-#define AUX_TOBOOL_41 1
-#define AUX_TOBOOL_42 1
-#define AUX_TOBOOL_43 1
-#define AUX_TOBOOL_44 1
-#define AUX_TOBOOL_45 1
-#define AUX_TOBOOL_46 1
-#define AUX_TOBOOL_47 1
-#define AUX_TOBOOL_48 1
-#define AUX_TOBOOL_49 1
-/* }}} */
-
-/* --- */
-
-#define AUX_READER_SIGN(sign,data,size) switch (data[0])        \
-{                                                               \
-    case '-': sign = -1; data++; size--; break;                 \
-    case '+': sign =  1; data++; size--; break;                 \
-    default : sign =  1; break;                                 \
-}
-#define AUX_READER_BASE(base,data,size) switch (data[0])        \
-{                                                               \
-    case '0': data++; size--;                                   \
-        switch (data[0])                                        \
-        {                                                       \
-        case 'B':                                               \
-        case 'b': base =  2; data++; size--; break;             \
-        case 'X':                                               \
-        case 'x': base = 16; data++; size--; break;             \
-        default : base =  8; break;                             \
-        }                                                       \
-        break;                                                  \
-    default : base = 10; break;                                 \
-}
-#define AUX_READER_UINT(dest,data,size,base)                    \
-                                                                \
-    for (; size--; ++data)                                      \
-    {                                                           \
-        ucht dig = aux_ch2dig(*data);                           \
-        if (base <= dig) break;                                 \
-                                                                \
-        dest = dest * base + dig;                               \
-    }
-#define AUX_READER_UFPT(dest,data,size,base)                    \
-                                                                \
-    AUX_READER_UINT(dest,data,size,base);                       \
-                                                                \
-    if (data[0] == '.')                                         \
-    {                                                           \
-        typeof(dest) curr = base;                               \
-                                                                \
-        data++;                                                 \
-                                                                \
-        for (; size--; ++data)                                  \
-        {                                                       \
-            ucht dig = aux_ch2dig(*data);                       \
-            if (base <= dig) break;                             \
-                                                                \
-            dest += dig / curr;                                 \
-            curr *= base;                                       \
-        }                                                       \
-    }
-/* TODO: Парсить экспоненциальную часть. В 10-тичных floating point числах
- * экспоненциальная часть предваряется [eE] и выражает степень числа 10.
- * Шестнадцатеричная запись использует [pP], число после которого означает
- * степень двойки (а не 16, как могло бы быть по аналогии с десятичной
- * записью). */
-#if 0
-    if (data[0] == 'e' || data[0] == 'E')                       \
-    {                                                           \
-        u32t temp = 0; data++;                                  \
-        AUX_READER_UINT(temp,data,size,10);                     \
-        dest *= pow(10, temp);                                  \
-    }
-#endif
-
-#define AUX_READER_SIZE_K 1024
-#define AUX_READER_SIZE_M 1048576
-#define AUX_READER_SIZE_G 1073741824
-#define AUX_READER_TIME_S 1
-#define AUX_READER_TIME_M 60
-#define AUX_READER_TIME_H 3600
-#define AUX_READER_TIME_D 86400    /* 3600 * 24       */
-#define AUX_READER_TIME_W 604800   /* 3600 * 24 * 7   */
-#define AUX_READER_TIME_C 2592000  /* 3600 * 24 * 30  */
-#define AUX_READER_TIME_Y 31536000 /* 3600 * 24 * 365 */
-#define AUX_READER_MSEC_S 1000
-#define AUX_READER_MSEC_M 1
-#define AUX_READER_MSEC_U 1000
-#define AUX_READER_MSEC_N 1000000
-#define AUX_READER_FLAG_0 0
-#define AUX_READER_FLAG_1 1
-#define AUX_READER_IDLE(dest,data,size)
-#define AUX_READER_SIZE(dest,data,size) switch (data[0])        \
-{                                                               \
-    case 'K': case 'k': dest *= AUX_READER_SIZE_K; break;       \
-    case 'M': case 'm': dest *= AUX_READER_SIZE_M; break;       \
-    case 'G': case 'g': dest *= AUX_READER_SIZE_G; break;       \
-}
-#define AUX_READER_TIME(dest,data,size) switch (data[0])        \
-{                                                               \
-    case 'M': case 'm': dest *= AUX_READER_TIME_M; break;       \
-    case 'H': case 'h': dest *= AUX_READER_TIME_H; break;       \
-    case 'D': case 'd': dest *= AUX_READER_TIME_D; break;       \
-    case 'W': case 'w': dest *= AUX_READER_TIME_W; break;       \
-    case 'C': case 'c': dest *= AUX_READER_TIME_C; break;       \
-    case 'Y': case 'y': dest *= AUX_READER_TIME_Y; break;       \
-}
-#define AUX_READER_MSEC(dest,data,size) switch (data[0])        \
-{                                                               \
-    case 'S': case 's': dest *= AUX_READER_MSEC_S; break;       \
-    case 'U': case 'u': dest /= AUX_READER_MSEC_U; break;       \
-    case 'N': case 'n': dest /= AUX_READER_MSEC_N; break;       \
-}
-#define AUX_READER_FLAG(dest,data,size) switch (data[0])        \
-{                                                               \
-    case 'N': case 'n': dest = AUX_READER_FLAG_0; break;        \
-    case 'F': case 'f': dest = AUX_READER_FLAG_0; break;        \
-    case 'Y': case 'y': dest = AUX_READER_FLAG_1; break;        \
-    case 'T': case 't': dest = AUX_READER_FLAG_1; break;        \
-    default : dest = !!dest; break;                             \
-}
-
-#define AUX_STR2SI(dest,data,size,base,sign,EX) ({              \
-                                                                \
-    typeof(data) d = data;                                      \
-    typeof(size) s = size;                                      \
-    scht i;                                                     \
-    ucht b;                                                     \
-                                                                \
-    AUX_IFELSE(sign, i = sign, AUX_READER_SIGN(i,d,s));         \
-    AUX_IFELSE(base, b = base, AUX_READER_BASE(b,d,s));         \
-                                                                \
-    dest = 0;                                                   \
-                                                                \
-    AUX_READER_UINT(dest,d,s,b);                                \
-    AUX_READER_##EX(dest,d,s);                                  \
-                                                                \
-    dest *= i;                                                  \
-    dest;                                                       \
-                                                                \
-    })
-
-#if 0
-#define AUX_STR2SF(dest,data,size,base,EX) ({                   \
-                                                                \
-    if (0 == aux_strncmp(data, "inf", size))                    \
-    {                                                           \
-        dest = AUX_INF; /* not type-specific version */         \
-    }                                                           \
-    else                                                        \
-    if (0 == aux_strncmp(data, "nan", size))                    \
-    {                                                           \
-        dest = AUX_NAN; /* not type-specific version */         \
-    }                                                           \
-    else                                                        \
-    {                                                           \
-        typeof(data) d = data;                                  \
-        typeof(size) s = size;                                  \
-                                                                \
-        scht i;                                                 \
-        ucht b;                                                 \
-                                                                \
-        AUX_IFELSE(sign, i = sign, AUX_READER_SIGN(i,d,s));     \
-        AUX_IFELSE(base, b = base, AUX_READER_BASE(b,d,s));     \
-                                                                \
-        dest = 0;                                               \
-                                                                \
-        AUX_READER_UFPT(dest,data,size,base);                   \
-        AUX_READER_##EX(dest,data,size,base);                   \
-                                                                \
-        dest *= i;                                              \
-    }                                                           \
-                                                                \
-    dest;                                                       \
-                                                                \
-    })
-#endif
-
-#define aux_str2ui(dest,data,size) AUX_STR2SI(dest,data,size,0,1,IDLE)
-#define aux_str2si(dest,data,size) AUX_STR2SI(dest,data,size,0,0,IDLE)
-#if 0
-#define aux_str2uf(dest,data,size) AUX_STR2SF(dest,data,size,0,1,IDLE)
-#define aux_str2sf(dest,data,size) AUX_STR2SF(dest,data,size,0,0,IDLE)
-#endif
 
 #ifdef __cplusplus
 }  /* extern "C" */

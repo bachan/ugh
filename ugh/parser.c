@@ -27,7 +27,7 @@
 
 int ugh_parser_client(ugh_client_t *c, char *data, size_t size)
 {
-	ucht state = c->state;
+	unsigned char state = c->state;
 	char *p = data;
 	char *e = p + size;
 
@@ -265,7 +265,7 @@ final:
 
 int ugh_parser_chunks(ugh_subreq_t *r, char *data, size_t size)
 {
-	ucht state = r->state;
+	unsigned char state = r->state;
 	char *p = data;
 	char *e = data + size;
 
@@ -367,7 +367,7 @@ final:
 
 int ugh_parser_subreq(ugh_subreq_t *r, char *data, size_t size)
 {
-	ucht state = r->state;
+	unsigned char state = r->state;
 	char *p = data;
 	char *e = data + size;
 
@@ -568,7 +568,7 @@ int ugh_parser_url(ugh_url_t *u, char *data, size_t size)
 	char *p = data;
 	char *e = data + size;
 
-	ucht state = S_HOST;
+	unsigned char state = S_HOST;
 	strp cur = &u->host;
 
 	aux_clrptr(u);

@@ -131,7 +131,7 @@ int process_response(char *data, size_t size, in_addr_t *addrs, int addrs_len, s
 		return -1;
 	}
 
-	uint code = flags & 0x7f;
+	unsigned int code = flags & 0x7f;
 
 	if (AUX_RESOLVE_FORMERR == code || AUX_RESOLVE_REFUSED < code) /* error in DNS response */
 	{
@@ -143,7 +143,7 @@ int process_response(char *data, size_t size, in_addr_t *addrs, int addrs_len, s
 		return -1;
 	}
 
-	uint i = sizeof(aux_resolver_query_t);
+	unsigned int i = sizeof(aux_resolver_query_t);
 	size_t len;
 
 	name->size = 0;
@@ -194,13 +194,13 @@ int process_response(char *data, size_t size, in_addr_t *addrs, int addrs_len, s
 
 	i += sizeof(aux_resolver_qs_t);
 
-	uint a;
+	unsigned int a;
 	in_addr_t addr = 0;
 	int naddrs = 0;
 
 	for (a = 0; a < nan; ++a)
 	{
-		uint start = i;
+		unsigned int start = i;
 
 		while (i < size)
 		{

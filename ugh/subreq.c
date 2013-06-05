@@ -433,7 +433,7 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags)
 	return r;
 }
 
-int ugh_subreq_set_method(ugh_subreq_t *r, ucht method)
+int ugh_subreq_set_method(ugh_subreq_t *r, unsigned char method)
 {
 	r->method = method;
 
