@@ -491,6 +491,15 @@ int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type)
 	return 0;
 }
 
+int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch)
+{
+	r->ch = ch;
+
+	ugh_channel_add_subreq(ch, r);
+
+	return 0;
+}
+
 int ugh_subreq_run(ugh_subreq_t *r)
 {
 	/* buffers */
@@ -850,6 +859,12 @@ ok:
 		}
 
 		/* coro_transfer(&ctx_main, &r->c->ctx); */
+	}
+
+	if ((r->flags & UGH_SUBREQ_PUSH))
+	{
+		ugh_header_t *h_content_type = ugh_subreq_header_get_nt(r, "Content-Type");
+		ugh_channel_add_message(r->ch, &r->body, &h_content_type->value, r);
 	}
 
 	JudyLFreeArray(&r->headers_hash, PJE0);

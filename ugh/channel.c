@@ -41,7 +41,7 @@ void ugh_channel_wcb_delete(EV_P_ ev_async *w, int tev)
 	}
 }
 
-ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id)
+ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id, unsigned type)
 {
 	/* check if channel already exist and return if it does */
 
@@ -76,6 +76,10 @@ ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id)
 	ev_async_init(&ch->wev_message, ugh_channel_wcb_delete);
 	ev_async_start(loop, &ch->wev_message);
 
+	ch->channel_id_hashed = aux_hash_key(channel_id->data, channel_id->size);
+
+	ch->type = type;
+
 	*dest = ch;
 
 	return ch;
@@ -102,6 +106,12 @@ int ugh_channel_del(ugh_server_t *s, strp channel_id)
 
 	ugh_channel_t *ch = *dest;
 
+	/* for now, we disallow removing proxy channels with DELETE requests */
+	if (ch->type == UGH_CHANNEL_PROXY)
+	{
+		return -1;
+	}
+
 	ch->status = UGH_CHANNEL_DELETED;
 
 	ev_async_send(loop, &ch->wev_message);
@@ -116,7 +126,13 @@ int ugh_channel_del(ugh_server_t *s, strp channel_id)
 	return 0;
 }
 
-int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type)
+int ugh_channel_add_subreq(ugh_channel_t *ch, ugh_subreq_t *s)
+{
+	Judy1Set(&ch->subreqs_hash, (uintptr_t) s, PJE0);
+	return 0;
+}
+
+int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r)
 {
 	Word_t etag = -1;
 	void **dest;
@@ -148,6 +164,11 @@ int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type)
 
 	ev_async_send(loop, &ch->wev_message);
 
+	if (ch->type == UGH_CHANNEL_PROXY && r != NULL)
+	{
+		Judy1Unset(&ch->subreqs_hash, (uintptr_t) r, PJE0);
+	}
+
 	return 0;
 }
 
@@ -170,6 +191,19 @@ int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, Word_
 
 	ugh_client_header_out_set(c, "Etag", sizeof("Etag") - 1, etag_data, etag_size);
 
+	/* check if we should remove PROXY channel now */
+
+	if (ch->type == UGH_CHANNEL_PROXY && NULL == ch->subreqs_hash)
+	{
+		if (NULL == (dest = JudyLNext(ch->messages_hash, &etag, PJE0))) /* check if next entry doesn't exist */
+		{
+			ch->status = UGH_CHANNEL_DELETED;
+			ev_async_send(loop, &ch->wev_message);
+
+			JudyLDel(&ch->s->channels_hash, ch->channel_id_hashed, PJE0);
+		}
+	}
+
 	return 0;
 }
 
@@ -177,7 +211,7 @@ int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 {
 	if (ch->status == UGH_CHANNEL_DELETED) /* XXX do we need this check here? */
 	{
-		return -1;
+		return UGH_ERROR;
 	}
 
 	/* check if the next entry exist */
@@ -188,14 +222,14 @@ int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 
 	if (0 == ugh_channel_gen_message(ch, c, body, etag))
 	{
-		return 0;
+		return UGH_OK;
 	}
 
-	/* next entry was not found, wait for new entries or return immediately */
+	/* next entry was not found, we're waiting for it */
 
 	if (type == UGH_CHANNEL_INTERVAL_POLL)
 	{
-		return 0;
+		return UGH_AGAIN;
 	}
 
 	Judy1Set(&ch->clients_hash, (uintptr_t) c, PJE0);
@@ -207,7 +241,7 @@ int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 
 	if (ch->status == UGH_CHANNEL_DELETED)
 	{
-		return -1;
+		return UGH_ERROR;
 	}
 
 	return ugh_channel_gen_message(ch, c, body, etag);

@@ -56,11 +56,11 @@ int ugh_module_push_publisher_handle(ugh_client_t *c, void *data, strp body)
 
 	if (c->method == UGH_HTTP_PUT)
 	{
-		ugh_channel_t *ch = ugh_channel_add(c->s, channel_id);
+		ugh_channel_t *ch = ugh_channel_add(c->s, channel_id, UGH_CHANNEL_PERMANENT);
 
 		if (NULL == ch)
 		{
-			return UGH_HTTP_EXPECTATION_FAILED;
+			return UGH_HTTP_INTERNAL_SERVER_ERROR;
 		}
 
 		return UGH_HTTP_OK;
@@ -88,7 +88,7 @@ int ugh_module_push_publisher_handle(ugh_client_t *c, void *data, strp body)
 		}
 
 		ugh_header_t *h_content_type = ugh_client_header_get_nt(c, "Content-Type");
-		ugh_channel_add_message(ch, &c->body, &h_content_type->value);
+		ugh_channel_add_message(ch, &c->body, &h_content_type->value, NULL);
 
 		return ch->clients_size ? UGH_HTTP_CREATED : UGH_HTTP_ACCEPTED;
 	}

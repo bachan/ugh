@@ -238,6 +238,9 @@ ugh_upstream_t *ugh_upstream_get(ugh_config_t *cfg, const char *name, size_t siz
 typedef struct ugh_subreq
 	ugh_subreq_t;
 
+typedef struct ugh_channel
+	ugh_channel_t;
+
 typedef int (*ugh_subreq_handle_fp)(ugh_subreq_t *r, char *data, size_t size);
 
 #define UGH_TIMEOUT_ONCE 0
@@ -313,15 +316,21 @@ struct ugh_subreq
 	ugh_upstream_t *upstream;
 	unsigned int upstream_current;
 	unsigned int upstream_tries;
+
+	/* push */
+
+	ugh_channel_t *ch;
 };
 
 #define UGH_SUBREQ_WAIT 1
+#define UGH_SUBREQ_PUSH 2
 
 ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags);
 int ugh_subreq_set_method(ugh_subreq_t *r, ucht method);
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
 int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
 int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type);
+int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch);
 int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
@@ -357,14 +366,17 @@ int ugh_parser_chunks(ugh_subreq_t *r, char *data, size_t size);
 
 /* ### channel ### */
 
+/* channel of proxy type is removed, when all planned subrequests are finished
+ * and all responses were sent to at least one client */
+
 #define UGH_CHANNEL_LONG_POLL 0
 #define UGH_CHANNEL_INTERVAL_POLL 1
 
 #define UGH_CHANNEL_WORKING 0
 #define UGH_CHANNEL_DELETED 1
 
-typedef struct ugh_channel
-	ugh_channel_t;
+#define UGH_CHANNEL_PERMANENT 0
+#define UGH_CHANNEL_PROXY 1
 
 struct ugh_channel
 {
@@ -379,14 +391,21 @@ struct ugh_channel
 	void *clients_hash; /* Judy1 (ugh_client_t *) */ /* XXX Judy is not required here */
 	size_t clients_size; /* XXX we can use plain array with this size variable */
 
+	void *subreqs_hash; /* Judy1 (ugh_subreq_t *) */
+
+	uintptr_t channel_id_hashed; /* this is needed only to delete PROXY channel from get_message func */
+
 	unsigned status:1;
+	unsigned type:1;
 };
 
-ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id);
+ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id, unsigned type);
 ugh_channel_t *ugh_channel_get(ugh_server_t *s, strp channel_id);
 int ugh_channel_del(ugh_server_t *s, strp channel_id);
 
-int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type);
+int ugh_channel_add_subreq(ugh_channel_t *ch, ugh_subreq_t *s);
+
+int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r); /* subrequest is optional parameter here */
 int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned type);
 
 typedef struct ugh_channel_message

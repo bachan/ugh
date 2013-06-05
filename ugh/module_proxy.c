@@ -4,8 +4,7 @@ typedef struct
 {
 	ugh_template_t url;
 	unsigned nowait;
-
-	double recv_timeout; /* TODO default timeout value */
+	double recv_timeout;
 
 } ugh_module_proxy_conf_t;
 
@@ -20,7 +19,7 @@ int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
 	{
 		ugh_subreq_t *r = ugh_subreq_add(c, tv->data, tv->size, 0);
 
-		if (conf->recv_timeout > 0)
+		if (conf->recv_timeout > 0) /* XXX to remove this if we should support default values per each block in _init function */
 		{
 			ugh_subreq_set_timeout(r, conf->recv_timeout, UGH_TIMEOUT_ONCE);
 		}
@@ -31,7 +30,7 @@ int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
 	{
 		ugh_subreq_t *r = ugh_subreq_add(c, tv->data, tv->size, UGH_SUBREQ_WAIT);
 
-		if (conf->recv_timeout > 0)
+		if (conf->recv_timeout > 0) /* XXX to remove this if we should support default values per each block in _init function */
 		{
 			ugh_subreq_set_timeout(r, conf->recv_timeout, UGH_TIMEOUT_ONCE);
 		}

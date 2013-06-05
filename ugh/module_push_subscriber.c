@@ -39,12 +39,12 @@ int ugh_module_push_subscriber_handle(ugh_client_t *c, void *data, strp body)
 
 	int rc = ugh_channel_get_message(ch, c, body, conf->type);
 
-	if (0 > rc)
+	if (UGH_ERROR == rc)
 	{
 		return UGH_HTTP_GONE;
 	}
 
-	if (0 == body->size)
+	if (UGH_AGAIN == rc)
 	{
 		return UGH_HTTP_NOT_MODIFIED;
 	}
