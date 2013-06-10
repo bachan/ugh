@@ -207,6 +207,9 @@ int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 
 	if (ch->type == UGH_CHANNEL_PROXY && NULL == ch->subreqs_hash)
 	{
+		/* XXX this behaviour is arguable, cause we can try to use the same
+		 * ugh_channel_t from client, which got last message */
+
 		if (NULL == (dest = JudyLNext(ch->messages_hash, &etag, PJE0))) /* check if next entry doesn't exist */
 		{
 			ch->status = UGH_CHANNEL_DELETED;
