@@ -178,7 +178,7 @@ static
 int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, Word_t etag)
 {
 	void **dest = JudyLNext(ch->messages_hash, &etag, PJE0);
-	if (NULL == dest) return -1; /* no new messages for this client */
+	if (NULL == dest) return UGH_AGAIN; /* no new messages for this client */
 
 	ugh_channel_message_t *m = *dest;
 
@@ -206,7 +206,7 @@ int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, Word_
 		}
 	}
 
-	return 0;
+	return UGH_OK;
 }
 
 int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned type)
@@ -237,15 +237,23 @@ int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 	Judy1Set(&ch->clients_hash, (uintptr_t) c, PJE0);
 	ch->clients_size++;
 
-	is_main_coro = 1;
-	coro_transfer(&c->ctx, &ctx_main);
-	is_main_coro = 0;
-
-	if (ch->status == UGH_CHANNEL_DELETED)
+	for (;;) /* wait until we can generate message for this client */
 	{
-		return UGH_ERROR;
+		is_main_coro = 1;
+		coro_transfer(&c->ctx, &ctx_main);
+		is_main_coro = 0;
+
+		if (ch->status == UGH_CHANNEL_DELETED)
+		{
+			return UGH_ERROR;
+		}
+
+		if (UGH_OK == ugh_channel_gen_message(ch, c, body, etag))
+		{
+			break;
+		}
 	}
 
-	return ugh_channel_gen_message(ch, c, body, etag);
+	return UGH_OK;
 }
 
