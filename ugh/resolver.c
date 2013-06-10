@@ -197,6 +197,7 @@ int ugh_resolver_addq(ugh_resolver_t *r, char *name, size_t size, ugh_resolver_c
 			if (0 == r->cfg->resolver_cache)
 			{
 				rec->naddrs = 0;
+				rec->tries = 0;
 
 				ev_io_init(&rec->wev_send, ugh_resolver_wcb_send, r->wev_recv.fd, EV_WRITE);
 				ev_timer_init(&rec->wev_timeout, ugh_resolver_wcb_timeout, 0, r->cfg->resolver_timeout);
@@ -219,6 +220,7 @@ int ugh_resolver_addq(ugh_resolver_t *r, char *name, size_t size, ugh_resolver_c
 			if (0 == r->cfg->resolver_cache)
 			{
 				rec->naddrs = 0;
+				rec->tries = 0;
 
 				ev_io_init(&rec->wev_send, ugh_resolver_wcb_send, r->wev_recv.fd, EV_WRITE);
 				ev_timer_init(&rec->wev_timeout, ugh_resolver_wcb_timeout, 0, r->cfg->resolver_timeout);

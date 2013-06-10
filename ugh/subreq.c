@@ -545,8 +545,8 @@ int ugh_subreq_run(ugh_subreq_t *r)
 
 	/* generate request */
 
-	/* ugh_subreq_gen(r, u_host); */
-	ugh_subreq_gen(r, &r->u.host);
+	ugh_subreq_gen(r, u_host);
+	/* ugh_subreq_gen(r, &r->u.host); */
 
 	/* resolve host */
 
@@ -831,7 +831,7 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 		r->buf_recv.data = r->buf_recv_data;
 		r->buf_recv.size = UGH_SUBREQ_BUF;
 
-		/* ugh_subreq_gen(r, u_host); */
+		ugh_subreq_gen(r, u_host);
 
 		JudyLFreeArray(&r->headers_hash, PJE0);
 
