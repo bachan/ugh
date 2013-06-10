@@ -35,6 +35,8 @@ void ugh_channel_wcb_delete(EV_P_ ev_async *w, int tev)
 		is_main_coro = 1;
 	}
 
+	Judy1FreeArray(&ch->clients_hash, PJE0); /* free clients array after sending message */
+
 	if (ch->status == UGH_CHANNEL_DELETED)
 	{
 		ugh_channel_del_memory(ch);
