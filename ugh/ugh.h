@@ -283,7 +283,7 @@ struct ugh_subreq
 
 	unsigned char state;
 	unsigned char version;
-	unsigned int status;
+	unsigned status;
 
 	void*headers_hash;
 
@@ -314,12 +314,13 @@ struct ugh_subreq
 	/* tmp */
 
 	ugh_upstream_t *upstream;
-	unsigned int upstream_current;
-	unsigned int upstream_tries;
+	unsigned upstream_current;
+	unsigned upstream_tries;
 
 	/* push */
 
 	ugh_channel_t *ch;
+	unsigned tag;
 };
 
 #define UGH_SUBREQ_WAIT 1
@@ -330,7 +331,7 @@ int ugh_subreq_set_method(ugh_subreq_t *r, unsigned char method);
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
 int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
 int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type);
-int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch);
+int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch, unsigned tag);
 int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
@@ -406,13 +407,14 @@ int ugh_channel_del(ugh_server_t *s, strp channel_id);
 int ugh_channel_add_subreq(ugh_channel_t *ch, ugh_subreq_t *s);
 
 int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r); /* subrequest is optional parameter here */
-int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned type);
+int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned *tag, unsigned type);
 
 typedef struct ugh_channel_message
 	ugh_channel_message_t;
 
 struct ugh_channel_message
 {
+	unsigned tag;
 	strt content_type;
 	strt body;
 };

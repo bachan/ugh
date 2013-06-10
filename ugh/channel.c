@@ -156,6 +156,11 @@ int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh
 	ugh_channel_message_t *m = aux_pool_malloc(ch->pool, sizeof(*m));
 	if (NULL == m) return -1;
 
+	if (NULL != r)
+	{
+		m->tag = r->tag;
+	}
+
 	m->body.data = aux_pool_strdup(ch->pool, body);
 	m->body.size = body->size;
 
@@ -166,7 +171,7 @@ int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh
 
 	ev_async_send(loop, &ch->wev_message);
 
-	if (ch->type == UGH_CHANNEL_PROXY && r != NULL)
+	if (ch->type == UGH_CHANNEL_PROXY && NULL != r)
 	{
 		Judy1Unset(&ch->subreqs_hash, (uintptr_t) r, PJE0);
 	}
@@ -175,12 +180,17 @@ int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh
 }
 
 static
-int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, Word_t etag)
+int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned *tag, Word_t etag)
 {
 	void **dest = JudyLNext(ch->messages_hash, &etag, PJE0);
 	if (NULL == dest) return UGH_AGAIN; /* no new messages for this client */
 
 	ugh_channel_message_t *m = *dest;
+
+	if (NULL != tag)
+	{
+		*tag = m->tag;
+	}
 
 	body->data = aux_pool_strdup(c->pool, &m->body);
 	body->size = m->body.size;
@@ -209,7 +219,7 @@ int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, Word_
 	return UGH_OK;
 }
 
-int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned type)
+int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned *tag, unsigned type)
 {
 	if (ch->status == UGH_CHANNEL_DELETED) /* XXX do we need this check here? */
 	{
@@ -222,7 +232,7 @@ int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 
 	Word_t etag = strtoul(h_if_none_match->value.data, NULL, 10);
 
-	if (0 == ugh_channel_gen_message(ch, c, body, etag))
+	if (0 == ugh_channel_gen_message(ch, c, body, tag, etag))
 	{
 		return UGH_OK;
 	}
@@ -248,7 +258,7 @@ int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 			return UGH_ERROR;
 		}
 
-		if (UGH_OK == ugh_channel_gen_message(ch, c, body, etag))
+		if (UGH_OK == ugh_channel_gen_message(ch, c, body, tag, etag))
 		{
 			break;
 		}

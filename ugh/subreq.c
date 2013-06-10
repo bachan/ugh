@@ -491,9 +491,10 @@ int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type)
 	return 0;
 }
 
-int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch)
+int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch, unsigned int tag)
 {
 	r->ch = ch;
+	r->tag = tag;
 
 	ugh_channel_add_subreq(ch, r);
 
