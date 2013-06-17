@@ -481,37 +481,57 @@ strp ugh_client_cookie_get(ugh_client_t *c, const char *name, size_t size)
 	h = ugh_client_header_get_nt(c, "cookie");
 	if (NULL == h) return &aux_empty_string;
 
-	char *p = aux_memmem(h->value.data, h->value.size, name, size);
-	if (NULL == p) return &aux_empty_string;
+	char *p = h->value.data;
+	char *e = p + h->value.size;
 
-	p += size;
-
-	strp res;
-
-	res = aux_pool_malloc(c->pool, sizeof(*res));
-	if (NULL == res) return &aux_empty_string;
-
-	char *e = h->value.data + h->value.size;
-
-	for (; p < e; ++p)
+	while (p < e)
 	{
-		if ('=' == *p) break;
+		if (0 != strncasecmp(p, name, size))
+		{
+			goto skip;
+		}
+
+		for (p += size; p < e && *p == ' '; ++p)
+		{
+			/* void */
+		}
+
+		if (p == e || *p != '=')
+		{
+			goto skip;
+		}
+
+		for (++p; p < e && *p == ' '; ++p)
+		{
+			/* void */
+		}
+
+		strp res = aux_pool_malloc(c->pool, sizeof(*res));
+		if (NULL == res) return &aux_empty_string;
+
+		res->data = p;
+
+		for (; p < e && *p != ';'; ++p)
+		{
+			/* void */
+		}
+
+		res->size = p - res->data;
+
+		return res;
+
+skip:
+		for (; p < e && *p != ';'; ++p)
+		{
+			/* void */
+		}
+
+		for (++p; p < e && *p == ' '; ++p)
+		{
+			/* void */
+		}
 	}
 
-	for (++p; p < e; ++p)
-	{
-		if (' ' != *p) break;
-	}
-
-	res->data = p;
-
-	for (; p < e; ++p)
-	{
-		if (';' == *p) break;
-	}
-
-	res->size = p - res->data;
-
-	return res;
+	return &aux_empty_string;
 }
 
