@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 		}
 
 		unsigned diff = (tv2.tv_sec - tv1.tv_sec) * 1000000 + tv2.tv_usec - tv1.tv_usec;
-		printf("%u.%06us\n", diff / 1000000, diff % 1000000);
+		printf("%u.%06us (%u.%06u-%u.%06u)\n", diff / 1000000, diff % 1000000, (unsigned) tv1.tv_sec, (unsigned) tv1.tv_usec, (unsigned) tv2.tv_sec, (unsigned) tv2.tv_usec);
 	}
 
 	close(sd);
