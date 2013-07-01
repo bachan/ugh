@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include "../ugh/aux/resolver.h"
 
 int main(int argc, char **argv)
@@ -32,6 +33,9 @@ int main(int argc, char **argv)
 
 	for (i = 2; i < argc; ++i)
 	{
+		struct timeval tv1, tv2;
+		gettimeofday(&tv1, NULL);
+
 		int qlen = create_name_query(q, argv[i], strlen(argv[i]));
 		if (0 > qlen) continue;
 
@@ -53,15 +57,19 @@ int main(int argc, char **argv)
 		name.data = name_data;
 
 		naddrs = process_response(a, rc, addrs, naddrs, &name);
-#if 1
-		printf("%s (name=%.*s):\n", argv[i], (int) name.size, name.data);
+
+		gettimeofday(&tv2, NULL);
+
+		printf("%s (name=%.*s): ", argv[i], (int) name.size, name.data);
 
 		for (j = 0; j < naddrs; ++j)
 		{
 			struct in_addr res_addr = { addrs[j] };
-			printf("%s\n", inet_ntoa(res_addr));
+			printf("%s ", inet_ntoa(res_addr));
 		}
-#endif
+
+		unsigned diff = (tv2.tv_sec - tv1.tv_sec) * 1000000 + tv2.tv_usec - tv1.tv_usec;
+		printf("%u.%06us\n", diff / 1000000, diff % 1000000);
 	}
 
 	close(sd);
