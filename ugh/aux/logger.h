@@ -2,6 +2,7 @@
 #define __AUX_LOGGER_H__
 
 #include <stdio.h>
+#include <sys/time.h>
 #include "gmtime.h"
 #include "system.h"
 
@@ -43,20 +44,21 @@ extern "C" {
 #define log_debug(  fmt,...) /* nothing here */
 #endif /* NDEBUG */
 
-#define LOG_FORMAT(lvstr,fmt) "%04u-%02u-%02u %02u:%02u:%02u "lvstr" "fmt"\n"
-#define LOG_VALUES(tmloc,...) tmloc.tm_year + 1900, tmloc.tm_mon + 1, tmloc.tm_mday, \
-    tmloc.tm_hour, tmloc.tm_min, tmloc.tm_sec, ##__VA_ARGS__
+#define LOG_FORMAT(lvstr,fmt) "%04u-%02u-%02u %02u:%02u:%02u.%03u "lvstr" "fmt"\n"
+#define LOG_VALUES(tmloc,tv,...) tmloc.tm_year + 1900, tmloc.tm_mon + 1, tmloc.tm_mday, \
+    tmloc.tm_hour, tmloc.tm_min, tmloc.tm_sec, (unsigned) tv.tv_usec / 1000, ##__VA_ARGS__
 
 #define log_fmt(fp,level,lvstr,fmt,...) do {                                \
                                                                             \
     if (level <= log_level)                                                 \
     {                                                                       \
         struct tm tmloc;                                                    \
-        time_t ts = time(NULL);                                             \
-        localtime_r(&ts, &tmloc);                                           \
+        struct timeval tv;                                                  \
+        gettimeofday(&tv, NULL);                                            \
+        localtime_r(&tv.tv_sec, &tmloc);                                    \
                                                                             \
         fprintf(fp, LOG_FORMAT(lvstr,fmt),                                  \
-            LOG_VALUES(tmloc,##__VA_ARGS__));                               \
+            LOG_VALUES(tmloc,tv,##__VA_ARGS__));                            \
     }                                                                       \
                                                                             \
 } while (0)
