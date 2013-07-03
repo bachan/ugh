@@ -37,7 +37,7 @@ int ugh_module_push_subscriber_handle(ugh_client_t *c, void *data, strp body)
 		return UGH_HTTP_GONE;
 	}
 
-	int rc = ugh_channel_get_message(ch, c, body, NULL, conf->type);
+	int rc = ugh_channel_get_message(ch, c, body, NULL, conf->type, "If-None-Match", "Etag");
 
 	if (UGH_ERROR == rc)
 	{
