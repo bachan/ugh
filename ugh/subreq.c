@@ -38,6 +38,8 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_send, w);
 
+	log_debug("send: %.*s", (int) r->buf_send.size, r->buf_send.data);
+
 	/* errno = 0; */
 
 	if (0 > (rc = aux_unix_send(w->fd, r->buf_send.data, r->buf_send.size)))
@@ -97,10 +99,15 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 	/* errno = 0; */
 
 	int nb = aux_unix_recv(w->fd, r->buf_recv.data, r->buf_recv.size);
+	log_debug("recv: %.*s", nb, r->buf_recv.data);
 
 	if (0 == nb)
 	{
-		log_warn("subreq DONE (nb=%d, %d: %s)", nb, errno, aux_strerror(errno));
+		if (r->content_length != UGH_RESPONSE_CLOSE_AFTER_BODY)
+		{
+			log_warn("upstream prematurely closed connection");
+		}
+
 		ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
 		return;
 	}
@@ -169,66 +176,90 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 		}
 		else
 		{
-			r->content_length = -1; /* Transfer-Encoding: chunked */
+			ugh_header_t *hdr_transfer_encoding = ugh_subreq_header_get_nt(r, "Transfer-Encoding");
 
-			r->chunk_body_size = UGH_SUBREQ_BUF;
-			r->body.data = aux_pool_malloc(r->c->pool, r->chunk_body_size);
-			r->body.size = 0;
-
-			char *next_chunk = r->request_end;
-
-			for (;;)
+			if (7 == hdr_transfer_encoding->value.size && 0 == strncmp(hdr_transfer_encoding->value.data, "chunked", 7))
 			{
-				status = ugh_parser_chunks(r, next_chunk, r->buf_recv.data - next_chunk);
+				r->content_length = UGH_RESPONSE_CHUNKED;
 
-				if (UGH_AGAIN == status)
+				r->chunk_body_size = UGH_SUBREQ_BUF;
+				r->body.data = aux_pool_malloc(r->c->pool, r->chunk_body_size);
+				r->body.size = 0;
+
+				char *next_chunk = r->request_end;
+
+				for (;;)
 				{
-					r->buf_recv.size += r->buf_recv.data - r->request_end;
-					r->buf_recv.data = r->request_end;
-					r->chunk_start = 0;
-					return;
+					status = ugh_parser_chunks(r, next_chunk, r->buf_recv.data - next_chunk);
+
+					if (UGH_AGAIN == status)
+					{
+						r->buf_recv.size += r->buf_recv.data - r->request_end;
+						r->buf_recv.data = r->request_end;
+						r->chunk_start = 0;
+						return;
+					}
+
+					if (UGH_ERROR == status)
+					{
+						ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER);
+						return;
+					}
+
+					if (0 == r->chunk_size)
+					{
+						ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
+						return;
+					}
+
+					size_t recv_len = r->buf_recv.data - r->chunk_start;
+
+					if (r->chunk_size > recv_len)
+					{
+						ugh_subreq_copy_chunk(r, r->chunk_start, recv_len);
+
+						r->chunk_size -= recv_len;
+
+						r->buf_recv.size += r->buf_recv.data - r->request_end;
+						r->buf_recv.data = r->request_end;
+
+						r->chunk_start = r->buf_recv.data;
+
+						break;
+					}
+					else
+					{
+						ugh_subreq_copy_chunk(r, r->chunk_start, r->chunk_size);
+
+						next_chunk = r->chunk_start + r->chunk_size;
+
+						r->chunk_size = 0;
+						r->chunk_start = 0;
+					}
 				}
+			}
+			else /* http/1.0 close after body response */
+			{
+				r->content_length = UGH_RESPONSE_CLOSE_AFTER_BODY;
 
-				if (UGH_ERROR == status)
+				r->body.data = r->request_end;
+				r->body.size = r->buf_recv.data - r->request_end;
+
+				if (r->buf_recv.size == 0)
 				{
-					ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER);
-					return;
-				}
+					char *old_body = r->body.data;
 
-				if (0 == r->chunk_size)
-				{
-					ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
-					return;
-				}
+					r->body.data = aux_pool_malloc(r->c->pool, r->body.size * 2);
 
-				size_t recv_len = r->buf_recv.data - r->chunk_start;
+					memcpy(r->body.data, old_body, r->body.size);
 
-				if (r->chunk_size > recv_len)
-				{
-					ugh_subreq_copy_chunk(r, r->chunk_start, recv_len);
-
-					r->chunk_size -= recv_len;
-
-					r->buf_recv.size += r->buf_recv.data - r->request_end;
-					r->buf_recv.data = r->request_end;
-
-					r->chunk_start = r->buf_recv.data;
-
-					break;
-				}
-				else
-				{
-					ugh_subreq_copy_chunk(r, r->chunk_start, r->chunk_size);
-
-					next_chunk = r->chunk_start + r->chunk_size;
-
-					r->chunk_size = 0;
-					r->chunk_start = 0;
+					r->buf_recv.data = r->body.data + r->body.size;
+					r->buf_recv.size = r->body.size;
 				}
 			}
 		}
 	}
-	else if (-1 == r->content_length)
+	else if (r->content_length == UGH_RESPONSE_CHUNKED)
 	{
 		for (;;)
 		{
@@ -281,6 +312,22 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 			{
 				ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
 			}
+		}
+	}
+	else if (r->content_length == UGH_RESPONSE_CLOSE_AFTER_BODY)
+	{
+		r->body.size += nb;
+
+		if (r->buf_recv.size == 0)
+		{
+			char *old_body = r->body.data;
+
+			r->body.data = aux_pool_malloc(r->c->pool, r->body.size * 2);
+
+			memcpy(r->body.data, old_body, r->body.size);
+
+			r->buf_recv.data = r->body.data + r->body.size;
+			r->buf_recv.size = r->body.size;
 		}
 	}
 	else

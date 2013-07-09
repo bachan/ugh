@@ -246,6 +246,9 @@ typedef int (*ugh_subreq_handle_fp)(ugh_subreq_t *r, char *data, size_t size);
 #define UGH_TIMEOUT_ONCE 0
 #define UGH_TIMEOUT_FULL 1
 
+#define UGH_RESPONSE_CHUNKED -1
+#define UGH_RESPONSE_CLOSE_AFTER_BODY -2
+
 struct ugh_subreq
 {
 	ugh_client_t *c;
@@ -291,7 +294,7 @@ struct ugh_subreq
 	strt buf_recv; /* UGH_SUBREQ_BUF */
 	strt body;
 
-	size_t content_length; /* if content_length is -1, then transfer-encoding is chunked */
+	size_t content_length; /* UGH_RESPONSE_* may be encoded here */
 
 	ev_tstamp response_time;
 	uint32_t ft_type;
