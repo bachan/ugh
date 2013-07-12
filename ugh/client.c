@@ -44,6 +44,7 @@ void ugh_client_wcb_send(EV_P_ ev_io *w, int tev)
 	}
 
 	rc = writev(w->fd, c->iov, c->iov_num);
+	log_debug("client send: %d: %.*s", rc, c->iov[0].iov_len, c->iov[0].iov_base);
 
 	if (0 > rc)
 	{
@@ -103,7 +104,16 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 	int nb;
 	ugh_client_t *c = aux_memberof(ugh_client_t, wev_recv, w);
 
-	if (0 >= (nb = aux_unix_recv(w->fd, c->buf_recv.data, c->buf_recv.size)))
+	nb = aux_unix_recv(w->fd, c->buf_recv.data, c->buf_recv.size);
+	log_debug("client recv: %d: %.*s", nb, nb, c->buf_recv.data);
+
+	if (0 == nb)
+	{
+		ugh_client_del(c);
+		return;
+	}
+
+	if (0 > nb)
 	{
 		if (EAGAIN == errno)
 		{

@@ -38,11 +38,12 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_send, w);
 
-	log_debug("send: %.*s", (int) r->buf_send.size, r->buf_send.data);
-
 	/* errno = 0; */
 
-	if (0 > (rc = aux_unix_send(w->fd, r->buf_send.data, r->buf_send.size)))
+	rc = aux_unix_send(w->fd, r->buf_send.data, r->buf_send.size);
+	log_debug("subreq send: %d: %.*s", rc, (int) r->buf_send.size, r->buf_send.data);
+
+	if (0 > rc)
 	{
 		log_warn("send error %.*s%s%.*s (%d: %s)", (int) r->u.uri.size, r->u.uri.data, r->u.args.size ? "?" : "", (int) r->u.args.size, r->u.args.data, errno, aux_strerror(errno));
 		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
@@ -99,7 +100,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 	/* errno = 0; */
 
 	int nb = aux_unix_recv(w->fd, r->buf_recv.data, r->buf_recv.size);
-	log_debug("recv: %.*s", nb, r->buf_recv.data);
+	log_debug("subreq recv: %d: %.*s", nb, nb, r->buf_recv.data);
 
 	if (0 == nb)
 	{
