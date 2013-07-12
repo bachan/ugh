@@ -4,6 +4,8 @@ const char *ugh_method_string [UGH_HTTP_MAX] = {
 	"GET",
 	"HEAD",
 	"POST",
+	"PUT",
+	"DELETE",
 };
 
 const char *ugh_version_string [UGH_HTTP_VERSION_MAX] = {

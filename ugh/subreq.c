@@ -562,6 +562,7 @@ int ugh_subreq_run(ugh_subreq_t *r)
 	}
 
 	r->buf_send.data = r->buf_send_data;
+	/* r->buf_send.size = UGH_SUBREQ_BUF; */
 
 	r->buf_recv_data = aux_pool_malloc(r->c->pool, UGH_SUBREQ_BUF);
 
@@ -594,7 +595,6 @@ int ugh_subreq_run(ugh_subreq_t *r)
 	/* generate request */
 
 	ugh_subreq_gen(r, u_host);
-	/* ugh_subreq_gen(r, &r->u.host); */
 
 	/* resolve host */
 
