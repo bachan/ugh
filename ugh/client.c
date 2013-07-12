@@ -44,7 +44,7 @@ void ugh_client_wcb_send(EV_P_ ev_io *w, int tev)
 	}
 
 	rc = writev(w->fd, c->iov, c->iov_num);
-	log_debug("client send: %d: %.*s", rc, c->iov[0].iov_len, c->iov[0].iov_base);
+	log_debug("client send: %d: %.*s", rc, (int) c->iov[0].iov_len, c->iov[0].iov_base);
 
 	if (0 > rc)
 	{
