@@ -192,8 +192,8 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 #if 1 /* prepare post args */
 	ugh_header_t *hdr_content_type = ugh_client_header_get_nt(c, "Content-Type");
 
-	if (sizeof("application/x-www-form-urlencoded") - 1 == hdr_content_type->key.size &&
-		0 == strncmp(hdr_content_type->key.data, "application/x-www-form-urlencoded", hdr_content_type->key.size))
+	if (sizeof("application/x-www-form-urlencoded") - 1 == hdr_content_type->value.size &&
+		0 == strncmp(hdr_content_type->value.data, "application/x-www-form-urlencoded", hdr_content_type->value.size))
 	{
 		ugh_parser_client_body(c, c->body.data, c->body.size);
 	}
