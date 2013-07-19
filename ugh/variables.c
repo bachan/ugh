@@ -25,6 +25,11 @@ strp ugh_variable_cookie_(ugh_client_t *c, const char *name, size_t size, void *
 	return ugh_client_cookie_get(c, name + 7, size - 7);
 }
 
+strp ugh_variable_body_(ugh_client_t *c, const char *name, size_t size, void *data)
+{
+	return ugh_client_body_getarg(c, name + 5, size - 5);
+}
+
 strp ugh_variable_hash_(ugh_client_t *c, const char *name, size_t size, void *data)
 {
 	strp val, res;
@@ -87,6 +92,7 @@ ugh_variable_t ugh_variables [] =
 #endif
 	{ aux_string("http_")  , ugh_variable_http_  , NULL },
 	{ aux_string("cookie_"), ugh_variable_cookie_, NULL },
+	{ aux_string("body_")  , ugh_variable_body_  , NULL },
 	{ aux_null_string      , NULL                , NULL },
 };
 

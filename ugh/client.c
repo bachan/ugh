@@ -189,6 +189,16 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 	ev_io_stop(loop, &c->wev_recv);
 	ev_timer_stop(loop, &c->wev_timeout);
 
+#if 1 /* prepare post args */
+	ugh_header_t *hdr_content_type = ugh_client_header_get_nt(c, "Content-Type");
+
+	if (sizeof("application/x-www-form-urlencoded") - 1 == hdr_content_type->key.size &&
+		0 == strncmp(hdr_content_type->key.data, "application/x-www-form-urlencoded", hdr_content_type->key.size))
+	{
+		ugh_parser_client_body(c, c->body.data, c->body.size);
+	}
+#endif
+
 #if 1 /* UGH_CORO ENABLE */
 	c->stack = aux_pool_malloc(c->pool, UGH_CORO_STACK);
 
@@ -363,6 +373,45 @@ strp ugh_client_setarg(ugh_client_t *c, const char *data, size_t size, char *val
 	strp vptr;
 
 	dest = JudyLIns(&c->args_hash, aux_hash_key(data, size), PJE0);
+	if (PJERR == dest) return NULL;
+
+	vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
+	if (NULL == vptr) return NULL;
+
+	*dest = vptr;
+
+	vptr->data = value_data;
+	vptr->size = value_size;
+
+	return vptr;
+}
+
+strp ugh_client_body_getarg_nt(ugh_client_t *c, const char *data)
+{
+	void **dest;
+
+	dest = JudyLGet(c->body_hash, aux_hash_key_nt(data), PJE0);
+	if (PJERR == dest || NULL == dest) return &aux_empty_string;
+
+	return *dest;
+}
+
+strp ugh_client_body_getarg(ugh_client_t *c, const char *data, size_t size)
+{
+	void **dest;
+
+	dest = JudyLGet(c->body_hash, aux_hash_key(data, size), PJE0);
+	if (PJERR == dest || NULL == dest) return &aux_empty_string;
+
+	return *dest;
+}
+
+strp ugh_client_body_setarg(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size)
+{
+	void **dest;
+	strp vptr;
+
+	dest = JudyLIns(&c->body_hash, aux_hash_key(data, size), PJE0);
 	if (PJERR == dest) return NULL;
 
 	vptr = aux_pool_malloc(c->pool, sizeof(*vptr));

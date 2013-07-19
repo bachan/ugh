@@ -257,6 +257,47 @@ final:
 	return UGH_OK;
 }
 
+#define S_CLIENT_BODY_ARGS 0x00
+#define S_CLIENT_BODY_ARGS_VALUE 0x01
+
+int ugh_parser_client_body(ugh_client_t *c, char *data, size_t size)
+{
+	unsigned char state = S_CLIENT_BODY_ARGS;
+	char *p = data;
+	char *e = p + size;
+
+	c->key_b = p;
+
+	for (; p < e; ++p)
+	{
+		char ch = *p;
+
+		switch (state)
+		{
+		case S_CLIENT_BODY_ARGS:
+			switch (ch)
+			{
+			case '&': c->key_b = p + 1; break;
+			case '=': c->key_e = p; c->val_b = p + 1; state = S_CLIENT_BODY_ARGS_VALUE; break;
+			}
+			break;
+		case S_CLIENT_BODY_ARGS_VALUE:
+			switch (ch)
+			{
+			case '&': ugh_client_body_setarg(c, c->key_b, c->key_e - c->key_b, c->val_b, p - c->val_b); c->key_b = p + 1; state = S_CLIENT_BODY_ARGS; break;
+			}
+			break;
+		}
+	}
+
+	if (c->key_e > c->key_b && p > c->val_b)
+	{
+		ugh_client_body_setarg(c, c->key_b, c->key_e - c->key_b, c->val_b, p - c->val_b);
+	}
+
+	return UGH_OK;
+}
+
 #define S_CHUNKS_READY              0x00
 #define S_CHUNKS_VALUE              0x01
 #define S_CHUNKS_LAST               0x02

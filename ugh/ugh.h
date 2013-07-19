@@ -130,6 +130,7 @@ struct ugh_client
 	strt args;
 	void*args_hash;
 	void*headers_hash;
+	void*body_hash; /* posted args (application/x-www-form-urlencoded) */
 #if 1
 	void*vars_hash;
 #endif
@@ -162,6 +163,10 @@ int ugh_client_send(ugh_client_t *c, int status);
 strp ugh_client_getarg_nt(ugh_client_t *c, const char *data);
 strp ugh_client_getarg(ugh_client_t *c, const char *data, size_t size);
 strp ugh_client_setarg(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size);
+
+strp ugh_client_body_getarg_nt(ugh_client_t *c, const char *data);
+strp ugh_client_body_getarg(ugh_client_t *c, const char *data, size_t size);
+strp ugh_client_body_setarg(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size);
 
 typedef struct ugh_header
 	ugh_header_t;
@@ -365,6 +370,7 @@ ugh_header_t *ugh_subreq_header_set(ugh_subreq_t *r, const char *data, size_t si
 /* ### parser ### */
 
 int ugh_parser_client(ugh_client_t *c, char *data, size_t size);
+int ugh_parser_client_body(ugh_client_t *c, char *data, size_t size);
 int ugh_parser_subreq(ugh_subreq_t *r, char *data, size_t size);
 int ugh_parser_chunks(ugh_subreq_t *r, char *data, size_t size);
 
