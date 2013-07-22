@@ -88,7 +88,7 @@ int ugh_module_push_publisher_handle(ugh_client_t *c, void *data, strp body)
 		}
 
 		ugh_header_t *h_content_type = ugh_client_header_get_nt(c, "Content-Type");
-		ugh_channel_add_message(ch, &c->body, &h_content_type->value, NULL, 0);
+		ugh_channel_add_message(ch, &c->body, &h_content_type->value, NULL);
 
 		return ch->clients_size ? UGH_HTTP_CREATED : UGH_HTTP_ACCEPTED;
 	}

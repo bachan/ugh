@@ -539,11 +539,10 @@ int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type)
 	return 0;
 }
 
-int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch, unsigned tag, unsigned requested_etag)
+int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch, unsigned tag)
 {
 	r->ch = ch;
 	r->tag = tag;
-	r->requested_etag = requested_etag;
 
 	ugh_channel_add_subreq(ch, r);
 
@@ -914,7 +913,7 @@ ok:
 	if ((r->flags & UGH_SUBREQ_PUSH))
 	{
 		ugh_header_t *h_content_type = ugh_subreq_header_get_nt(r, "Content-Type");
-		ugh_channel_add_message(r->ch, &r->body, &h_content_type->value, r, r->requested_etag);
+		ugh_channel_add_message(r->ch, &r->body, &h_content_type->value, r);
 	}
 
 	JudyLFreeArray(&r->headers_hash, PJE0);

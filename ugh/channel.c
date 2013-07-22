@@ -165,25 +165,18 @@ int ugh_channel_add_subreq(ugh_channel_t *ch, ugh_subreq_t *s)
 	return 0;
 }
 
-int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r, unsigned requested_etag)
+int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r)
 {
 	Word_t etag = -1;
 	void **dest;
 
-	if (requested_etag != 0)
+	if (NULL != JudyLLast(ch->messages_hash, &etag, PJE0))
 	{
-		etag = requested_etag;
+		++etag;
 	}
 	else
 	{
-		if (NULL != JudyLLast(ch->messages_hash, &etag, PJE0))
-		{
-			++etag;
-		}
-		else
-		{
-			etag = 1; /* first possible etag */
-		}
+		etag = 1; /* first possible etag */
 	}
 
 	dest = JudyLIns(&ch->messages_hash, etag, PJE0);

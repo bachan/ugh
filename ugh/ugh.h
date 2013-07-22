@@ -329,7 +329,6 @@ struct ugh_subreq
 
 	ugh_channel_t *ch;
 	unsigned tag; /* you can get this later from the message, so it'll help you to distinguish different sources */
-	unsigned requested_etag; /* if this is not 0, message will be placed with particular etag */
 };
 
 #define UGH_SUBREQ_WAIT 1
@@ -344,7 +343,7 @@ int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type)
 /* NOTE: tag helps you to distinguish different subrequests, etag helps you to
  * sort received messages, but if you just want to get them as-is (unsorted,
  * use etag=0)  */
-int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch, unsigned tag, unsigned requested_etag);
+int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch, unsigned tag);
 
 int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
@@ -423,7 +422,7 @@ int ugh_channel_del(ugh_server_t *s, strp channel_id);
 
 int ugh_channel_add_subreq(ugh_channel_t *ch, ugh_subreq_t *s);
 
-int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r, unsigned requested_etag); /* subrequest is optional parameter here */
+int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r); /* subrequest is optional parameter here */
 int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned *tag, unsigned type, const char *if_none_match_name, const char *etag_name); /* XXX *_name parameters is a hack */
 
 typedef struct ugh_channel_message
