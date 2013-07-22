@@ -50,6 +50,8 @@ void ugh_channel_wcb_timeout(EV_P_ ev_timer *w, int tev)
 	ugh_channel_t *ch = aux_memberof(ugh_channel_t, wev_timeout, w);
 	log_warn("received timeout for channel_id=%.*s", (int) ch->channel_id.size, ch->channel_id.data);
 
+	JudyLDel(&ch->s->channels_hash, aux_hash_key(ch->channel_id.data, ch->channel_id.size), PJE0);
+
 	ch->status = UGH_CHANNEL_DELETED;
 	ugh_channel_process_message(ch);
 }
@@ -145,7 +147,6 @@ int ugh_channel_del(ugh_server_t *s, strp channel_id)
 	}
 
 	ch->status = UGH_CHANNEL_DELETED;
-
 	ev_async_send(loop, &ch->wev_message);
 
 	/* 
