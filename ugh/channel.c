@@ -166,7 +166,7 @@ int ugh_channel_add_subreq(ugh_channel_t *ch, ugh_subreq_t *s)
 
 int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r, unsigned requested_etag)
 {
-	uintptr_t etag = -1;
+	Word_t etag = -1;
 	void **dest;
 
 	if (requested_etag != 0)
