@@ -328,7 +328,8 @@ struct ugh_subreq
 	/* push */
 
 	ugh_channel_t *ch;
-	unsigned tag;
+	unsigned tag; /* you can get this later from the message, so it'll help you to distinguish different sources */
+	unsigned requested_etag; /* if this is not 0, message will be placed with particular etag */
 };
 
 #define UGH_SUBREQ_WAIT 1
@@ -339,7 +340,12 @@ int ugh_subreq_set_method(ugh_subreq_t *r, unsigned char method);
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
 int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
 int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type);
-int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch, unsigned tag);
+
+/* NOTE: tag helps you to distinguish different subrequests, etag helps you to
+ * sort received messages, but if you just want to get them as-is (unsorted,
+ * use etag=0)  */
+int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch, unsigned tag, unsigned requested_etag);
+
 int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
@@ -394,6 +400,8 @@ struct ugh_channel
 	aux_pool_t *pool;
 
 	ev_async wev_message;
+	ev_timer wev_timeout;
+	ev_tstamp timeout;
 
 	void *messages_hash; /* JudyL (etag -> ugh_channel_message_t *) */
 	/* TODO last-modified / if-modified-since mechanism */
@@ -403,19 +411,19 @@ struct ugh_channel
 
 	void *subreqs_hash; /* Judy1 (ugh_subreq_t *) */
 
-	uintptr_t channel_id_hashed; /* this is needed only to delete PROXY channel from get_message func */
+	strt channel_id;
 
-	unsigned status:1;
-	unsigned type:1;
+	unsigned status:1; /* WORKING|DELETED */
+	unsigned type:1; /* PERMANENT|PROXY */
 };
 
-ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id, unsigned type);
+ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id, unsigned type, ev_tstamp timeout);
 ugh_channel_t *ugh_channel_get(ugh_server_t *s, strp channel_id);
 int ugh_channel_del(ugh_server_t *s, strp channel_id);
 
 int ugh_channel_add_subreq(ugh_channel_t *ch, ugh_subreq_t *s);
 
-int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r); /* subrequest is optional parameter here */
+int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r, unsigned requested_etag); /* subrequest is optional parameter here */
 int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned *tag, unsigned type, const char *if_none_match_name, const char *etag_name); /* XXX *_name parameters is a hack */
 
 typedef struct ugh_channel_message

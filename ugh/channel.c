@@ -5,6 +5,11 @@ int ugh_channel_del_memory(ugh_channel_t *ch)
 {
 	ev_async_stop(loop, &ch->wev_message);
 
+	if (ch->timeout > 0)
+	{
+		ev_timer_stop(loop, &ch->wev_timeout);
+	}
+
 	JudyLFreeArray(&ch->messages_hash, PJE0);
 	JudyLFreeArray(&ch->clients_hash, PJE0);
 
@@ -14,14 +19,8 @@ int ugh_channel_del_memory(ugh_channel_t *ch)
 }
 
 static
-void ugh_channel_wcb_delete(EV_P_ ev_async *w, int tev)
+int ugh_channel_process_message(ugh_channel_t *ch)
 {
-	ugh_channel_t *ch = aux_memberof(ugh_channel_t, wev_message, w);
-
-	log_info("received message for channel=%p (status=%d)", ch, ch->status);
-
-	/* invoke all waiting clients */
-
 	Word_t idx = 0;
 	int rc;
 
@@ -41,9 +40,30 @@ void ugh_channel_wcb_delete(EV_P_ ev_async *w, int tev)
 	{
 		ugh_channel_del_memory(ch);
 	}
+
+	return 0;
 }
 
-ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id, unsigned type)
+static
+void ugh_channel_wcb_timeout(EV_P_ ev_timer *w, int tev)
+{
+	ugh_channel_t *ch = aux_memberof(ugh_channel_t, wev_timeout, w);
+	log_warn("received timeout for channel_id=%.*s", (int) ch->channel_id.size, ch->channel_id.data);
+
+	ch->status = UGH_CHANNEL_DELETED;
+	ugh_channel_process_message(ch);
+}
+
+static
+void ugh_channel_wcb_message(EV_P_ ev_async *w, int tev)
+{
+	ugh_channel_t *ch = aux_memberof(ugh_channel_t, wev_message, w);
+	log_info("received message for channel_id=%.*s (status=%d)", (int) ch->channel_id.size, ch->channel_id.data, ch->status);
+
+	ugh_channel_process_message(ch);
+}
+
+ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id, unsigned type, ev_tstamp timeout)
 {
 	/* check if channel already exist and return if it does */
 
@@ -75,10 +95,20 @@ ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id, unsigned type)
 	ch->s = s;
 	ch->pool = pool;
 
-	ev_async_init(&ch->wev_message, ugh_channel_wcb_delete);
+	ev_async_init(&ch->wev_message, ugh_channel_wcb_message);
 	ev_async_start(loop, &ch->wev_message);
 
-	ch->channel_id_hashed = aux_hash_key(channel_id->data, channel_id->size);
+	ch->timeout = timeout;
+
+	if (ch->timeout > 0)
+	{
+		ev_timer_init(&ch->wev_timeout, ugh_channel_wcb_timeout, 0, ch->timeout);
+		ev_timer_again(loop, &ch->wev_timeout);
+	}
+
+	ch->channel_id.size = channel_id->size;
+	ch->channel_id.data = aux_pool_strdup(ch->pool, channel_id);
+	if (NULL == ch->channel_id.data) return NULL;
 
 	ch->type = type;
 
@@ -134,18 +164,25 @@ int ugh_channel_add_subreq(ugh_channel_t *ch, ugh_subreq_t *s)
 	return 0;
 }
 
-int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r)
+int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r, unsigned requested_etag)
 {
-	Word_t etag = -1;
+	uintptr_t etag = -1;
 	void **dest;
 
-	if (NULL != JudyLLast(ch->messages_hash, &etag, PJE0))
+	if (requested_etag != 0)
 	{
-		++etag;
+		etag = requested_etag;
 	}
 	else
 	{
-		etag = 1; /* first possible etag */
+		if (NULL != JudyLLast(ch->messages_hash, &etag, PJE0))
+		{
+			++etag;
+		}
+		else
+		{
+			etag = 1; /* first possible etag */
+		}
 	}
 
 	dest = JudyLIns(&ch->messages_hash, etag, PJE0);
@@ -215,7 +252,7 @@ int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 			ch->status = UGH_CHANNEL_DELETED;
 			ev_async_send(loop, &ch->wev_message);
 
-			JudyLDel(&ch->s->channels_hash, ch->channel_id_hashed, PJE0);
+			JudyLDel(&ch->s->channels_hash, aux_hash_key(ch->channel_id.data, ch->channel_id.size), PJE0);
 		}
 	}
 

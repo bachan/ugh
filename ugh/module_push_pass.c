@@ -28,7 +28,7 @@ int ugh_module_push_pass_handle(ugh_client_t *c, void *data, strp body)
 
 	strp channel_id = ugh_template_execute(&conf->channel_id, c);
 
-	ugh_channel_t *ch = ugh_channel_add(c->s, channel_id, UGH_CHANNEL_PROXY);
+	ugh_channel_t *ch = ugh_channel_add(c->s, channel_id, UGH_CHANNEL_PROXY, 0); /* TODO add configurable timeout for channel lifetime instead of 0 here */
 
 	if (NULL == ch)
 	{
@@ -40,7 +40,7 @@ int ugh_module_push_pass_handle(ugh_client_t *c, void *data, strp body)
 	strp url = ugh_template_execute(&conf->url, c);
 
 	ugh_subreq_t *r = ugh_subreq_add(c, url->data, url->size, UGH_SUBREQ_PUSH);
-	ugh_subreq_set_channel(r, ch, 0);
+	ugh_subreq_set_channel(r, ch, 0, 0);
 
 	if (conf->recv_timeout > 0) /* XXX to remove this if we should support default values per each block in _init function */
 	{
