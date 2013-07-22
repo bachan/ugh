@@ -381,6 +381,16 @@ int ugh_parser_chunks(ugh_subreq_t *r, char *data, size_t size);
 
 /* ### channel ### */
 
+typedef struct ugh_channel_message
+	ugh_channel_message_t;
+
+struct ugh_channel_message
+{
+	unsigned tag;
+	strt content_type;
+	strt body;
+};
+
 /* channel of proxy type is removed, when all planned subrequests are finished
  * and all responses were sent to at least one client */
 
@@ -423,17 +433,7 @@ int ugh_channel_del(ugh_server_t *s, strp channel_id);
 int ugh_channel_add_subreq(ugh_channel_t *ch, ugh_subreq_t *s);
 
 int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh_subreq_t *r); /* subrequest is optional parameter here */
-int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned *tag, unsigned type, const char *if_none_match_name, const char *etag_name); /* XXX *_name parameters is a hack */
-
-typedef struct ugh_channel_message
-	ugh_channel_message_t;
-
-struct ugh_channel_message
-{
-	unsigned tag;
-	strt content_type;
-	strt body;
-};
+int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, ugh_channel_message_t **m, unsigned type, Word_t *etag);
 
 /* ### status ### */
 

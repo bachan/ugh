@@ -37,7 +37,12 @@ int ugh_module_push_subscriber_handle(ugh_client_t *c, void *data, strp body)
 		return UGH_HTTP_GONE;
 	}
 
-	int rc = ugh_channel_get_message(ch, c, body, NULL, conf->type, "If-None-Match", "Etag");
+	ugh_header_t *h_if_none_match = ugh_client_header_get_nt(c, "If-None-Match");
+	Word_t etag = strtoul(h_if_none_match->value.data, NULL, 10);
+
+	ugh_channel_message_t *m;
+
+	int rc = ugh_channel_get_message(ch, c, &m, conf->type, &etag);
 
 	if (UGH_ERROR == rc)
 	{
@@ -48,6 +53,16 @@ int ugh_module_push_subscriber_handle(ugh_client_t *c, void *data, strp body)
 	{
 		return UGH_HTTP_NOT_MODIFIED;
 	}
+
+	body->data = aux_pool_strdup(c->pool, &m->body);
+	body->size = m->body.size;
+
+	char *content_type_data = aux_pool_strdup(c->pool, &m->content_type);
+	ugh_client_header_out_set(c, "Content-Type", sizeof("Content-Type") - 1, content_type_data, m->content_type.size);
+
+	char *etag_data = aux_pool_malloc(c->pool, 21);
+	int etag_size = snprintf(etag_data, 21, "%lu", etag);
+	ugh_client_header_out_set(c, "Etag", sizeof("Etag") - 1, etag_data, etag_size);
 
 	return UGH_HTTP_OK;
 }

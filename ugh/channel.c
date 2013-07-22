@@ -27,6 +27,7 @@ int ugh_channel_process_message(ugh_channel_t *ch)
 	for (rc = Judy1First(ch->clients_hash, &idx, PJE0); 0 != rc;
 		 rc = Judy1Next (ch->clients_hash, &idx, PJE0))
 	{
+		Judy1Unset(&ch->clients_hash, idx, PJE0);
 		ugh_client_t *c = (ugh_client_t *) idx;
 
 		is_main_coro = 0;
@@ -34,7 +35,7 @@ int ugh_channel_process_message(ugh_channel_t *ch)
 		is_main_coro = 1;
 	}
 
-	Judy1FreeArray(&ch->clients_hash, PJE0); /* free clients array after sending message */
+	/* Judy1FreeArray(&new_clients_hash, PJE0); */
 
 	if (ch->status == UGH_CHANNEL_DELETED)
 	{
@@ -211,28 +212,12 @@ int ugh_channel_add_message(ugh_channel_t *ch, strp body, strp content_type, ugh
 }
 
 static
-int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned *tag, Word_t etag, const char *etag_name)
+int ugh_channel_gen_message(ugh_channel_t *ch, ugh_channel_message_t **m, Word_t *etag)
 {
-	void **dest = JudyLNext(ch->messages_hash, &etag, PJE0);
+	void **dest = JudyLNext(ch->messages_hash, etag, PJE0);
 	if (NULL == dest) return UGH_AGAIN; /* no new messages for this client */
 
-	ugh_channel_message_t *m = *dest;
-
-	if (NULL != tag)
-	{
-		*tag = m->tag;
-	}
-
-	body->data = aux_pool_strdup(c->pool, &m->body);
-	body->size = m->body.size;
-
-	char *content_type_data = aux_pool_strdup(c->pool, &m->content_type);
-	ugh_client_header_out_set(c, "Content-Type", sizeof("Content-Type") - 1, content_type_data, m->content_type.size);
-
-	char *etag_data = aux_pool_malloc(c->pool, 11); /* XXX 11 is maximum length of unsigned 32bit value plus 1 byte */
-	int etag_size = snprintf(etag_data, 11, "%lu", etag);
-
-	ugh_client_header_out_set(c, etag_name, strlen(etag_name), etag_data, etag_size);
+	*m = *dest;
 
 	/* check if we should remove PROXY channel now */
 
@@ -241,7 +226,9 @@ int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 		/* XXX this behaviour is arguable, cause we can try to use the same
 		 * ugh_channel_t from client, which got last message */
 
-		if (NULL == (dest = JudyLNext(ch->messages_hash, &etag, PJE0))) /* check if next entry doesn't exist */
+		Word_t next_etag = *etag;
+
+		if (NULL == (dest = JudyLNext(ch->messages_hash, &next_etag, PJE0))) /* check if next entry doesn't exist */
 		{
 			ch->status = UGH_CHANNEL_DELETED;
 			ev_async_send(loop, &ch->wev_message);
@@ -253,7 +240,7 @@ int ugh_channel_gen_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 	return UGH_OK;
 }
 
-int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsigned *tag, unsigned type, const char *if_none_match_name, const char *etag_name)
+int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, ugh_channel_message_t **m, unsigned type, Word_t *etag)
 {
 	if (ch->status == UGH_CHANNEL_DELETED) /* XXX do we need this check here? */
 	{
@@ -262,14 +249,14 @@ int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 
 	/* check if the next entry exist */
 
-	ugh_header_t *h_if_none_match = ugh_client_header_get_nt(c, if_none_match_name);
+	Word_t original_etag = *etag;
 
-	Word_t etag = strtoul(h_if_none_match->value.data, NULL, 10);
-
-	if (0 == ugh_channel_gen_message(ch, c, body, tag, etag, etag_name))
+	if (UGH_OK == ugh_channel_gen_message(ch, m, etag))
 	{
 		return UGH_OK;
 	}
+
+	*etag = original_etag;
 
 	/* next entry was not found, we're waiting for it */
 
@@ -292,7 +279,7 @@ int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, strp body, unsig
 			return UGH_ERROR;
 		}
 
-		if (UGH_OK == ugh_channel_gen_message(ch, c, body, tag, etag, etag_name))
+		if (UGH_OK == ugh_channel_gen_message(ch, m, etag))
 		{
 			break;
 		}
