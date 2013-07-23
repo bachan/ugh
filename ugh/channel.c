@@ -3,6 +3,8 @@
 static
 int ugh_channel_del_memory(ugh_channel_t *ch)
 {
+	log_info("channel_id=%.*s del memory", (int) ch->channel_id.size, ch->channel_id.data);
+
 	ev_async_stop(loop, &ch->wev_message);
 
 	if (ch->timeout > 0)
@@ -49,7 +51,7 @@ static
 void ugh_channel_wcb_timeout(EV_P_ ev_timer *w, int tev)
 {
 	ugh_channel_t *ch = aux_memberof(ugh_channel_t, wev_timeout, w);
-	log_warn("received timeout for channel_id=%.*s", (int) ch->channel_id.size, ch->channel_id.data);
+	log_warn("channel_id=%.*s received timeout", (int) ch->channel_id.size, ch->channel_id.data);
 
 	JudyLDel(&ch->s->channels_hash, aux_hash_key(ch->channel_id.data, ch->channel_id.size), PJE0);
 
@@ -61,7 +63,7 @@ static
 void ugh_channel_wcb_message(EV_P_ ev_async *w, int tev)
 {
 	ugh_channel_t *ch = aux_memberof(ugh_channel_t, wev_message, w);
-	log_info("received message for channel_id=%.*s (status=%d)", (int) ch->channel_id.size, ch->channel_id.data, ch->status);
+	log_info("channel_id=%.*s received %s", (int) ch->channel_id.size, ch->channel_id.data, ch->status ? "delete" : "message");
 
 	ugh_channel_process_message(ch);
 }
@@ -75,7 +77,7 @@ ugh_channel_t *ugh_channel_add(ugh_server_t *s, strp channel_id, unsigned type, 
 
 	if (NULL != *dest)
 	{
-		log_warn("trying to add channel on existing channel_id=%.*s", (int) channel_id->size, channel_id->data);
+		log_warn("channel_id=%.*s trying to add existing channel", (int) channel_id->size, channel_id->data);
 		return *dest;
 	}
 
