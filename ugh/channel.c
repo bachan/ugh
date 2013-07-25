@@ -53,15 +53,16 @@ void ugh_channel_wcb_timeout(EV_P_ ev_timer *w, int tev)
 	ugh_channel_t *ch = aux_memberof(ugh_channel_t, wev_timeout, w);
 	log_warn("channel_id=%.*s received timeout", (int) ch->channel_id.size, ch->channel_id.data);
 
-	JudyLDel(&ch->s->channels_hash, aux_hash_key(ch->channel_id.data, ch->channel_id.size), PJE0);
-
 	/* we can't remove proxy channel waiting for subrequest */
 	/* TODO maybe we should force finish of subrequest here, but it's not that easy */
 	if (ch->type == UGH_CHANNEL_PROXY && NULL != ch->subreqs_hash)
 	{
+		log_warn("channel_id=%.*s could not be removed right now, waiting for subrequests to finish", (int) ch->channel_id.size, ch->channel_id.data);
 		ev_timer_again(loop, w);
 		return;
 	}
+
+	JudyLDel(&ch->s->channels_hash, aux_hash_key(ch->channel_id.data, ch->channel_id.size), PJE0);
 
 	ch->status = UGH_CHANNEL_DELETED;
 	ugh_channel_process_message(ch);
