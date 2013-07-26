@@ -6,6 +6,8 @@ typedef struct
 	ugh_template_t value;
 } ugh_module_add_header_conf_t;
 
+extern ugh_module_t ugh_module_add_header;
+
 static
 int ugh_module_add_header_handle(ugh_client_t *c, void *data, strp body)
 {
@@ -30,7 +32,9 @@ int ugh_command_add_header(ugh_config_t *cfg, int argc, char **argv, ugh_command
 	ugh_template_compile(&conf->key, argv[1], strlen(argv[1]), cfg);
 	ugh_template_compile(&conf->value, argv[2], strlen(argv[2]), cfg);
 
-	ugh_module_handle_add(ugh_module_add_header_handle, conf);
+log_info("handle_add (add_header) %p", conf);
+
+	ugh_module_handle_add(ugh_module_add_header, conf, ugh_module_add_header_handle);
 
 	return 0;
 }

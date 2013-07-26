@@ -1,5 +1,7 @@
 #include "ugh.h"
 
+extern ugh_module_t ugh_module_upstream;
+
 static
 int ugh_command_upstream_handle_line(ugh_config_t *cfg, int argc, char **argv)
 {
@@ -47,7 +49,7 @@ int ugh_command_upstream(ugh_config_t *cfg, int argc, char **argv, ugh_command_t
 
 	upstream = ugh_upstream_add(cfg, argv[1], strlen(argv[1]));
 
-	ugh_module_handle_add(NULL, upstream);
+	ugh_module_handle_add(ugh_module_upstream, upstream, NULL);
 
 	ugh_config_parser(cfg, ugh_command_upstream_handle_line);
 

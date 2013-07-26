@@ -23,6 +23,8 @@ typedef struct
 
 } ugh_module_push_publisher_conf_t;
 
+extern ugh_module_t ugh_module_push_publisher;
+
 static
 int ugh_module_push_publisher_handle(ugh_client_t *c, void *data, strp body)
 {
@@ -106,7 +108,7 @@ int ugh_command_push_publisher(ugh_config_t *cfg, int argc, char **argv, ugh_com
 
 	ugh_template_compile(&conf->channel_id, argv[1], strlen(argv[1]), cfg);
 
-	ugh_module_handle_add(ugh_module_push_publisher_handle, conf);
+	ugh_module_handle_add(ugh_module_push_publisher, conf, ugh_module_push_publisher_handle);
 
 	return 0;
 }

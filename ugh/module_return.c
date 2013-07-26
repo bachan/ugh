@@ -5,6 +5,8 @@ typedef struct
 	ugh_template_t template;
 } ugh_module_return_conf_t;
 
+extern ugh_module_t ugh_module_return;
+
 static
 int ugh_module_return_handle(ugh_client_t *c, void *data, strp body)
 {
@@ -28,7 +30,7 @@ int ugh_command_return(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *
 
 	ugh_template_compile(&conf->template, argv[1], strlen(argv[1]), cfg);
 
-	ugh_module_handle_add(ugh_module_return_handle, conf);
+	ugh_module_handle_add(ugh_module_return, conf, ugh_module_return_handle);
 
 	return 0;
 }

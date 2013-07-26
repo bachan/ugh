@@ -8,6 +8,8 @@ typedef struct
 
 } ugh_module_proxy_conf_t;
 
+extern ugh_module_t ugh_module_proxy;
+
 static
 int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
 {
@@ -55,7 +57,7 @@ int ugh_command_proxy_pass(ugh_config_t *cfg, int argc, char **argv, ugh_command
 
 	ugh_template_compile(&conf->url, argv[1], strlen(argv[1]), cfg);
 
-	ugh_module_handle_add(ugh_module_proxy_handle, conf);
+	ugh_module_handle_add(ugh_module_proxy, conf, ugh_module_proxy_handle);
 
 	return 0;
 }

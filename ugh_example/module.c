@@ -8,19 +8,7 @@ typedef struct
 	ugh_template_t logger_host;
 } ugh_module_example_conf_t;
 
-int ugh_module_example_init(ugh_config_t *cfg)
-{
-	log_info("ugh_module_example_init (called each time server is started)");
-
-	return 0;
-}
-
-int ugh_module_example_free()
-{
-	log_info("ugh_module_example_free (called each time server is stopped)");
-
-	return 0;
-}
+extern ugh_module_t ugh_module_example;
 
 int ugh_module_example_handle(ugh_client_t *c, void *data, strp body)
 {
@@ -93,6 +81,22 @@ int ugh_module_example_handle(ugh_client_t *c, void *data, strp body)
 	return UGH_HTTP_OK;
 }
 
+int ugh_module_example_init(ugh_config_t *cfg, void *data)
+{
+	ugh_module_example_conf_t *conf = data;
+
+	log_info("ugh_module_example_init (called for each added handle, each time server is starting), conf=%p", &conf);
+
+	return 0;
+}
+
+int ugh_module_example_free(ugh_config_t *cfg, void *data)
+{
+	log_info("ugh_module_example_free (called for each added handle, each time server is stopped)");
+
+	return 0;
+}
+
 int ugh_command_example(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
 {
 	ugh_module_example_conf_t *conf;
@@ -100,7 +104,7 @@ int ugh_command_example(ugh_config_t *cfg, int argc, char **argv, ugh_command_t 
 	conf = aux_pool_malloc(cfg->pool, sizeof(*conf));
 	if (NULL == conf) return -1;
 
-	ugh_module_handle_add(ugh_module_example_handle, conf);
+	ugh_module_handle_add(ugh_module_example, conf, ugh_module_example_handle);
 
 	return 0;
 }

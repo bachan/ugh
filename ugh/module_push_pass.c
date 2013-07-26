@@ -12,6 +12,8 @@ typedef struct
 
 } ugh_module_push_pass_conf_t;
 
+extern ugh_module_t ugh_module_push_pass;
+
 static
 int ugh_module_push_pass_handle(ugh_client_t *c, void *data, strp body)
 {
@@ -63,7 +65,7 @@ int ugh_command_push_pass(ugh_config_t *cfg, int argc, char **argv, ugh_command_
 	ugh_template_compile(&conf->channel_id, argv[1], strlen(argv[1]), cfg);
 	ugh_template_compile(&conf->url, argv[2], strlen(argv[2]), cfg);
 
-	ugh_module_handle_add(ugh_module_push_pass_handle, conf);
+	ugh_module_handle_add(ugh_module_push_pass, conf, ugh_module_push_pass_handle);
 
 	return 0;
 }

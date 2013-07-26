@@ -7,6 +7,8 @@ typedef struct
 	strt default_value;
 } ugh_module_map_conf_t;
 
+extern ugh_module_t ugh_module_map;
+
 /* TODO XXX JudyLFreeArray */
 
 static
@@ -74,7 +76,7 @@ int ugh_command_map(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd
 	conf->default_value.data = NULL;
 	conf->default_value.size = 0;
 
-	ugh_module_handle_add(NULL, conf);
+	ugh_module_handle_add(ugh_module_map, conf, NULL);
 
 	/* variable */
 

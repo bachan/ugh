@@ -88,7 +88,7 @@ void ugh_client_ccb_handle(void *arg)
 {
 	ugh_client_t *c = arg;
 
-	int status = ugh_module_handle(c);
+	int status = ugh_module_handle_all(c);
 
 	if (UGH_AGAIN == status)
 	{

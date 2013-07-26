@@ -3,20 +3,19 @@
 struct ev_loop *loop;
 
 #if 1
-ugh_module_handle_fp ugh_module_handles [UGH_MODULE_HANDLES_MAX];
-void * ugh_module_configs [UGH_MODULE_HANDLES_MAX];
+ugh_module_handle_t ugh_module_handles [UGH_MODULE_HANDLES_MAX];
 size_t ugh_module_handles_size = 0;
 
-int ugh_module_handle(ugh_client_t *c)
+int ugh_module_handle_all(ugh_client_t *c)
 {
 	size_t i;
 	int status = UGH_HTTP_OK;
 
 	for (i = 0; i < ugh_module_handles_size; ++i)
 	{
-		if (NULL == ugh_module_handles[i]) continue;
+		if (NULL == ugh_module_handles[i].handle) continue;
 
-		int tmp_status = ugh_module_handles[i](c, ugh_module_configs[i], &c->bufs[i]);
+		int tmp_status = ugh_module_handles[i].handle(c, ugh_module_handles[i].config, &c->bufs[i]);
 
 #if 1 /* XXX UGH_AGAIN means here, that module was not supposed to be called */
 		if (tmp_status != UGH_AGAIN)
@@ -93,11 +92,11 @@ int ugh_daemon_exec(const char *cfg_filename, unsigned daemon)
 
 	size_t i;
 
-	for (i = 0; i < ugh_modules_size; ++i)
+	for (i = 0; i < ugh_module_handles_size; ++i)
 	{
-		if (ugh_modules[i]->init)
+		if (ugh_module_handles[i].module->init)
 		{
-			rc = ugh_modules[i]->init(&d.cfg);
+			rc = ugh_module_handles[i].module->init(&d.cfg, ugh_module_handles[i].config);
 			if (0 > rc) return -1;
 		}
 	}
@@ -112,11 +111,11 @@ int ugh_daemon_exec(const char *cfg_filename, unsigned daemon)
 
 	ugh_server_enough(&d.srv);
 
-	for (i = 0; i < ugh_modules_size; ++i)
+	for (i = 0; i < ugh_module_handles_size; ++i)
 	{
-		if (ugh_modules[i]->free)
+		if (ugh_module_handles[i].module->free)
 		{
-			rc = ugh_modules[i]->free();
+			rc = ugh_module_handles[i].module->free(&d.cfg, ugh_module_handles[i].config);
 			if (0 > rc) return -1;
 		}
 	}

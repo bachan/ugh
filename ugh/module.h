@@ -14,8 +14,8 @@ struct ugh_module
 {
 	ugh_command_t *cmds;
 
-	int (*init)(ugh_config_t *cfg);
-	int (*free)();
+	int (*init)(ugh_config_t *cfg, void *data); /* data is module conf */
+	int (*free)(ugh_config_t *cfg, void *data); /* data is module conf */
 };
 
 #define UGH_MODULES_MAX 16

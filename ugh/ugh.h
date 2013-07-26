@@ -486,22 +486,31 @@ extern const char *ugh_status_header [UGH_HTTP_STATUS_MAX];
 /* ### module ### */
 
 #if 1
-typedef int (*ugh_module_handle_fp) (ugh_client_t *c, void *data, strp body);
+typedef struct ugh_module_handle
+	ugh_module_handle_t;
+
+struct ugh_module_handle
+{
+	ugh_module_t *module;
+	void *config;
+	int (*handle) (ugh_client_t *c, void *data, strp body);
+};
 
 #define	UGH_MODULE_HANDLES_MAX 1024
 
-extern ugh_module_handle_fp ugh_module_handles [UGH_MODULE_HANDLES_MAX];
-extern void * ugh_module_configs [UGH_MODULE_HANDLES_MAX];
+extern ugh_module_handle_t ugh_module_handles [UGH_MODULE_HANDLES_MAX];
 extern size_t ugh_module_handles_size;
 
-#define ugh_module_handle_add(handle, config) \
-	ugh_module_handles[ugh_module_handles_size] = handle; \
-	ugh_module_configs[ugh_module_handles_size] = config; \
+#define ugh_module_handle_add(_module, _config, _handle) \
+	ugh_module_handles[ugh_module_handles_size].module = &_module; \
+	ugh_module_handles[ugh_module_handles_size].config = _config; \
+	ugh_module_handles[ugh_module_handles_size].handle = _handle; \
 	ugh_module_handles_size++
 
-int ugh_module_handle(ugh_client_t *c);
+int ugh_module_handle_all(ugh_client_t *c);
 
-#define ugh_module_config_get_last() ugh_module_configs[ugh_module_handles_size - 1]
+/* XXX remove this macro */
+#define ugh_module_config_get_last() ugh_module_handles[ugh_module_handles_size - 1].config
 #endif
 
 #if 1

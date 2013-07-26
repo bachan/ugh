@@ -9,6 +9,8 @@ typedef struct
 	size_t curr;
 } ugh_module_set_conf_t;
 
+extern ugh_module_t ugh_module_set;
+
 static
 int ugh_command_set_handle_line(ugh_config_t *cfg, int argc, char **argv)
 {
@@ -45,7 +47,7 @@ int ugh_command_set(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd
 	conf = aux_pool_calloc(cfg->pool, sizeof(*conf));
 	if (NULL == conf) return -1;
 
-	ugh_module_handle_add(NULL, conf);
+	ugh_module_handle_add(ugh_module_set, conf, NULL);
 
 	/* variable */
 
