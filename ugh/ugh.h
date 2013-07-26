@@ -182,7 +182,7 @@ ugh_header_t *ugh_client_header_get(ugh_client_t *c, const char *data, size_t si
 ugh_header_t *ugh_client_header_set(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size);
 
 ugh_header_t *ugh_client_header_out_set(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size);
-#define ugh_client_header_out_set_nt(c, data, value_data, value_size) ugh_client_header_out_set((c), (data), strlen(data), (char *) (value_data), strlen(value_data))
+#define ugh_client_header_out_set_nt(c, data, value_data) ugh_client_header_out_set((c), (data), strlen(data), (char *) (value_data), strlen(value_data))
 
 #if 1
 strp ugh_client_getvar(ugh_client_t *c, const char *data, size_t size);
