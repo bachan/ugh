@@ -1,0 +1,261 @@
+ugh (0.0.10-1) unstable; urgency=low
+
+  * changed module API
+
+ -- bachan <bachan@sample-sandbox1g.dev.itim.vn>  Mon, 29 Jul 2013 17:33:20 +0700
+
+ugh (0.0.9-1) unstable; urgency=low
+
+  * lots of fixes around channel stuff
+
+ -- bachan <bachan@sample-sandbox1g.dev.itim.vn>  Tue, 23 Jul 2013 11:36:28 +0700
+
+ugh (0.0.7-2) unstable; urgency=low
+
+  * don't remove debug symbols
+
+ -- bachan <bachan@sample-sandbox1g.dev.itim.vn>  Wed, 10 Jul 2013 18:26:24 +0700
+
+ugh (0.0.7-1) unstable; urgency=low
+
+  * support http/1.0 close after body responses
+
+ -- bachan <bachan@sample-sandbox1g.dev.itim.vn>  Wed, 10 Jul 2013 18:11:10 +0700
+
+ugh (0.0.6-6) unstable; urgency=low
+
+  * customizable header names in channel.c
+
+ -- bachan <bachan@sample-sandbox1g.dev.itim.vn>  Wed, 03 Jul 2013 15:39:34 +0700
+
+ugh (0.0.6-5) unstable; urgency=low
+
+  * milliseconds in log
+  * destination port in log
+  * bugfix in cookie parser
+  * changed output format in resolver test
+
+ -- bachan <bachan@sample-sandbox1g.dev.itim.vn>  Tue, 02 Jul 2013 14:33:06 +0700
+
+ugh (0.0.6-4) unstable; urgency=low
+
+  * fixed infinite loop in resolver
+
+ -- bachan <bachan@sample-sandbox1g.dev.itim.vn>  Wed, 12 Jun 2013 17:24:57 +0700
+
+ugh (0.0.6-2) unstable; urgency=low
+
+  * push/relay bugfixes
+
+ -- bachan <bachan@sample-sandbox1g.dev.itim.vn>  Mon, 10 Jun 2013 19:15:19 +0700
+
+ugh (0.0.6-1) unstable; urgency=low
+
+  * push/relay protocol
+
+ -- bachan <bachan@sample-sandbox1g.dev.itim.vn>  Thu, 06 Jun 2013 18:18:49 +0700
+
+ugh (0.0.5-5) unstable; urgency=low
+
+  * show correct error message in case of async connect error
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Tue, 12 Mar 2013 18:29:23 +0700
+
+ugh (0.0.5-4) unstable; urgency=low
+
+  * C++ type conversion fix
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Tue, 19 Feb 2013 18:22:10 +0700
+
+ugh (0.0.5-3) unstable; urgency=low
+
+  * ugh_make_command_sint
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Tue, 29 Jan 2013 21:07:20 +0700
+
+ugh (0.0.5-2) unstable; urgency=low
+
+  * Calculate response_time correctly in case of resolver errors
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Thu, 24 Jan 2013 15:35:35 +0700
+
+ugh (0.0.5-1) unstable; urgency=low
+
+  * resolver_cache
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Tue, 08 Jan 2013 11:49:58 +0700
+
+ugh (0.0.4-13) unstable; urgency=low
+
+  * support full operation timeouts
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Thu, 03 Jan 2013 17:55:43 +0700
+
+ugh (0.0.4-12) unstable; urgency=low
+
+  * SUBREQ_BUF
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Tue, 11 Dec 2012 19:35:26 +0700
+
+ugh (0.0.4-11) unstable; urgency=low
+
+  * Fixed htons on upstream config load
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Fri, 07 Dec 2012 05:54:38 +0700
+
+ugh (0.0.4-10) unstable; urgency=low
+
+  * Added support for default values
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Tue, 04 Dec 2012 18:29:32 +0700
+
+ugh (0.0.4-9) unstable; urgency=low
+
+  * Removed garbage in logs in resolver
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Thu, 22 Nov 2012 17:05:13 +0700
+
+ugh (0.0.4-8) unstable; urgency=low
+
+  * Write localtime in logs
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Mon, 19 Nov 2012 12:35:11 +0700
+
+ugh (0.0.4-7) unstable; urgency=low
+
+  * set_size_slot
+
+ -- bachan <bachan@sample-sandbox2g.dev.itim.vn>  Wed, 31 Oct 2012 16:38:56 +0700
+
+ugh (0.0.4-6) unstable; urgency=high
+
+  * Fixed resolver bug
+
+ -- bachan <ba4an@yandex.ru>  Wed, 11 Oct 2012 18:21:00 +0700
+
+ugh (0.0.4-5) unstable; urgency=high
+
+  * Access log
+
+ -- bachan <ba4an@yandex.ru>  Wed, 12 Sep 2012 11:12:00 +0700
+
+ugh (0.0.4-4) unstable; urgency=high
+
+  * Fixed chunked POST body bug
+
+ -- bachan <ba4an@yandex.ru>  Thu, 10 Aug 2012 18:57:00 +0700
+
+ugh (0.0.4-3) unstable; urgency=high
+
+  * Increased UGH_HDRBUF size
+
+ -- bachan <ba4an@yandex.ru>  Thu,  7 Aug 2012 20:10:00 +0700
+
+ugh (0.0.4-2) unstable; urgency=high
+
+  * Remove Content-Length header if original request was POST but we're
+    subrequesting GET
+
+ -- bachan <ba4an@yandex.ru>  Thu,  2 Aug 2012 18:20:00 +0700
+
+ugh (0.0.4-1) unstable; urgency=high
+
+  * Fixed crash if client was freed earlier than subreq
+  * Added README
+
+ -- bachan <ba4an@yandex.ru>  Thu,  7 Jul 2012 20:49:00 +0700
+
+ugh (0.0.3-2) unstable; urgency=high
+
+  * Fixed log levels
+  * Stub for worker_threads
+
+ -- bachan <ba4an@yandex.ru>  Mon, 11 Jun 2012 18:43:00 +0700
+
+ugh (0.0.3-1) unstable; urgency=high
+
+  * Added support for POST requests
+
+ -- bachan <ba4an@yandex.ru>  Wed, 23 May 2012 20:11:00 +0700
+
+ugh (0.0.2-7) unstable; urgency=high
+
+  * Fixed short chunked responses crash
+  * Fixed content-length check
+
+ -- bachan <ba4an@yandex.ru>  Mon, 21 May 2012 13:36:00 +0700
+
+ugh (0.0.2-6) unstable; urgency=high
+
+  * Logging socket errors
+
+ -- bachan <ba4an@yandex.ru>  Tue, 18 May 2012 18:20:00 +0700
+
+ugh (0.0.2-5) unstable; urgency=high
+
+  * Added ugh_subreq_get_host()
+  * Added ugh_subreq_get_port()
+  * Fixed size of UGH_HDRBUF buffer
+
+ -- bachan <ba4an@yandex.ru>  Tue, 18 May 2012 16:03:00 +0700
+
+ugh (0.0.2-4) unstable; urgency=high
+
+  * Fixed ugh_subreq_get_upstream_curr() in case of one server in upstream
+
+ -- bachan <ba4an@yandex.ru>  Tue, 15 May 2012 19:33:00 +0700
+
+ugh (0.0.2-3) unstable; urgency=high
+
+  * REALLY fixed wrong name of ugh_subreq_get_upstream_curr() implementation
+
+ -- bachan <ba4an@yandex.ru>  Tue, 15 May 2012 18:39:00 +0700
+
+ugh (0.0.2-2) unstable; urgency=high
+
+  * Fixed wrong name of ugh_subreq_get_upstream_curr() implementation
+
+ -- bachan <ba4an@yandex.ru>  Tue, 15 May 2012 18:13:00 +0700
+
+ugh (0.0.2-1) unstable; urgency=high
+
+  * Added chunked transfer encoding support
+  * Added ugh_subreq_get_upstream_curr() function
+
+ -- bachan <ba4an@yandex.ru>  Tue, 15 May 2012 17:22:00 +0700
+
+ugh (0.0.1-6) unstable; urgency=low
+
+  * Added error handling on startup.
+
+ -- bachan <ba4an@yandex.ru>  Wed,  9 May 2012 19:47:00 +0700
+
+ugh (0.0.1-5) unstable; urgency=high
+
+  * Fixed response_time bug.
+
+ -- bachan <ba4an@yandex.ru>  Wed,  9 May 2012 18:23:00 +0700
+
+ugh (0.0.1-4) unstable; urgency=high
+
+  * Added response_time, ft_type to ugh_subreq_t structure.
+
+ -- bachan <ba4an@yandex.ru>  Wed,  9 May 2012 11:04:00 +0700
+
+ugh (0.0.1-3) unstable; urgency=high
+
+  * Fixing directives count, now 1024
+
+ -- bachan <ba4an@yandex.ru>  Thu, 26 Apr 2012 19:52:00 +0700
+
+ugh (0.0.1-2) unstable; urgency=low
+
+  * Fixing upstram count, now 1024
+
+ -- pianist <pianist@usrsrc.ru>  Mon, 26 Apr 2012 13:26:55 +0700
+
+ugh (0.0.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- pianist <pianist@usrsrc.ru>  Mon, 26 Mar 2012 20:44:55 +0700

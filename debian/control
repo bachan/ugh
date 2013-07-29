@@ -1,0 +1,22 @@
+Source: ugh
+Section: unknown
+Priority: extra
+Maintainer: bachan <ba4an@yandex.ru>
+Build-Depends: debhelper (>= 7.0.50~), cmake
+Standards-Version: 3.8.4
+Homepage: https://github.com/bachan/ugh
+#Vcs-Git: git://git.debian.org/collab-maint/ugh.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/ugh.git;a=summary
+
+Package: ugh
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: ugh http server
+ ugh http server (single-threaded with coroutines)
+
+Package: ugh-dev
+Architecture: any
+Depends: ugh ${shlibs:Depends}, ${misc:Depends}
+Description: ugh http server dev headers
+ ugh server headers for module development
+
