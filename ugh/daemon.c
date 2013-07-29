@@ -17,7 +17,10 @@ int ugh_module_handle_all(ugh_client_t *c)
 
 		int tmp_status = ugh_module_handles[i].handle(c, ugh_module_handles[i].config, &c->bufs[i]);
 
-#if 1 /* XXX UGH_AGAIN means here, that module was not supposed to be called */
+		/* XXX UGH_AGAIN means here, that module was not supposed to be called
+		 * OR that the module itself didn't want to change response status
+		 */
+#if 1
 		if (tmp_status != UGH_AGAIN)
 		{
 			status = tmp_status;

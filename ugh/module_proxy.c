@@ -20,23 +20,13 @@ int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
 	if (conf->nowait)
 	{
 		ugh_subreq_t *r = ugh_subreq_add(c, tv->data, tv->size, 0);
-
-		if (conf->recv_timeout > 0) /* XXX to remove this if we should support default values per each block in _init function */
-		{
-			ugh_subreq_set_timeout(r, conf->recv_timeout, UGH_TIMEOUT_ONCE);
-		}
-
+		ugh_subreq_set_timeout(r, conf->recv_timeout, UGH_TIMEOUT_ONCE);
 		ugh_subreq_run(r);
 	}
 	else
 	{
 		ugh_subreq_t *r = ugh_subreq_add(c, tv->data, tv->size, UGH_SUBREQ_WAIT);
-
-		if (conf->recv_timeout > 0) /* XXX to remove this if we should support default values per each block in _init function */
-		{
-			ugh_subreq_set_timeout(r, conf->recv_timeout, UGH_TIMEOUT_ONCE);
-		}
-
+		ugh_subreq_set_timeout(r, conf->recv_timeout, UGH_TIMEOUT_ONCE);
 		ugh_subreq_run(r);
 		ugh_subreq_wait(c);
 
@@ -44,7 +34,22 @@ int ugh_module_proxy_handle(ugh_client_t *c, void *data, strp body)
 		body->size = r->body.size;
 	}
 
-	return UGH_HTTP_OK;
+	/* TODO we should copy upstream headers */
+
+	return UGH_HTTP_OK; /* TODO we should return upstream status */
+}
+
+static
+int ugh_module_proxy_init(ugh_config_t *cfg, void *data)
+{
+	ugh_module_proxy_conf_t *conf = data;
+
+	if (conf->recv_timeout == 0)
+	{
+		conf->recv_timeout = UGH_CONFIG_SUBREQ_TIMEOUT;
+	}
+
+	return 0;
 }
 
 static
@@ -52,7 +57,7 @@ int ugh_command_proxy_pass(ugh_config_t *cfg, int argc, char **argv, ugh_command
 {
 	ugh_module_proxy_conf_t *conf;
 
-	conf = aux_pool_malloc(cfg->pool, sizeof(*conf));
+	conf = aux_pool_calloc(cfg->pool, sizeof(*conf));
 	if (NULL == conf) return -1;
 
 	ugh_template_compile(&conf->url, argv[1], strlen(argv[1]), cfg);
@@ -130,7 +135,7 @@ static ugh_command_t ugh_module_proxy_cmds [] =
 ugh_module_t ugh_module_proxy =
 {
 	ugh_module_proxy_cmds,
-	NULL,
+	ugh_module_proxy_init,
 	NULL
 };
 

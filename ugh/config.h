@@ -27,7 +27,7 @@ struct ugh_config
 	void *vars_hash; /* "var_name" -> var */
 	void *upstreams_hash; /* "upstream_name" -> upstream */
 
-	uint32_t next_upstream; /* TODO one per subrequest */
+	uint32_t next_upstream; /* TODO one per subrequest OR better - one per upstream */
 
 	char *beg;
 	char *pos;

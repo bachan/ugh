@@ -18,7 +18,7 @@ int ugh_module_add_header_handle(ugh_client_t *c, void *data, strp body)
 
 	ugh_client_header_out_set(c, key->data, key->size, value->data, value->size);
 
-	return UGH_HTTP_OK;
+	return UGH_AGAIN;
 }
 
 static
@@ -31,8 +31,6 @@ int ugh_command_add_header(ugh_config_t *cfg, int argc, char **argv, ugh_command
 
 	ugh_template_compile(&conf->key, argv[1], strlen(argv[1]), cfg);
 	ugh_template_compile(&conf->value, argv[2], strlen(argv[2]), cfg);
-
-log_info("handle_add (add_header) %p", conf);
 
 	ugh_module_handle_add(ugh_module_add_header, conf, ugh_module_add_header_handle);
 
