@@ -1,3 +1,9 @@
+ugh (0.1.1-2) unstable; urgency=low
+
+  * recv_timeout fixes, version fix
+
+ -- bachan <ba4an@yandex.ru>  Mon, 29 Jul 2013 18:20:20 +0700
+
 ugh (0.0.10-1) unstable; urgency=low
 
   * changed module API
