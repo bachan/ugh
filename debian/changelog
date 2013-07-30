@@ -1,3 +1,9 @@
+ugh (0.1.1-3) unstable; urgency=low
+
+  * fix clearing full timeout when going to the next upstream
+
+ -- bachan <ba4an@yandex.ru>  Tue, 30 Jul 2013 20:57:20 +0700
+
 ugh (0.1.1-2) unstable; urgency=low
 
   * recv_timeout fixes, version fix
