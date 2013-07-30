@@ -443,18 +443,21 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	{
 		ev_tstamp new_timeout = r->timeout - (ev_now(loop) - r->response_time);
 
-		/* XXX this is just temporarily on info level */
-		log_info("updating timeout from %f to %f (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
-			, r->timeout
-			, new_timeout
-			, (int) r->u.host.size, r->u.host.data
-			, (int) r->u.port.size, r->u.port.data
-			, (int) r->u.uri.size, r->u.uri.data
-			, r->u.args.size ? "?" : ""
-			, (int) r->u.args.size, r->u.args.data
-			, inet_ntoa(r->addr.sin_addr)
-			, ntohs(r->addr.sin_port)
-		);
+		if (new_timeout != r->timeout)
+		{
+			/* XXX this is just temporarily on info level */
+			log_info("updating timeout from %f to %f (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
+				, r->timeout
+				, new_timeout
+				, (int) r->u.host.size, r->u.host.data
+				, (int) r->u.port.size, r->u.port.data
+				, (int) r->u.uri.size, r->u.uri.data
+				, r->u.args.size ? "?" : ""
+				, (int) r->u.args.size, r->u.args.data
+				, inet_ntoa(r->addr.sin_addr)
+				, ntohs(r->addr.sin_port)
+			);
+		}
 
 		if (new_timeout < 0)
 		{
