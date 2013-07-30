@@ -109,10 +109,15 @@ int ugh_command_proxy_next_upstream(ugh_config_t *cfg, int argc, char **argv, ug
 		else if (0 == strcmp(argv[i], "http_5xx"))
 		{
 			cfg->next_upstream |= UGH_UPSTREAM_FT_HTTP_5XX;
+			cfg->next_upstream |= UGH_UPSTREAM_FT_HTTP_500;
+			cfg->next_upstream |= UGH_UPSTREAM_FT_HTTP_502;
+			cfg->next_upstream |= UGH_UPSTREAM_FT_HTTP_503;
+			cfg->next_upstream |= UGH_UPSTREAM_FT_HTTP_504;
 		}
 		else if (0 == strcmp(argv[i], "http_4xx"))
 		{
 			cfg->next_upstream |= UGH_UPSTREAM_FT_HTTP_4XX;
+			cfg->next_upstream |= UGH_UPSTREAM_FT_HTTP_404;
 		}
 		else if (0 == strcmp(argv[i], "off"))
 		{

@@ -342,32 +342,32 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 
 		switch (r->status)
 		{
-		case 400: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 401: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 402: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 403: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 404: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX|UGH_UPSTREAM_FT_HTTP_404; break;
-		case 405: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 406: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 407: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 408: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 409: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 410: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 411: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 412: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 413: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 414: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 415: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 416: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 417: ft_type |= UGH_UPSTREAM_FT_HTTP_4XX; break;
-		case 500: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_500; break;
-		case 501: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-		case 502: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_502; break;
-		case 503: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_503; break;
-		case 504: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX|UGH_UPSTREAM_FT_HTTP_504; break;
-		case 505: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-		case 506: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
-		case 507: ft_type |= UGH_UPSTREAM_FT_HTTP_5XX; break;
+		case 400: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 401: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 402: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 403: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 404: ft_type = UGH_UPSTREAM_FT_HTTP_404; break;
+		case 405: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 406: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 407: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 408: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 409: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 410: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 411: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 412: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 413: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 414: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 415: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 416: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 417: ft_type = UGH_UPSTREAM_FT_HTTP_4XX; break;
+		case 500: ft_type = UGH_UPSTREAM_FT_HTTP_500; break;
+		case 501: ft_type = UGH_UPSTREAM_FT_HTTP_5XX; break;
+		case 502: ft_type = UGH_UPSTREAM_FT_HTTP_502; break;
+		case 503: ft_type = UGH_UPSTREAM_FT_HTTP_503; break;
+		case 504: ft_type = UGH_UPSTREAM_FT_HTTP_504; break;
+		case 505: ft_type = UGH_UPSTREAM_FT_HTTP_5XX; break;
+		case 506: ft_type = UGH_UPSTREAM_FT_HTTP_5XX; break;
+		case 507: ft_type = UGH_UPSTREAM_FT_HTTP_5XX; break;
 		}
 
 		ugh_subreq_del(r, ft_type);
@@ -385,8 +385,11 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	 */
 	r->wev_recv.fd = -1;
 
-	/* start calculating response_time from this point */
-	r->response_time = ev_now(loop);
+	/* start calculating response_time from the first try */
+	if (r->response_time == 0)
+	{
+		r->response_time = ev_now(loop);
+	}
 
 	if (INADDR_NONE == addr)
 	{
@@ -435,7 +438,37 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 	ev_io_init(&r->wev_recv, ugh_subreq_wcb_recv, sd, EV_READ);
 	ev_io_init(&r->wev_send, ugh_subreq_wcb_send, sd, EV_WRITE);
 	ev_io_init(&r->wev_connect, ugh_subreq_wcb_connect, sd, EV_READ | EV_WRITE);
-	ev_timer_init(&r->wev_timeout, ugh_subreq_wcb_timeout, 0, r->timeout);
+
+	if (UGH_TIMEOUT_FULL == r->timeout_type)
+	{
+		ev_tstamp new_timeout = r->timeout - (ev_now(loop) - r->response_time);
+
+		/* XXX this is just temporarily on info level */
+		log_info("updating timeout from %f to %f (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
+			, r->timeout
+			, new_timeout
+			, (int) r->u.host.size, r->u.host.data
+			, (int) r->u.port.size, r->u.port.data
+			, (int) r->u.uri.size, r->u.uri.data
+			, r->u.args.size ? "?" : ""
+			, (int) r->u.args.size, r->u.args.data
+			, inet_ntoa(r->addr.sin_addr)
+			, ntohs(r->addr.sin_port)
+		);
+
+		if (new_timeout < 0)
+		{
+			ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT);
+			return -1;
+		}
+
+		ev_timer_init(&r->wev_timeout, ugh_subreq_wcb_timeout, 0, new_timeout);
+	}
+	else
+	{
+		ev_timer_init(&r->wev_timeout, ugh_subreq_wcb_timeout, 0, r->timeout);
+	}
+
 	ev_timer_again(loop, &r->wev_timeout);
 	ev_io_start(loop, &r->wev_connect);
 
@@ -835,6 +868,12 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 			, ntohs(r->addr.sin_port)
 		);
 		break;
+	}
+
+	/* stop if full timeout is already ticked out */
+	if (UGH_TIMEOUT_FULL == r->timeout_type && r->timeout < ev_now(loop) - r->response_time)
+	{
+		goto ok;
 	}
 
 	if (r->upstream && r->upstream_tries <= r->upstream->values_size
