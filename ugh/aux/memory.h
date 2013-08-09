@@ -40,7 +40,9 @@ void aux_pool_free(aux_pool_t *pool);
 void *aux_pool_nalloc(aux_pool_t *pool, size_t size);  /* non-aligned */
 void *aux_pool_malloc(aux_pool_t *pool, size_t size);  /*     aligned */
 void *aux_pool_calloc(aux_pool_t *pool, size_t size);  /*     aligned */
-char *aux_pool_strdup(aux_pool_t *pool, strp data);    /* non-aligned */
+
+char *aux_pool_strdup(aux_pool_t *pool, strp data);                     /* non-aligned */
+char *aux_pool_memdup(aux_pool_t *pool, const char *data, size_t size); /* non-aligned */
 
 #ifdef __cplusplus
 }

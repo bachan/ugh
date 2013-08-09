@@ -189,3 +189,17 @@ char *aux_pool_strdup(aux_pool_t *pool, strp data)
 	return dest;
 }
 
+char *aux_pool_memdup(aux_pool_t *pool, const char *data, size_t size)
+{
+	char *dest;
+
+	dest = aux_pool_nalloc(pool, size);
+
+	if (NULL != dest)
+	{
+		memcpy(dest, data, size);
+	}
+
+	return dest;
+}
+

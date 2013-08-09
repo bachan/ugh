@@ -704,8 +704,6 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 	}
 	else
 	{
-		/* TODO what nginx does on proxy_pass host:port/uri?; ? */
-
 		r->buf_send.size = snprintf(r->buf_send.data, UGH_SUBREQ_BUF, "%s %.*s?%.*s %s" CRLF
 			, ugh_method_string[r->method]
 			, (int) r->u.uri.size, r->u.uri.data
