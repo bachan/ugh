@@ -324,6 +324,7 @@ const char *parse_resolv_conf(aux_pool_t *pool)
 			switch (ch)
 			{
 			case '#': state = S_RESOLV_CONF_SHARP; break;
+			case '\t':
 			case ' ':
 			case CR :
 			case LF : break;
@@ -334,6 +335,7 @@ const char *parse_resolv_conf(aux_pool_t *pool)
 			switch (ch)
 			{
 			case '#': state = S_RESOLV_CONF_SHARP; break;
+			case '\t':
 			case ' ': param_e = p; state = S_RESOLV_CONF_VALUE_BEGIN; break;
 			case CR :
 			case LF : state = S_RESOLV_CONF_BEGIN; break;
@@ -343,6 +345,7 @@ const char *parse_resolv_conf(aux_pool_t *pool)
 			switch (ch)
 			{
 			case '#': state = S_RESOLV_CONF_SHARP; break;
+			case '\t':
 			case ' ': break;
 			case CR :
 			case LF : state = S_RESOLV_CONF_BEGIN; break;
@@ -353,6 +356,7 @@ const char *parse_resolv_conf(aux_pool_t *pool)
 			switch (ch)
 			{
 			case '#': value_e = p; state = S_RESOLV_CONF_SHARP; break;
+			case '\t':
 			case ' ': value_e = p; state = S_RESOLV_CONF_VALUE_SPACE; break;
 			case CR :
 			case LF : value_e = p; state = S_RESOLV_CONF_BEGIN; break;
@@ -362,6 +366,7 @@ const char *parse_resolv_conf(aux_pool_t *pool)
 			switch (ch)
 			{
 			case '#': state = S_RESOLV_CONF_SHARP; break;
+			case '\t':
 			case ' ': break;
 			case CR :
 			case LF : state = S_RESOLV_CONF_BEGIN; break;
