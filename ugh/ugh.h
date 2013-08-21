@@ -184,15 +184,14 @@ ugh_header_t *ugh_client_header_set(ugh_client_t *c, const char *data, size_t si
 ugh_header_t *ugh_client_header_out_set(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size);
 #define ugh_client_header_out_set_nt(c, data, value_data) ugh_client_header_out_set((c), (data), strlen(data), (char *) (value_data), strlen(value_data))
 
-#if 1
+strp ugh_client_cookie_get(ugh_client_t *c, const char *name, size_t size);
+#define ugh_client_cookie_get_nt(c, name) ugh_client_cookie_get((c), (name), strlen(name))
+
 strp ugh_client_getvar(ugh_client_t *c, const char *data, size_t size);
 strp ugh_client_getvar_nt(ugh_client_t *c, const char *data);
 strp ugh_client_setvar(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size);
 strp ugh_client_setvar_nt(ugh_client_t *c, const char *data, char *value_data, size_t value_size);
-#endif
-
-strp ugh_client_cookie_get(ugh_client_t *c, const char *name, size_t size);
-#define ugh_client_cookie_get_nt(c, name) ugh_client_cookie_get((c), (name), strlen(name))
+strp ugh_client_setvar_cp(ugh_client_t *c, const char *data, char *value_data, size_t value_size);
 
 /* ### url ### */
 

@@ -492,56 +492,6 @@ ugh_header_t *ugh_client_header_out_set(ugh_client_t *c, const char *data, size_
 	return vptr;
 }
 
-#if 1
-strp ugh_client_getvar(ugh_client_t *c, const char *data, size_t size)
-{
-	void **dest = JudyLGet(c->vars_hash, aux_hash_key(data, size), PJE0);
-	if (PJERR == dest || NULL == dest) return &aux_empty_string;
-
-	return *dest;
-}
-
-strp ugh_client_getvar_nt(ugh_client_t *c, const char *data)
-{
-	void **dest = JudyLGet(c->vars_hash, aux_hash_key_nt(data), PJE0);
-	if (PJERR == dest || NULL == dest) return &aux_empty_string;
-
-	return *dest;
-}
-
-strp ugh_client_setvar(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size)
-{
-	void **dest = JudyLIns(&c->vars_hash, aux_hash_key(data, size), PJE0);
-	if (PJERR == dest) return NULL;
-
-	strp vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
-	if (NULL == vptr) return NULL;
-
-	*dest = vptr;
-
-	vptr->data = value_data;
-	vptr->size = value_size;
-
-	return vptr;
-}
-
-strp ugh_client_setvar_nt(ugh_client_t *c, const char *data, char *value_data, size_t value_size)
-{
-	void **dest = JudyLIns(&c->vars_hash, aux_hash_key_nt(data), PJE0);
-	if (PJERR == dest) return NULL;
-
-	strp vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
-	if (NULL == vptr) return NULL;
-
-	*dest = vptr;
-
-	vptr->data = value_data;
-	vptr->size = value_size;
-
-	return vptr;
-}
-#endif
-
 strp ugh_client_cookie_get(ugh_client_t *c, const char *name, size_t size)
 {
 	ugh_header_t *h;
@@ -601,5 +551,71 @@ skip:
 	}
 
 	return &aux_empty_string;
+}
+
+strp ugh_client_getvar(ugh_client_t *c, const char *data, size_t size)
+{
+	void **dest = JudyLGet(c->vars_hash, aux_hash_key(data, size), PJE0);
+	if (PJERR == dest || NULL == dest) return &aux_empty_string;
+
+	return *dest;
+}
+
+strp ugh_client_getvar_nt(ugh_client_t *c, const char *data)
+{
+	void **dest = JudyLGet(c->vars_hash, aux_hash_key_nt(data), PJE0);
+	if (PJERR == dest || NULL == dest) return &aux_empty_string;
+
+	return *dest;
+}
+
+strp ugh_client_setvar(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size)
+{
+	void **dest = JudyLIns(&c->vars_hash, aux_hash_key(data, size), PJE0);
+	if (PJERR == dest) return NULL;
+
+	strp vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
+	if (NULL == vptr) return NULL;
+
+	*dest = vptr;
+
+	vptr->data = value_data;
+	vptr->size = value_size;
+
+	return vptr;
+}
+
+strp ugh_client_setvar_nt(ugh_client_t *c, const char *data, char *value_data, size_t value_size)
+{
+	void **dest = JudyLIns(&c->vars_hash, aux_hash_key_nt(data), PJE0);
+	if (PJERR == dest) return NULL;
+
+	strp vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
+	if (NULL == vptr) return NULL;
+
+	*dest = vptr;
+
+	vptr->data = value_data;
+	vptr->size = value_size;
+
+	return vptr;
+}
+
+strp ugh_client_setvar_cp(ugh_client_t *c, const char *data, char *value_data, size_t value_size)
+{
+	void **dest = JudyLIns(&c->vars_hash, aux_hash_key_nt(data), PJE0);
+	if (PJERR == dest) return NULL;
+
+	strp vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
+	if (NULL == vptr) return NULL;
+
+	*dest = vptr;
+
+	vptr->data = aux_pool_nalloc(c->pool, value_size);
+	if (NULL == vptr->data) return NULL;
+
+	vptr->size = aux_cpymsz(vptr->data, value_data, value_size);
+
+	return vptr;
 }
 
