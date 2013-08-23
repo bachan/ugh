@@ -870,6 +870,19 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 		if (r->upstream_tries < r->upstream->values_size)
 		{
 			r->upstream_current += 1;
+
+			/*
+			 * XXX MEGA HACK for antmat, if upstream has choose random
+			 * directive, we add additional (upstreams_count - 1) to current
+			 * upstream to imitate choosing random upstream right after FIRST
+			 * failure
+			 */
+
+			if (r->upstream->choose == UGH_UPSTREAM_CHOOSE_RANDOM && r->upstream_tries == 1)
+			{
+				r->upstream_current += aux_random() % (r->upstream->values_size - 1);
+			}
+
 			r->upstream_current %= r->upstream->values_size;
 			r->upstream_tries++;
 

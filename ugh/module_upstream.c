@@ -22,8 +22,7 @@ int ugh_command_upstream_handle_line(ugh_config_t *cfg, int argc, char **argv)
 			upstream->values_curr = upstream->values_size - 1;
 		}
 	}
-
-	if (0 == strcmp(argv[0], "backup"))
+	else if (0 == strcmp(argv[0], "backup"))
 	{
 		if (upstream->backup_values_size < UGH_MAX_UPSTREAM_ELEMENTS)
 		{
@@ -36,6 +35,24 @@ int ugh_command_upstream_handle_line(ugh_config_t *cfg, int argc, char **argv)
 
 			upstream->backup_values_size++;
 			upstream->backup_values_curr = upstream->backup_values_size - 1;
+		}
+	}
+	else if (0 == strcmp(argv[0], "choose"))
+	{
+		if (0 == strcmp(argv[1], "rr"))
+		{
+			upstream->choose = UGH_UPSTREAM_CHOOSE_RR;
+		}
+		else if (0 == strcmp(argv[1], "random"))
+		{
+			upstream->choose = UGH_UPSTREAM_CHOOSE_RANDOM;
+
+			int rc = aux_random_init();
+			if (0 > rc) return -1;
+		}
+		else
+		{
+			return -1;
 		}
 	}
 
