@@ -792,21 +792,6 @@ in_port_t ugh_subreq_get_port(ugh_subreq_t *r)
 	return r->upstream->backup_values[r->upstream->backup_values_curr].port;
 }
 
-ugh_upstream_server_t *ugh_subreq_get_upstream_curr(ugh_subreq_t *r) /* deprecated */
-{
-	if (!r->upstream)
-	{
-		return NULL;
-	}
-
-	if (r->upstream_tries <= r->upstream->values_size)
-	{
-		return &r->upstream->values[r->upstream_current];
-	}
-
-	return &r->upstream->backup_values[r->upstream->backup_values_curr];
-}
-
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 {
 	ev_io_stop(loop, &r->wev_recv);

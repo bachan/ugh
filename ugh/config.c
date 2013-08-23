@@ -301,3 +301,13 @@ int ugh_config_set_template_slot(ugh_config_t *cfg, int argc, char **argv, ugh_c
 	return 0;
 }
 
+int ugh_config_set_double_slot(ugh_config_t *cfg, int argc, char **argv, ugh_command_t *cmd)
+{
+	char *p = ugh_module_config_get_last();
+	double *ep = (double *) (p + cmd->offset);
+
+	*ep = atof(argv[1]);
+
+	return 0;
+}
+

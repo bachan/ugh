@@ -349,8 +349,6 @@ int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
 
-ugh_upstream_server_t *ugh_subreq_get_upstream_curr(ugh_subreq_t *r); /* deprecated */
-
 strp ugh_subreq_get_host(ugh_subreq_t *r);
 in_port_t ugh_subreq_get_port(ugh_subreq_t *r);
 
