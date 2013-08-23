@@ -619,3 +619,27 @@ strp ugh_client_setvar_cp(ugh_client_t *c, const char *data, char *value_data, s
 	return vptr;
 }
 
+strp ugh_client_setvar_va(ugh_client_t *c, const char *data, const char *fmt, ...)
+{
+	void **dest = JudyLIns(&c->vars_hash, aux_hash_key_nt(data), PJE0);
+	if (PJERR == dest) return NULL;
+
+	strp vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
+	if (NULL == vptr) return NULL;
+
+	*dest = vptr;
+
+	va_list ap;
+
+	va_start(ap, fmt);
+	vptr->size = vsnprintf(NULL, 0, fmt, ap);
+
+	vptr->data = aux_pool_nalloc(c->pool, vptr->size + 1);
+	if (NULL == vptr->data) return NULL;
+
+	va_start(ap, fmt);
+	vptr->size = vsnprintf(vptr->data, vptr->size + 1, fmt, ap);
+
+	return vptr;
+}
+

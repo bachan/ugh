@@ -3,6 +3,7 @@
 
 #include <ev.h>
 #include <Judy.h>
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
+#include "aux/config.h"
 #include "aux/hashes.h"
 #include "aux/daemon.h"
 #include "aux/logger.h"
@@ -192,6 +194,7 @@ strp ugh_client_getvar_nt(ugh_client_t *c, const char *data);
 strp ugh_client_setvar(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size);
 strp ugh_client_setvar_nt(ugh_client_t *c, const char *data, char *value_data, size_t value_size);
 strp ugh_client_setvar_cp(ugh_client_t *c, const char *data, char *value_data, size_t value_size);
+strp ugh_client_setvar_va(ugh_client_t *c, const char *data, const char *fmt, ...) AUX_FORMAT(printf, 3, 4);
 
 /* ### url ### */
 
