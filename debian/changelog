@@ -1,3 +1,9 @@
+ugh (0.1.2-2) unstable; urgency=low
+
+  * aux_urlenc, aux_urldec
+
+ -- bachan <ba4an@yandex.ru>  Fri, 28 Aug 2013 18:40:20 +0700
+
 ugh (0.1.2-1) unstable; urgency=low
 
   * choose random directive in upstream
