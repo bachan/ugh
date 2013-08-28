@@ -160,6 +160,10 @@ char *aux_memmem(const char *m, size_t sz_m, const char *n, size_t sz_n)
 	return NULL;
 }
 
+/* two functions below will add terminating 0 byte! */
+size_t aux_urlenc(char *dst, const char *src, size_t sz_src);
+size_t aux_urldec(char *dst, const char *src, size_t sz_src);
+
 #ifdef __cplusplus
 }  /* extern "C" */
 #endif

@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "string.h"
 
 strt aux_empty_string = { 0, "" };
@@ -30,7 +31,7 @@ const unsigned char aux_ch2dig_table [UCHAR_MAX + 1] =
 #define UPP AUX_UPPER
 #define LOW AUX_LOWER
 
-const unsigned char aux_ctypes_table [UCHAR_MAX + 1] = 
+const unsigned char aux_ctypes_table [UCHAR_MAX + 1] =
 {
     0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, SPA, SPA, SPA, SPA, SPA, 0x0, 0x0,
     0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
@@ -134,5 +135,97 @@ char *aux_strxstr(const char *s, const char *n, size_t len)
 	}
 
 	return NULL;
+}
+
+static unsigned char table_hexval [] = "0123456789ABCDEF";
+
+static unsigned char table_urldec [UCHAR_MAX + 1] =
+{
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  0,  0,  0,  0,  0,  0,  /* 0-9 */
+	0, 10, 11, 12, 13, 14, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* a-f */
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0, 10, 11, 12, 13, 14, 15,  0,  0,  0,  0,  0,  0,  0,  0,  0,  /* A-F */
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+};
+
+static uint32_t table_urlenc [] =
+{
+	0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+	            /* ?>=< ;:98 7654 3210  /.-, +*)( '&%$ #"!  */
+	0xfc009fff, /* 1111 1100 0000 0000  1001 1111 1111 1111 */
+	            /* _^]\ [ZYX WVUT SRQP  ONML KJIH GFED CBA@ */
+	0x78000001, /* 0111 1000 0000 0000  0000 0000 0000 0001 */
+	            /*  ~}| {zyx wvut srqp  onml kjih gfed cba` */
+	0xb8000001, /* 1011 1000 0000 0000  0000 0000 0000 0001 */
+	0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+	0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+	0xffffffff, /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+	0xffffffff  /* 1111 1111 1111 1111  1111 1111 1111 1111 */
+};
+
+size_t aux_urlenc(char* dst, const char* src, size_t sz_src)
+{
+	unsigned char* pdst = (unsigned char *) dst;
+	unsigned char* psrc = (unsigned char *) src;
+	unsigned char* esrc = (unsigned char *) src + sz_src;
+
+	while (psrc < esrc)
+	{
+		if (table_urlenc[*psrc >> 5] & (1 << (*psrc & 0x1f)))
+		{
+			*pdst++ = '%';
+			*pdst++ = table_hexval[*psrc >> 4];
+			*pdst++ = table_hexval[*psrc & 0xf];
+			++psrc;
+		}
+		else
+		{
+			*pdst++ = *psrc++;
+		}
+	}
+
+	*pdst = 0;
+
+	return pdst - (unsigned char *) dst;
+}
+
+size_t aux_urldec(char* dst, const char* src, size_t sz_src)
+{
+	unsigned char* pdst = (unsigned char *) dst;
+	const unsigned char* psrc = (const unsigned char *) src;
+	const unsigned char* esrc = (const unsigned char *) src + sz_src;
+
+	while (psrc < esrc)
+	{
+		if (*psrc == '%' && psrc < esrc - 2)
+		{
+			*pdst++ = table_urldec[*(psrc+1)] * 0x10 + table_urldec[*(psrc+2)] * 0x01;
+			psrc += 3;
+		}
+		else if (*psrc == '+')
+		{
+			*pdst++ = ' ';
+			++psrc;
+		}
+		else
+		{
+			*pdst++ = *psrc++;
+		}
+	}
+
+	*pdst = 0;
+
+	return pdst - (unsigned char *) dst;
 }
 
