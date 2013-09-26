@@ -24,10 +24,16 @@ int aux_set_sckopt(int s, int level, int key, int value)
 	return setsockopt(s, level, key, (void *) &value, sizeof(value));
 }
 
+#if defined(__APPLE__) || defined(__MACH__)
+#define AUX_NOSIGNAL SO_NOSIGPIPE
+#else
+#define AUX_NOSIGNAL MSG_NOSIGNAL
+#endif
+
 static inline
 int aux_unix_send(int fd, void *data, size_t size)
 {
-	return send(fd, data, size, MSG_NOSIGNAL);
+	return send(fd, data, size, AUX_NOSIGNAL);
 }
 
 static inline
