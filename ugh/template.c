@@ -94,13 +94,12 @@ strp ugh_template_execute(ugh_template_t *t, ugh_client_t *c)
 		}
 	}
 
-	strp res;
 	size_t i;
 
-	res = aux_pool_malloc(c->pool, sizeof(*res));
+	strp res = aux_pool_malloc(c->pool, sizeof(*res));
 	if (NULL == res) return &aux_empty_string;
 
-	res->data = aux_pool_malloc(c->pool, UGH_TEMPLATE_MAX_LENGTH);
+	res->data = aux_pool_nalloc(c->pool, UGH_TEMPLATE_MAX_LENGTH);
 	if (NULL == res->data) return &aux_empty_string;
 
 	res->size = 0;

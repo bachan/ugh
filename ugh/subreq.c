@@ -81,7 +81,7 @@ int ugh_subreq_copy_chunk(ugh_subreq_t *r, char *data, size_t size)
 		char *old_body = r->body.data;
 
 		r->chunk_body_size *= 2;
-		r->body.data = aux_pool_malloc(r->c->pool, r->chunk_body_size);
+		r->body.data = aux_pool_nalloc(r->c->pool, r->chunk_body_size);
 
 		memcpy(r->body.data, old_body, r->body.size);
 	}
@@ -161,7 +161,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 
 			if (r->content_length > r->buf_recv.size + (r->buf_recv.data - r->request_end))
 			{
-				r->body.data = aux_pool_malloc(r->c->pool, r->content_length);
+				r->body.data = aux_pool_nalloc(r->c->pool, r->content_length);
 				r->body.size = r->buf_recv.data - r->request_end;
 
 				memcpy(r->body.data, r->request_end, r->body.size);
@@ -184,7 +184,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 				r->content_length = UGH_RESPONSE_CHUNKED;
 
 				r->chunk_body_size = UGH_SUBREQ_BUF;
-				r->body.data = aux_pool_malloc(r->c->pool, r->chunk_body_size);
+				r->body.data = aux_pool_nalloc(r->c->pool, r->chunk_body_size);
 				r->body.size = 0;
 
 				char *next_chunk = r->request_end;
@@ -250,7 +250,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 				{
 					char *old_body = r->body.data;
 
-					r->body.data = aux_pool_malloc(r->c->pool, r->body.size * 2);
+					r->body.data = aux_pool_nalloc(r->c->pool, r->body.size * 2);
 
 					memcpy(r->body.data, old_body, r->body.size);
 
@@ -323,7 +323,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 		{
 			char *old_body = r->body.data;
 
-			r->body.data = aux_pool_malloc(r->c->pool, r->body.size * 2);
+			r->body.data = aux_pool_nalloc(r->c->pool, r->body.size * 2);
 
 			memcpy(r->body.data, old_body, r->body.size);
 
@@ -535,13 +535,10 @@ int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *val
 #if 0
 	/* TODO implement */
 
-	void **dest;
-	ugh_header_t *vptr;
-
-	dest = JudyLIns(&r->headers_out_hash, aux_hash_key_lc_header(data, size), PJE0);
+	void **dest = JudyLIns(&r->headers_out_hash, aux_hash_key_lc_header(data, size), PJE0);
 	if (PJERR == dest) return NULL;
 
-	vptr = aux_pool_malloc(r->c->pool, sizeof(*vptr));
+	ugh_header_t *vptr = aux_pool_malloc(r->c->pool, sizeof(*vptr));
 	if (NULL == vptr) return NULL;
 
 	*dest = vptr;
@@ -589,7 +586,7 @@ int ugh_subreq_run(ugh_subreq_t *r)
 {
 	/* buffers */
 
-	r->buf_send_data = aux_pool_malloc(r->c->pool, UGH_SUBREQ_BUF);
+	r->buf_send_data = aux_pool_nalloc(r->c->pool, UGH_SUBREQ_BUF);
 
 	if (NULL == r->buf_send_data)
 	{
@@ -600,7 +597,7 @@ int ugh_subreq_run(ugh_subreq_t *r)
 	r->buf_send.data = r->buf_send_data;
 	/* r->buf_send.size = UGH_SUBREQ_BUF; */
 
-	r->buf_recv_data = aux_pool_malloc(r->c->pool, UGH_SUBREQ_BUF);
+	r->buf_recv_data = aux_pool_nalloc(r->c->pool, UGH_SUBREQ_BUF);
 
 	if (NULL == r->buf_recv_data)
 	{
@@ -979,9 +976,7 @@ static ugh_header_t ugh_empty_header = {
 
 ugh_header_t *ugh_subreq_header_get_nt(ugh_subreq_t *r, const char *data)
 {
-	void **dest;
-
-	dest = JudyLGet(r->headers_hash, aux_hash_key_lc_header_nt(data), PJE0);
+	void **dest = JudyLGet(r->headers_hash, aux_hash_key_lc_header_nt(data), PJE0);
 	if (PJERR == dest || NULL == dest) return &ugh_empty_header;
 
 	return *dest;
@@ -989,9 +984,7 @@ ugh_header_t *ugh_subreq_header_get_nt(ugh_subreq_t *r, const char *data)
 
 ugh_header_t *ugh_subreq_header_get(ugh_subreq_t *r, const char *data, size_t size)
 {
-	void **dest;
-
-	dest = JudyLGet(r->headers_hash, aux_hash_key_lc_header(data, size), PJE0);
+	void **dest = JudyLGet(r->headers_hash, aux_hash_key_lc_header(data, size), PJE0);
 	if (PJERR == dest || NULL == dest) return &ugh_empty_header;
 
 	return *dest;
@@ -999,13 +992,10 @@ ugh_header_t *ugh_subreq_header_get(ugh_subreq_t *r, const char *data, size_t si
 
 ugh_header_t *ugh_subreq_header_set(ugh_subreq_t *r, const char *data, size_t size, char *value_data, size_t value_size)
 {
-	void **dest;
-	ugh_header_t *vptr;
-
-	dest = JudyLIns(&r->headers_hash, aux_hash_key_lc_header(data, size), PJE0);
+	void **dest = JudyLIns(&r->headers_hash, aux_hash_key_lc_header(data, size), PJE0);
 	if (PJERR == dest) return NULL;
 
-	vptr = aux_pool_malloc(r->c->pool, sizeof(*vptr));
+	ugh_header_t *vptr = aux_pool_malloc(r->c->pool, sizeof(*vptr));
 	if (NULL == vptr) return NULL;
 
 	*dest = vptr;

@@ -155,7 +155,7 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 
 				if (c->content_length > (c->buf_recv.size + (c->buf_recv.data - c->request_end)))
 				{
-					c->body.data = aux_pool_malloc(c->pool, c->content_length);
+					c->body.data = aux_pool_nalloc(c->pool, c->content_length);
 					c->body.size = c->buf_recv.data - c->request_end;
 
 					memcpy(c->body.data, c->request_end, c->body.size);
@@ -236,7 +236,7 @@ int ugh_client_send(ugh_client_t *c, int status)
 		c->bufs_sumlen += c->bufs[i].size;
 	}
 
-	c->buf_send.data = (char *) aux_pool_malloc(c->pool, UGH_HEADER_BUF);
+	c->buf_send.data = (char *) aux_pool_nalloc(c->pool, UGH_HEADER_BUF);
 	c->buf_send.size = snprintf(c->buf_send.data, UGH_HEADER_BUF,
 		"HTTP/1.1 %s"              CRLF
 		"Server: ugh/"UGH_VERSION  CRLF
@@ -303,7 +303,7 @@ int ugh_client_add(ugh_server_t *s, int sd, struct sockaddr_in *addr)
 	c->pool = pool;
 
 	c->buf_recv.size = UGH_HEADER_BUF;
-	c->buf_recv.data = aux_pool_malloc(pool, UGH_HEADER_BUF);
+	c->buf_recv.data = aux_pool_nalloc(pool, UGH_HEADER_BUF);
 
 	if (NULL == c->buf_recv.data)
 	{
@@ -349,9 +349,7 @@ int ugh_client_del(ugh_client_t *c)
 
 strp ugh_client_getarg_nt(ugh_client_t *c, const char *data)
 {
-	void **dest;
-
-	dest = JudyLGet(c->args_hash, aux_hash_key_nt(data), PJE0);
+	void **dest = JudyLGet(c->args_hash, aux_hash_key_nt(data), PJE0);
 	if (PJERR == dest || NULL == dest) return &aux_empty_string;
 
 	return *dest;
@@ -359,9 +357,7 @@ strp ugh_client_getarg_nt(ugh_client_t *c, const char *data)
 
 strp ugh_client_getarg(ugh_client_t *c, const char *data, size_t size)
 {
-	void **dest;
-
-	dest = JudyLGet(c->args_hash, aux_hash_key(data, size), PJE0);
+	void **dest = JudyLGet(c->args_hash, aux_hash_key(data, size), PJE0);
 	if (PJERR == dest || NULL == dest) return &aux_empty_string;
 
 	return *dest;
@@ -369,13 +365,10 @@ strp ugh_client_getarg(ugh_client_t *c, const char *data, size_t size)
 
 strp ugh_client_setarg(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size)
 {
-	void **dest;
-	strp vptr;
-
-	dest = JudyLIns(&c->args_hash, aux_hash_key(data, size), PJE0);
+	void **dest = JudyLIns(&c->args_hash, aux_hash_key(data, size), PJE0);
 	if (PJERR == dest) return NULL;
 
-	vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
+	strp vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
 	if (NULL == vptr) return NULL;
 
 	*dest = vptr;
@@ -388,9 +381,7 @@ strp ugh_client_setarg(ugh_client_t *c, const char *data, size_t size, char *val
 
 strp ugh_client_body_getarg_nt(ugh_client_t *c, const char *data)
 {
-	void **dest;
-
-	dest = JudyLGet(c->body_hash, aux_hash_key_nt(data), PJE0);
+	void **dest = JudyLGet(c->body_hash, aux_hash_key_nt(data), PJE0);
 	if (PJERR == dest || NULL == dest) return &aux_empty_string;
 
 	return *dest;
@@ -398,9 +389,7 @@ strp ugh_client_body_getarg_nt(ugh_client_t *c, const char *data)
 
 strp ugh_client_body_getarg(ugh_client_t *c, const char *data, size_t size)
 {
-	void **dest;
-
-	dest = JudyLGet(c->body_hash, aux_hash_key(data, size), PJE0);
+	void **dest = JudyLGet(c->body_hash, aux_hash_key(data, size), PJE0);
 	if (PJERR == dest || NULL == dest) return &aux_empty_string;
 
 	return *dest;
@@ -408,13 +397,10 @@ strp ugh_client_body_getarg(ugh_client_t *c, const char *data, size_t size)
 
 strp ugh_client_body_setarg(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size)
 {
-	void **dest;
-	strp vptr;
-
-	dest = JudyLIns(&c->body_hash, aux_hash_key(data, size), PJE0);
+	void **dest = JudyLIns(&c->body_hash, aux_hash_key(data, size), PJE0);
 	if (PJERR == dest) return NULL;
 
-	vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
+	strp vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
 	if (NULL == vptr) return NULL;
 
 	*dest = vptr;
@@ -432,9 +418,7 @@ static ugh_header_t ugh_empty_header = {
 
 ugh_header_t *ugh_client_header_get_nt(ugh_client_t *c, const char *data)
 {
-	void **dest;
-
-	dest = JudyLGet(c->headers_hash, aux_hash_key_lc_header_nt(data), PJE0);
+	void **dest = JudyLGet(c->headers_hash, aux_hash_key_lc_header_nt(data), PJE0);
 	if (PJERR == dest || NULL == dest) return &ugh_empty_header;
 
 	return *dest;
@@ -442,9 +426,7 @@ ugh_header_t *ugh_client_header_get_nt(ugh_client_t *c, const char *data)
 
 ugh_header_t *ugh_client_header_get(ugh_client_t *c, const char *data, size_t size)
 {
-	void **dest;
-
-	dest = JudyLGet(c->headers_hash, aux_hash_key_lc_header(data, size), PJE0);
+	void **dest = JudyLGet(c->headers_hash, aux_hash_key_lc_header(data, size), PJE0);
 	if (PJERR == dest || NULL == dest) return &ugh_empty_header;
 
 	return *dest;
@@ -452,13 +434,10 @@ ugh_header_t *ugh_client_header_get(ugh_client_t *c, const char *data, size_t si
 
 ugh_header_t *ugh_client_header_set(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size)
 {
-	void **dest;
-	ugh_header_t *vptr;
-
-	dest = JudyLIns(&c->headers_hash, aux_hash_key_lc_header(data, size), PJE0);
+	void **dest = JudyLIns(&c->headers_hash, aux_hash_key_lc_header(data, size), PJE0);
 	if (PJERR == dest) return NULL;
 
-	vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
+	ugh_header_t *vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
 	if (NULL == vptr) return NULL;
 
 	*dest = vptr;
@@ -473,13 +452,10 @@ ugh_header_t *ugh_client_header_set(ugh_client_t *c, const char *data, size_t si
 
 ugh_header_t *ugh_client_header_out_set(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size)
 {
-	void **dest;
-	ugh_header_t *vptr;
-
-	dest = JudyLIns(&c->headers_out_hash, aux_hash_key_lc_header(data, size), PJE0);
+	void **dest = JudyLIns(&c->headers_out_hash, aux_hash_key_lc_header(data, size), PJE0);
 	if (PJERR == dest) return NULL;
 
-	vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
+	ugh_header_t *vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
 	if (NULL == vptr) return NULL;
 
 	*dest = vptr;
@@ -494,9 +470,7 @@ ugh_header_t *ugh_client_header_out_set(ugh_client_t *c, const char *data, size_
 
 strp ugh_client_cookie_get(ugh_client_t *c, const char *name, size_t size)
 {
-	ugh_header_t *h;
-
-	h = ugh_client_header_get_nt(c, "cookie");
+	ugh_header_t *h = ugh_client_header_get_nt(c, "cookie");
 	if (NULL == h) return &aux_empty_string;
 
 	char *p = h->value.data;

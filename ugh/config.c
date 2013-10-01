@@ -92,7 +92,7 @@ int ugh_config_optset(ugh_config_t *cfg, int *argc, char **argv)
 {
 	if (*argc < UGH_CONFIG_ARGMAX)
 	{
-		char *arg = aux_pool_malloc(cfg->pool, cfg->pos - cfg->beg + 1);
+		char *arg = aux_pool_nalloc(cfg->pool, cfg->pos - cfg->beg + 1);
 		if (NULL == arg) return -1;
 
 		memcpy(arg, cfg->beg, cfg->pos - cfg->beg);

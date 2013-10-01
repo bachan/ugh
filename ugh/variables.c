@@ -12,9 +12,7 @@ strp ugh_variable_arg_(ugh_client_t *c, const char *name, size_t size, void *dat
 
 strp ugh_variable_http_(ugh_client_t *c, const char *name, size_t size, void *data)
 {
-	ugh_header_t *h;
-
-	h = ugh_client_header_get(c, name + 5, size - 5);
+	ugh_header_t *h = ugh_client_header_get(c, name + 5, size - 5);
 	if (NULL == h) return &aux_empty_string;
 
 	return &h->value;
@@ -32,16 +30,13 @@ strp ugh_variable_body_(ugh_client_t *c, const char *name, size_t size, void *da
 
 strp ugh_variable_hash_(ugh_client_t *c, const char *name, size_t size, void *data)
 {
-	strp val, res;
-	uintptr_t key;
+	strp val = ugh_get_varvalue(c, name + 5, size - 5);
+	uintptr_t key = aux_hash_key(val->data, val->size);
 
-	val = ugh_get_varvalue(c, name + 5, size - 5);
-	key = aux_hash_key(val->data, val->size);
-
-	res = aux_pool_malloc(c->pool, sizeof(*res));
+	strp res = aux_pool_malloc(c->pool, sizeof(*res));
 	if (NULL == res) return &aux_empty_string;
 
-	res->data = aux_pool_malloc(c->pool, 32);
+	res->data = aux_pool_nalloc(c->pool, 32);
 	if (NULL == res->data) return &aux_empty_string;
 
 	res->size = snprintf(res->data, 32, "%"PRIuPTR, key);
@@ -51,12 +46,10 @@ strp ugh_variable_hash_(ugh_client_t *c, const char *name, size_t size, void *da
 
 strp ugh_variable_c0_(ugh_client_t *c, const char *name, size_t size, void *data)
 {
-	strp val, res;
-
-	val = ugh_get_varvalue(c, name + 3, size - 3);
+	strp val = ugh_get_varvalue(c, name + 3, size - 3);
 	if (1 > val->size) return &aux_empty_string;
 
-	res = aux_pool_malloc(c->pool, sizeof(*res));
+	strp res = aux_pool_malloc(c->pool, sizeof(*res));
 	if (NULL == res) return &aux_empty_string;
 
 	res->data = val->data;
@@ -67,12 +60,10 @@ strp ugh_variable_c0_(ugh_client_t *c, const char *name, size_t size, void *data
 
 strp ugh_variable_cl_(ugh_client_t *c, const char *name, size_t size, void *data)
 {
-	strp val, res;
-
-	val = ugh_get_varvalue(c, name + 3, size - 3);
+	strp val = ugh_get_varvalue(c, name + 3, size - 3);
 	if (1 > val->size) return &aux_empty_string;
 
-	res = aux_pool_malloc(c->pool, sizeof(*res));
+	strp res = aux_pool_malloc(c->pool, sizeof(*res));
 	if (NULL == res) return &aux_empty_string;
 
 	res->data = val->data + val->size - 1;
@@ -98,9 +89,7 @@ ugh_variable_t ugh_variables [] =
 
 ugh_variable_t *ugh_set_variable(ugh_config_t *cfg, const char *name, size_t size, ugh_variable_t *var)
 {
-	void **dest;
-
-	dest = JudyLIns(&cfg->vars_hash, aux_hash_key(name, size), PJE0);
+	void **dest = JudyLIns(&cfg->vars_hash, aux_hash_key(name, size), PJE0);
 	if (PJERR == dest) return NULL;
 
 	*dest = var;
@@ -110,9 +99,7 @@ ugh_variable_t *ugh_set_variable(ugh_config_t *cfg, const char *name, size_t siz
 
 ugh_variable_t *ugh_get_variable(ugh_config_t *cfg, const char *name, size_t size)
 {
-	void **dest;
-
-	dest = JudyLGet(cfg->vars_hash, aux_hash_key(name, size), PJE0);
+	void **dest = JudyLGet(cfg->vars_hash, aux_hash_key(name, size), PJE0);
 	if (PJERR == dest || NULL == dest) return NULL;
 
 	return *dest;
@@ -138,9 +125,7 @@ void ugh_idx_variable(ugh_config_t *cfg, const char *name, size_t size)
 
 strp ugh_get_varvalue(ugh_client_t *c, const char *name, size_t size)
 {
-	ugh_variable_t *var;
-
-	var = ugh_get_variable(c->s->cfg, name, size);
+	ugh_variable_t *var = ugh_get_variable(c->s->cfg, name, size);
 	if (NULL == var) return &aux_empty_string;
 
 	return var->handle(c, name, size, var->data);

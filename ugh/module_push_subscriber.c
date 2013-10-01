@@ -62,7 +62,7 @@ int ugh_module_push_subscriber_handle(ugh_client_t *c, void *data, strp body)
 	char *content_type_data = aux_pool_strdup(c->pool, &m->content_type);
 	ugh_client_header_out_set(c, "Content-Type", sizeof("Content-Type") - 1, content_type_data, m->content_type.size);
 
-	char *etag_data = aux_pool_malloc(c->pool, 21);
+	char *etag_data = aux_pool_nalloc(c->pool, 21);
 	int etag_size = snprintf(etag_data, 21, "%lu", etag);
 	ugh_client_header_out_set(c, "Etag", sizeof("Etag") - 1, etag_data, etag_size);
 

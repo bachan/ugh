@@ -240,7 +240,7 @@ int ugh_resolver_addq(ugh_resolver_t *r, char *name, size_t size, ugh_resolver_c
 		rec = (ugh_resolver_rec_t *) aux_pool_calloc(r->pool, sizeof(*rec));
 		if (NULL == rec) return -1;
 
-		rec->name.data = (char *) aux_pool_malloc(r->pool, size);
+		rec->name.data = (char *) aux_pool_nalloc(r->pool, size);
 		if (NULL == rec->name.data) return -1;
 
 		rec->name.size = aux_cpymsz(rec->name.data, name, size);
