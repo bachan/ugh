@@ -40,8 +40,8 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 
 	/* errno = 0; */
 
-	rc = aux_unix_send(w->fd, r->buf_send.data, r->buf_send.size);
-	log_debug("subreq send: %d: %.*s", rc, (int) r->buf_send.size, r->buf_send.data);
+	rc = aux_unix_send(w->fd, r->b_send.data + r->b_send.rpos, r->b_send.wpos - r->b_send.rpos);
+	log_debug("subreq send: %d: %.*s", rc, (int) (r->b_send.wpos - r->b_send.rpos), r->b_send.data + r->b_send.rpos);
 
 	if (0 > rc)
 	{
@@ -62,10 +62,9 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 		ev_timer_again(loop, &r->wev_timeout);
 	}
 
-	r->buf_send.data += rc;
-	r->buf_send.size -= rc;
+	r->b_send.rpos += rc;
 
-	if (0 == r->buf_send.size)
+	if (r->b_send.rpos == r->b_send.wpos)
 	{
 		ev_io_stop(loop, &r->wev_send);
 		ev_io_start(loop, &r->wev_recv);
@@ -183,7 +182,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 			{
 				r->content_length = UGH_RESPONSE_CHUNKED;
 
-				r->chunk_body_size = UGH_SUBREQ_BUF;
+				r->chunk_body_size = UGH_CHUNKS_BUF;
 				r->body.data = aux_pool_nalloc(r->c->pool, r->chunk_body_size);
 				r->body.size = 0;
 
@@ -586,16 +585,11 @@ int ugh_subreq_run(ugh_subreq_t *r)
 {
 	/* buffers */
 
-	r->buf_send_data = aux_pool_nalloc(r->c->pool, UGH_SUBREQ_BUF);
-
-	if (NULL == r->buf_send_data)
+	if (0 > aux_buffer_init(&r->b_send, r->c->pool, UGH_SUBREQ_BUF))
 	{
 		aux_pool_free(r->c->pool);
 		return -1;
 	}
-
-	r->buf_send.data = r->buf_send_data;
-	/* r->buf_send.size = UGH_SUBREQ_BUF; */
 
 	r->buf_recv_data = aux_pool_nalloc(r->c->pool, UGH_SUBREQ_BUF);
 
@@ -681,7 +675,7 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 
 	if (0 == r->u.uri.size)
 	{
-		r->buf_send.size = snprintf(r->buf_send.data, UGH_SUBREQ_BUF, "%s %.*s%s%.*s %s" CRLF
+		aux_buffer_printf(&r->b_send, c->pool, "%s %.*s%s%.*s %s" CRLF
 			, ugh_method_string[r->method]
 			, (int) c->uri.size, c->uri.data
 			, c->args.size ? "?" : ""
@@ -691,7 +685,7 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 	}
 	else if (0 == r->u.args.size)
 	{
-		r->buf_send.size = snprintf(r->buf_send.data, UGH_SUBREQ_BUF, "%s %.*s%s%.*s %s" CRLF
+		aux_buffer_printf(&r->b_send, c->pool, "%s %.*s%s%.*s %s" CRLF
 			, ugh_method_string[r->method]
 			, (int) r->u.uri.size, r->u.uri.data
 			, c->args.size ? "?" : ""
@@ -701,7 +695,7 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 	}
 	else
 	{
-		r->buf_send.size = snprintf(r->buf_send.data, UGH_SUBREQ_BUF, "%s %.*s?%.*s %s" CRLF
+		aux_buffer_printf(&r->b_send, c->pool, "%s %.*s?%.*s %s" CRLF
 			, ugh_method_string[r->method]
 			, (int) r->u.uri.size, r->u.uri.data
 			, (int) r->u.args.size, r->u.args.data
@@ -721,8 +715,9 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 
 		if (4 == h->key.size && aux_hash_key_lc_header("Host", 4) == aux_hash_key_lc_header(h->key.data, h->key.size))
 		{
-			r->buf_send.size += snprintf(r->buf_send.data + r->buf_send.size, UGH_SUBREQ_BUF - r->buf_send.size,
-				"Host: %.*s" CRLF, (int) u_host->size, u_host->data);
+			aux_buffer_printf(&r->b_send, c->pool, "Host: %.*s" CRLF
+				, (int) u_host->size, u_host->data
+			);
 		}
 		else if (14 == h->key.size && aux_hash_key_lc_header("Content-Length", 14) == aux_hash_key_lc_header(h->key.data, h->key.size) && r->method == UGH_HTTP_GET)
 		{
@@ -730,8 +725,10 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 		}
 		else
 		{
-			r->buf_send.size += snprintf(r->buf_send.data + r->buf_send.size, UGH_SUBREQ_BUF - r->buf_send.size,
-				"%.*s: %.*s" CRLF, (int) h->key.size, h->key.data, (int) h->value.size, h->value.data);
+			aux_buffer_printf(&r->b_send, c->pool, "%.*s: %.*s" CRLF
+				, (int) h->key.size, h->key.data
+				, (int) h->value.size, h->value.data
+			);
 		}
 	}
 
@@ -739,19 +736,20 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 	{
 		if (r->c->method != UGH_HTTP_POST) /* don't write new Content-Length if it was in original request */
 		{
-			r->buf_send.size += snprintf(r->buf_send.data + r->buf_send.size, UGH_SUBREQ_BUF - r->buf_send.size,
-				"Content-Length: %"PRIuMAX CRLF, (uintmax_t) r->request_body.size);
+			aux_buffer_printf(&r->b_send, c->pool, "Content-Length: %"PRIuMAX CRLF
+				, (uintmax_t) r->request_body.size
+			);
 		}
 
 		/* TODO Content-Type */
 
-		r->buf_send.size += snprintf(r->buf_send.data + r->buf_send.size, UGH_SUBREQ_BUF - r->buf_send.size, CRLF);
+		aux_buffer_strcpy(&r->b_send, c->pool, CRLF);
 
-		r->buf_send.size += aux_cpymsz(r->buf_send.data + r->buf_send.size, r->request_body.data, r->request_body.size);
+		aux_buffer_memcpy(&r->b_send, c->pool, r->request_body.data, r->request_body.size);
 	}
 	else
 	{
-		r->buf_send.size += snprintf(r->buf_send.data + r->buf_send.size, UGH_SUBREQ_BUF - r->buf_send.size, CRLF);
+		aux_buffer_strcpy(&r->b_send, c->pool, CRLF);
 	}
 
 	/* log_debug("ugh_subreq(%.*s)", (int) r->buf_send.size, r->buf_send.data); */
@@ -907,9 +905,8 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 		r->body.data = NULL;
 		r->body.size = 0;
 
-		r->buf_send.size += r->buf_send.data - r->buf_send_data;
-		r->buf_send.data = r->buf_send_data;
-		/* r->buf_send.size = 0; */
+		r->b_send.rpos = 0;
+		r->b_send.wpos = 0;
 
 		r->buf_recv.data = r->buf_recv_data;
 		r->buf_recv.size = UGH_SUBREQ_BUF;

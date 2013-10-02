@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
+#include "aux/buffer.h"
 #include "aux/config.h"
 #include "aux/hashes.h"
 #include "aux/daemon.h"
@@ -95,6 +96,7 @@ extern const char *ugh_version_string [UGH_HTTP_VERSION_MAX];
 
 #define UGH_HEADER_BUF (32768) /* XXX this is temporary upper header buffer size limit to simplify things */
 #define UGH_SUBREQ_BUF (32768 * 4) /* XXX make this dynamically allocated also */
+#define UGH_CHUNKS_BUF (32768 * 4) /* start buffer size for chunked response */
 #define UGH_CORO_STACK (32768 * 16)
 
 typedef struct ugh_client
@@ -284,8 +286,7 @@ struct ugh_subreq
 
 	/* void*headers_out_hash; */
 
-	char*buf_send_data;
-	strt buf_send; /* UGH_SUBREQ_BUF */
+	aux_buffer_t b_send;
 
 	/* recv */
 
