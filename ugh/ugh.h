@@ -548,7 +548,7 @@ strp ugh_get_varvalue(ugh_client_t *c, const char *name, size_t size);
 
 /* ### ugh_template ### */
 
-#define UGH_TEMPLATE_MAX_CHUNKS 16
+#define UGH_TEMPLATE_MAX_CHUNKS 32
 #define UGH_TEMPLATE_MAX_LENGTH 4096
 
 typedef struct ugh_template
