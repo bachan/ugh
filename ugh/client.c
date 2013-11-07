@@ -607,12 +607,14 @@ strp ugh_client_setvar_va(ugh_client_t *c, const char *data, const char *fmt, ..
 
 	va_start(ap, fmt);
 	vptr->size = vsnprintf(NULL, 0, fmt, ap);
+	va_end(ap);
 
 	vptr->data = aux_pool_nalloc(c->pool, vptr->size + 1);
 	if (NULL == vptr->data) return NULL;
 
 	va_start(ap, fmt);
 	vptr->size = vsnprintf(vptr->data, vptr->size + 1, fmt, ap);
+	va_end(ap);
 
 	return vptr;
 }

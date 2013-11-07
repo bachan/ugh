@@ -39,6 +39,7 @@ int aux_buffer_printf(aux_buffer_t *b, aux_pool_t *pool, const char *fmt, ...)
 
 	va_start(ap, fmt);
 	size_t size = vsnprintf(NULL, 0, fmt, ap);
+	va_end(ap);
 
 	if (b->size < b->wpos + size + 1) /* we need +1 cause vsnprintf writes terminating null */
 	{
@@ -53,6 +54,7 @@ int aux_buffer_printf(aux_buffer_t *b, aux_pool_t *pool, const char *fmt, ...)
 
 	va_start(ap, fmt);
 	b->wpos += vsnprintf(b->data + b->wpos, b->size - b->wpos, fmt, ap);
+	va_end(ap);
 
 	return 0;
 }
