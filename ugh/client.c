@@ -267,6 +267,17 @@ int ugh_client_send(ugh_client_t *c, int status)
 	}
 #endif
 
+	int rc;
+	idx = 0;
+
+	for (rc = Judy1First(c->cookies_out_hash, &idx, PJE0); rc; rc = Judy1Next(c->cookies_out_hash, &idx, PJE0))
+	{
+		strp cookie = (strp) idx;
+
+		c->buf_send.size += snprintf(c->buf_send.data + c->buf_send.size, UGH_HEADER_BUF - c->buf_send.size,
+			"Set-Cookie: %.*s" CRLF, (int) cookie->size, cookie->data);
+	}
+
 	c->buf_send.size += snprintf(c->buf_send.data + c->buf_send.size, UGH_HEADER_BUF - c->buf_send.size, CRLF);
 
 	log_notice("access %s:%u '%.*s%s%.*s' %.*s %"PRIuMAX, inet_ntoa(c->addr.sin_addr), ntohs(c->addr.sin_port), (int) c->uri.size, c->uri.data,
@@ -339,6 +350,7 @@ int ugh_client_del(ugh_client_t *c)
 	JudyLFreeArray(&c->args_hash, PJE0);
 	JudyLFreeArray(&c->headers_hash, PJE0);
 	JudyLFreeArray(&c->headers_out_hash, PJE0);
+	Judy1FreeArray(&c->cookies_out_hash, PJE0);
 #if 1
 	JudyLFreeArray(&c->vars_hash, PJE0);
 #endif
@@ -525,6 +537,19 @@ skip:
 	}
 
 	return &aux_empty_string;
+}
+
+strp ugh_client_cookie_out_set(ugh_client_t *c, char *data, size_t size)
+{
+	strp vptr = aux_pool_malloc(c->pool, sizeof(*vptr));
+	if (NULL == vptr) return NULL;
+
+	Judy1Set(&c->cookies_out_hash, (Word_t) vptr, PJE0);
+
+	vptr->data = data;
+	vptr->size = size;
+
+	return vptr;
 }
 
 strp ugh_client_getvar(ugh_client_t *c, const char *data, size_t size)

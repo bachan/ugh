@@ -146,6 +146,7 @@ struct ugh_client
 	/* response */
 
 	void*headers_out_hash;
+	void*cookies_out_hash;
 	strp bufs;
 	size_t bufs_sumlen;
 
@@ -191,6 +192,8 @@ ugh_header_t *ugh_client_header_out_set(ugh_client_t *c, const char *data, size_
 
 strp ugh_client_cookie_get(ugh_client_t *c, const char *name, size_t size);
 #define ugh_client_cookie_get_nt(c, name) ugh_client_cookie_get((c), (name), strlen(name))
+
+strp ugh_client_cookie_out_set(ugh_client_t *c, char *data, size_t size);
 
 strp ugh_client_getvar(ugh_client_t *c, const char *data, size_t size);
 strp ugh_client_getvar_nt(ugh_client_t *c, const char *data);
