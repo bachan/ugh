@@ -4,6 +4,13 @@ static
 void ugh_subreq_wcb_timeout(EV_P_ ev_timer *w, int tev)
 {
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_timeout, w);
+	ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT, 0);
+}
+
+static
+void ugh_subreq_wcb_timeout_connect(EV_P_ ev_timer *w, int tev)
+{
+	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_timeout_connect, w);
 
 	/*
 	 * XXX this is temporary, later we should introduce explicit
@@ -23,13 +30,6 @@ void ugh_subreq_wcb_timeout(EV_P_ ev_timer *w, int tev)
 		, (int) r->c->args.size, r->c->args.data
 	);
 
-	ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT, 0);
-}
-
-static
-void ugh_subreq_wcb_timeout_connect(EV_P_ ev_timer *w, int tev)
-{
-	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_timeout_connect, w);
 	ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT, 0);
 }
 
