@@ -1,3 +1,9 @@
+ugh (0.1.6-1) unstable; urgency=low
+
+  * connection timeouts support
+
+ -- bachan <bachan@farm.itim.vn>  Mon, 17 Mar 2014 18:03:27 +0700
+
 ugh (0.1.5-1) unstable; urgency=low
 
   * multiple set-cookie header support
