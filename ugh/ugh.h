@@ -262,7 +262,7 @@ typedef struct ugh_channel
 
 typedef int (*ugh_subreq_handle_fp)(ugh_subreq_t *r, char *data, size_t size);
 
-#define UGH_TIMEOUT_ONCE 0
+#define UGH_TIMEOUT_ONCE 0 /* TODO this is deprecated, we should just have 4 separate timeouts: full, recv, send and connect */
 #define UGH_TIMEOUT_FULL 1
 
 #define UGH_RESPONSE_CHUNKED -1
@@ -276,9 +276,13 @@ struct ugh_subreq
 	ev_io wev_recv;
 	ev_io wev_send;
 	ev_io wev_connect;
+
 	ev_timer wev_timeout;
 	ev_tstamp timeout;
 	int timeout_type;
+
+	ev_timer wev_timeout_connect;
+	ev_tstamp timeout_connect;
 
 	/* send */
 
@@ -352,6 +356,7 @@ int ugh_subreq_set_method(ugh_subreq_t *r, unsigned char method);
 int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
 int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
 int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type);
+int ugh_subreq_set_timeout_connect(ugh_subreq_t *r, ev_tstamp timeout);
 
 /* NOTE: tag helps you to distinguish different subrequests, etag helps you to
  * sort received messages, but if you just want to get them as-is (unsorted,

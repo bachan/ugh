@@ -8,6 +8,13 @@ void ugh_subreq_wcb_timeout(EV_P_ ev_timer *w, int tev)
 }
 
 static
+void ugh_subreq_wcb_timeout_connect(EV_P_ ev_timer *w, int tev)
+{
+	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_timeout_connect, w);
+	ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT);
+}
+
+static
 void ugh_subreq_wcb_connect(EV_P_ ev_io *w, int tev)
 {
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_connect, w);
@@ -28,6 +35,8 @@ void ugh_subreq_wcb_connect(EV_P_ ev_io *w, int tev)
 	}
 
 	ev_io_stop(loop, &r->wev_connect);
+	ev_timer_stop(loop, &r->wev_timeout_connect);
+
 	ev_io_start(loop, &r->wev_send);
 }
 
@@ -471,7 +480,11 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 		ev_timer_init(&r->wev_timeout, ugh_subreq_wcb_timeout, 0, r->timeout);
 	}
 
+	ev_timer_init(&r->wev_timeout_connect, ugh_subreq_wcb_timeout_connect, 0, r->timeout_connect);
+
 	ev_timer_again(loop, &r->wev_timeout);
+	ev_timer_again(loop, &r->wev_timeout_connect);
+
 	ev_io_start(loop, &r->wev_connect);
 
 	return 0;
@@ -496,7 +509,8 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags)
 	r->flags = flags;
 	r->handle = NULL;
 
-	r->timeout = UGH_CONFIG_SUBREQ_TIMEOUT;
+	r->timeout = UGH_CONFIG_SUBREQ_TIMEOUT; /* XXX this should be "no timeout" by default */
+	r->timeout_connect = UGH_CONFIG_SUBREQ_TIMEOUT_CONNECT; /* XXX this should be "no timeout" by default */
 
 	ugh_parser_url(&r->u, url, size);
 
@@ -567,6 +581,13 @@ int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type)
 {
 	r->timeout = timeout;
 	r->timeout_type = timeout_type;
+
+	return 0;
+}
+
+int ugh_subreq_set_timeout_connect(ugh_subreq_t *r, ev_tstamp timeout)
+{
+	r->timeout_connect = timeout;
 
 	return 0;
 }
@@ -793,6 +814,7 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 	ev_io_stop(loop, &r->wev_send);
 	ev_io_stop(loop, &r->wev_connect);
 	ev_timer_stop(loop, &r->wev_timeout);
+	ev_timer_stop(loop, &r->wev_timeout_connect);
 
 	close(r->wev_recv.fd);
 
