@@ -4,14 +4,14 @@ static
 void ugh_subreq_wcb_timeout(EV_P_ ev_timer *w, int tev)
 {
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_timeout, w);
-	ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT);
+	ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT, 0);
 }
 
 static
 void ugh_subreq_wcb_timeout_connect(EV_P_ ev_timer *w, int tev)
 {
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_timeout_connect, w);
-	ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT);
+	ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT, 0);
 }
 
 static
@@ -29,8 +29,7 @@ void ugh_subreq_wcb_connect(EV_P_ ev_io *w, int tev)
 			optval = errno;
 		}
 
-		log_warn("conn error %.*s%s%.*s (%d: %s)", (int) r->u.uri.size, r->u.uri.data, r->u.args.size ? "?" : "", (int) r->u.args.size, r->u.args.data, optval, aux_strerror(optval));
-		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR, optval);
 		return;
 	}
 
@@ -54,8 +53,7 @@ void ugh_subreq_wcb_send(EV_P_ ev_io *w, int tev)
 
 	if (0 > rc)
 	{
-		log_warn("send error %.*s%s%.*s (%d: %s)", (int) r->u.uri.size, r->u.uri.data, r->u.args.size ? "?" : "", (int) r->u.args.size, r->u.args.data, errno, aux_strerror(errno));
-		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR, errno);
 		return;
 	}
 
@@ -117,7 +115,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 			log_warn("upstream prematurely closed connection");
 		}
 
-		ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF, 0);
 		return;
 	}
 
@@ -133,8 +131,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 			return;
 		}
 
-		log_warn("recv error %.*s%s%.*s (%d: %s)", (int) r->u.uri.size, r->u.uri.data, r->u.args.size ? "?" : "", (int) r->u.args.size, r->u.args.data, errno, aux_strerror(errno));
-		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR, errno);
 		return;
 	}
 
@@ -157,7 +154,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 
 		if (UGH_ERROR == status)
 		{
-			ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER);
+			ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER, 0);
 			return;
 		}
 
@@ -211,13 +208,13 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 
 					if (UGH_ERROR == status)
 					{
-						ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER);
+						ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER, 0);
 						return;
 					}
 
 					if (0 == r->chunk_size)
 					{
-						ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
+						ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF, 0);
 						return;
 					}
 
@@ -313,13 +310,13 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 
 			if (UGH_ERROR == status)
 			{
-				ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER);
+				ugh_subreq_del(r, UGH_UPSTREAM_FT_INVALID_HEADER, 0);
 				return;
 			}
 
 			if (0 == r->chunk_size)
 			{
-				ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF);
+				ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF, 0);
 			}
 		}
 	}
@@ -378,7 +375,7 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 		case 507: ft_type = UGH_UPSTREAM_FT_HTTP_5XX; break;
 		}
 
-		ugh_subreq_del(r, ft_type);
+		ugh_subreq_del(r, ft_type, 0);
 	}
 }
 
@@ -401,9 +398,7 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 
 	if (INADDR_NONE == addr)
 	{
-		log_debug("ugh_subreq_connect(INADDR_NONE)");
-		/* aux_pool_free(r->c->pool); */
-		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR, ENXIO);
 		return -1;
 	}
 
@@ -415,18 +410,14 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 
 	if (0 > (sd = socket(AF_INET, SOCK_STREAM, 0)))
 	{
-		log_error("socket(AF_INET, SOCK_STREAM, 0) (%d: %s)", errno, aux_strerror(errno));
-		/* aux_pool_free(r->c->pool); */
-		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR, errno);
 		return -1;
 	}
 
 	if (0 > (rc = aux_set_nonblk(sd, 1)))
 	{
-		log_error("aux_set_nonblk(%d, 1) (%d: %s)", sd, errno, aux_strerror(errno));
 		close(sd);
-		/* aux_pool_free(r->c->pool); */
-		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR, errno);
 		return -1;
 	}
 
@@ -434,10 +425,8 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 
 	if (0 > rc && EINPROGRESS != errno)
 	{
-		log_error("connect(%d, ...) (%d: %s)", sd, errno, aux_strerror(errno));
 		close(sd);
-		/* aux_pool_free(r->c->pool); */
-		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR);
+		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR, errno);
 		return -1;
 	}
 
@@ -469,7 +458,7 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 
 		if (new_timeout < 0)
 		{
-			ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT);
+			ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT, 0);
 			return -1;
 		}
 
@@ -808,7 +797,7 @@ in_port_t ugh_subreq_get_port(ugh_subreq_t *r)
 	return r->upstream->backup_values[r->upstream->backup_values_curr].port;
 }
 
-int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
+int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno)
 {
 	ev_io_stop(loop, &r->wev_recv);
 	ev_io_stop(loop, &r->wev_send);
@@ -821,7 +810,9 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 	switch (ft_type)
 	{
 	case UGH_UPSTREAM_FT_ERROR:
-		log_warn("connection or read/write error on upstream socket (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
+		log_warn("connection or read/write error (%d: %s) on upstream socket (%.*s:%.*s%.*s%s%.*s, addr=%s:%u) while %.*s%s%.*s"
+			, ft_errno
+			, aux_strerror(ft_errno)
 			, (int) r->u.host.size, r->u.host.data
 			, (int) r->u.port.size, r->u.port.data
 			, (int) r->u.uri.size, r->u.uri.data
@@ -829,10 +820,13 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 			, (int) r->u.args.size, r->u.args.data
 			, inet_ntoa(r->addr.sin_addr)
 			, ntohs(r->addr.sin_port)
+			, (int) r->c->uri.size, r->c->uri.data
+			, r->c->args.size ? "?" : ""
+			, (int) r->c->args.size, r->c->args.data
 		);
 		break;
 	case UGH_UPSTREAM_FT_TIMEOUT:
-		log_warn("upstream timeout (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
+		log_warn("upstream timeout (%.*s:%.*s%.*s%s%.*s, addr=%s:%u) while %.*s%s%.*s"
 			, (int) r->u.host.size, r->u.host.data
 			, (int) r->u.port.size, r->u.port.data
 			, (int) r->u.uri.size, r->u.uri.data
@@ -840,10 +834,13 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 			, (int) r->u.args.size, r->u.args.data
 			, inet_ntoa(r->addr.sin_addr)
 			, ntohs(r->addr.sin_port)
+			, (int) r->c->uri.size, r->c->uri.data
+			, r->c->args.size ? "?" : ""
+			, (int) r->c->args.size, r->c->args.data
 		);
 		break;
 	case UGH_UPSTREAM_FT_INVALID_HEADER:
-		log_warn("invalid header in upstream response (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
+		log_warn("invalid header in upstream response (%.*s:%.*s%.*s%s%.*s, addr=%s:%u) while %.*s%s%.*s"
 			, (int) r->u.host.size, r->u.host.data
 			, (int) r->u.port.size, r->u.port.data
 			, (int) r->u.uri.size, r->u.uri.data
@@ -851,6 +848,9 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 			, (int) r->u.args.size, r->u.args.data
 			, inet_ntoa(r->addr.sin_addr)
 			, ntohs(r->addr.sin_port)
+			, (int) r->c->uri.size, r->c->uri.data
+			, r->c->args.size ? "?" : ""
+			, (int) r->c->args.size, r->c->args.data
 		);
 		break;
 	case UGH_UPSTREAM_FT_HTTP_500:
@@ -860,7 +860,7 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 	case UGH_UPSTREAM_FT_HTTP_404:
 	case UGH_UPSTREAM_FT_HTTP_5XX:
 	case UGH_UPSTREAM_FT_HTTP_4XX:
-		log_warn("error status %u in upstream response (%.*s:%.*s%.*s%s%.*s, addr=%s:%u)"
+		log_warn("error status %u in upstream response (%.*s:%.*s%.*s%s%.*s, addr=%s:%u) while %.*s%s%.*s"
 			, r->status
 			, (int) r->u.host.size, r->u.host.data
 			, (int) r->u.port.size, r->u.port.data
@@ -869,6 +869,9 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type)
 			, (int) r->u.args.size, r->u.args.data
 			, inet_ntoa(r->addr.sin_addr)
 			, ntohs(r->addr.sin_port)
+			, (int) r->c->uri.size, r->c->uri.data
+			, r->c->args.size ? "?" : ""
+			, (int) r->c->args.size, r->c->args.data
 		);
 		break;
 	}

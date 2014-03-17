@@ -365,7 +365,7 @@ int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch, unsigned tag);
 
 int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
-int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type);
+int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno);
 
 strp ugh_subreq_get_host(ugh_subreq_t *r);
 in_port_t ugh_subreq_get_port(ugh_subreq_t *r);
