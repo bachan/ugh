@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/file.h>
 #include "logger.h"
 #include "system.h"
 
@@ -76,22 +77,49 @@ int aux_mkpidf(const char *path)
 	int fd, nb;
 	char buf [32];
 
-	if (0 == access(path, R_OK))
+	fd = open(path, O_CREAT|O_RDWR, 0644);
+	if (0 > fd) return -1;
+
+	if (0 > flock(fd, LOCK_EX|LOCK_NB))
 	{
-		log_emerg("pid-file %s exists", path);
+		log_emerg("can't lock pid-file %s", path);
+		close(fd);
 		return -1;
 	}
 
-	fd = open(path, O_CREAT|O_WRONLY|O_TRUNC, 0644);
-	if (0 > fd) return -1;
+	struct stat st;
+
+	if (0 > fstat(fd, &st))
+	{
+		log_emerg("can't stat locked pid-file %s", path);
+		flock(fd, LOCK_UN);
+		close(fd);
+		return -1;
+	}
+
+	if (st.st_size > 0)
+	{
+		log_emerg("pid-file %s exists", path);
+		flock(fd, LOCK_UN);
+		close(fd);
+		return -1;
+	}
 
 	if (0 > (nb = snprintf(buf, 32, "%d\n", (int) getpid())))
 	{
+		flock(fd, LOCK_UN);
 		close(fd);
 		return -1;
 	}
 
 	if (0 > write(fd, buf, nb))
+	{
+		flock(fd, LOCK_UN);
+		close(fd);
+		return -1;
+	}
+
+	if (0 > flock(fd, LOCK_UN))
 	{
 		close(fd);
 		return -1;
