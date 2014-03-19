@@ -1,3 +1,9 @@
+ugh (0.1.6-4) unstable; urgency=low
+
+  * fix pid-file race condition
+
+ -- bachan <bachan@farm.itim.vn>  Wed, 19 Mar 2014 11:50:27 +0700
+
 ugh (0.1.6-3) unstable; urgency=low
 
   * log string about connect timeout
