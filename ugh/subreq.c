@@ -11,26 +11,7 @@ static
 void ugh_subreq_wcb_timeout_connect(EV_P_ ev_timer *w, int tev)
 {
 	ugh_subreq_t *r = aux_memberof(ugh_subreq_t, wev_timeout_connect, w);
-
-	/*
-	 * XXX this is temporary, later we should introduce explicit
-	 * UGH_UPSTREAM_FT_TIMEOUT_CONNECT and make sure all the modules use it
-	 */
-
-	log_warn("upstream connect timeout (%.*s:%.*s%.*s%s%.*s, addr=%s:%u) while %.*s%s%.*s"
-		, (int) r->u.host.size, r->u.host.data
-		, (int) r->u.port.size, r->u.port.data
-		, (int) r->u.uri.size, r->u.uri.data
-		, r->u.args.size ? "?" : ""
-		, (int) r->u.args.size, r->u.args.data
-		, inet_ntoa(r->addr.sin_addr)
-		, ntohs(r->addr.sin_port)
-		, (int) r->c->uri.size, r->c->uri.data
-		, r->c->args.size ? "?" : ""
-		, (int) r->c->args.size, r->c->args.data
-	);
-
-	ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT, 0);
+	ugh_subreq_del(r, UGH_UPSTREAM_FT_TIMEOUT_CONNECT, 0);
 }
 
 static
@@ -881,6 +862,20 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno)
 	case UGH_UPSTREAM_FT_HTTP_4XX:
 		log_warn("error status %u in upstream response (%.*s:%.*s%.*s%s%.*s, addr=%s:%u) while %.*s%s%.*s"
 			, r->status
+			, (int) r->u.host.size, r->u.host.data
+			, (int) r->u.port.size, r->u.port.data
+			, (int) r->u.uri.size, r->u.uri.data
+			, r->u.args.size ? "?" : ""
+			, (int) r->u.args.size, r->u.args.data
+			, inet_ntoa(r->addr.sin_addr)
+			, ntohs(r->addr.sin_port)
+			, (int) r->c->uri.size, r->c->uri.data
+			, r->c->args.size ? "?" : ""
+			, (int) r->c->args.size, r->c->args.data
+		);
+		break;
+	case UGH_UPSTREAM_FT_TIMEOUT_CONNECT:
+		log_warn("upstream connect timeout (%.*s:%.*s%.*s%s%.*s, addr=%s:%u) while %.*s%s%.*s"
 			, (int) r->u.host.size, r->u.host.data
 			, (int) r->u.port.size, r->u.port.data
 			, (int) r->u.uri.size, r->u.uri.data

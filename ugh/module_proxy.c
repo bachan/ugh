@@ -122,6 +122,10 @@ int ugh_command_proxy_next_upstream(ugh_config_t *cfg, int argc, char **argv, ug
 			cfg->next_upstream |= UGH_UPSTREAM_FT_HTTP_4XX;
 			cfg->next_upstream |= UGH_UPSTREAM_FT_HTTP_404;
 		}
+		else if (0 == strcmp(argv[i], "timeout_connect"))
+		{
+			cfg->next_upstream |= UGH_UPSTREAM_FT_TIMEOUT_CONNECT;
+		}
 		else if (0 == strcmp(argv[i], "off"))
 		{
 			cfg->next_upstream  = UGH_UPSTREAM_FT_OFF;

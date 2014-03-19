@@ -370,17 +370,18 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno);
 strp ugh_subreq_get_host(ugh_subreq_t *r);
 in_port_t ugh_subreq_get_port(ugh_subreq_t *r);
 
-#define UGH_UPSTREAM_FT_OFF            0x0000
-#define UGH_UPSTREAM_FT_ERROR          0x0001
-#define UGH_UPSTREAM_FT_TIMEOUT        0x0002
-#define UGH_UPSTREAM_FT_INVALID_HEADER 0x0004
-#define UGH_UPSTREAM_FT_HTTP_500       0x0008
-#define UGH_UPSTREAM_FT_HTTP_502       0x0010
-#define UGH_UPSTREAM_FT_HTTP_503       0x0020
-#define UGH_UPSTREAM_FT_HTTP_504       0x0040
-#define UGH_UPSTREAM_FT_HTTP_404       0x0080
-#define UGH_UPSTREAM_FT_HTTP_5XX       0x0100
-#define UGH_UPSTREAM_FT_HTTP_4XX       0x0200
+#define UGH_UPSTREAM_FT_OFF             0x0000
+#define UGH_UPSTREAM_FT_ERROR           0x0001
+#define UGH_UPSTREAM_FT_TIMEOUT         0x0002
+#define UGH_UPSTREAM_FT_INVALID_HEADER  0x0004
+#define UGH_UPSTREAM_FT_HTTP_500        0x0008
+#define UGH_UPSTREAM_FT_HTTP_502        0x0010
+#define UGH_UPSTREAM_FT_HTTP_503        0x0020
+#define UGH_UPSTREAM_FT_HTTP_504        0x0040
+#define UGH_UPSTREAM_FT_HTTP_404        0x0080
+#define UGH_UPSTREAM_FT_HTTP_5XX        0x0100
+#define UGH_UPSTREAM_FT_HTTP_4XX        0x0200
+#define UGH_UPSTREAM_FT_TIMEOUT_CONNECT 0x0400
 
 void ugh_subreq_wait(ugh_client_t *c);
 

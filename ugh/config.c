@@ -18,7 +18,7 @@ int ugh_config_init(ugh_config_t *cfg)
 	cfg->pool = aux_pool_init(0);
 	if (NULL == cfg->pool) return -1;
 
-	cfg->next_upstream = UGH_UPSTREAM_FT_ERROR | UGH_UPSTREAM_FT_TIMEOUT | UGH_UPSTREAM_FT_HTTP_4XX | UGH_UPSTREAM_FT_HTTP_5XX;
+	cfg->next_upstream = UGH_UPSTREAM_FT_ERROR | UGH_UPSTREAM_FT_TIMEOUT | UGH_UPSTREAM_FT_HTTP_4XX | UGH_UPSTREAM_FT_HTTP_5XX | UGH_UPSTREAM_FT_TIMEOUT_CONNECT;
 
 	cfg->log_error = "ugh.log";
 	cfg->log_level = "info";
