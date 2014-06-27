@@ -80,14 +80,12 @@ int ugh_daemon_exec(const char *cfg_filename, unsigned daemon)
 	rc = ugh_config_load(&d.cfg, cfg_filename);
 	if (0 > rc) return -1;
 
+	log_level = log_levels(d.cfg.log_level);
+
 	if (daemon)
 	{
-		rc = log_create(d.cfg.log_error, log_levels(d.cfg.log_level));
+		rc = log_create(d.cfg.log_error, log_level);
 		if (0 > rc) return -1;
-	}
-	else
-	{
-		log_level = log_levels(d.cfg.log_level);
 	}
 
 	rc = ugh_resolver_init(&d.resolver, &d.cfg);
