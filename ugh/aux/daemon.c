@@ -23,7 +23,8 @@ static struct option aux_getopt_opts [] =
 
 int aux_getopt_usage(int argc, char** argv)
 {
-	msg("Usage:                                \n"
+	std_msg(
+		"Usage:                                \n"
 		"  %s <opts>                           \n"
 		"                                      \n"
 		"Options:                              \n"
