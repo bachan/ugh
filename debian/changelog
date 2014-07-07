@@ -1,3 +1,9 @@
+ugh (0.1.7-2) unstable; urgency=low
+
+  * renamed some macros to avoid compilation errors with some libraries
+
+ -- bachan <bachan@farm.itim.vn>  Wed,  7 Jul 2014 12:50:27 +0700
+
 ugh (0.1.7-1) unstable; urgency=low
 
   * add separate ft_type for connect timeout
