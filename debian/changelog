@@ -1,3 +1,9 @@
+ugh (0.1.7-3) unstable; urgency=high
+
+  * fixed default next_upstream setting
+
+ -- bachan <bachan@farm.itim.vn>  Mon, 14 Jul 2014 17:21:00 +0700
+
 ugh (0.1.7-2) unstable; urgency=low
 
   * renamed some macros to avoid compilation errors with some libraries
