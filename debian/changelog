@@ -1,3 +1,9 @@
+ugh (0.1.7-4) unstable; urgency=high
+
+  * fixed failover in case of connections prematurely closed by upstream
+
+ -- bachan <bachan@farm.itim.vn>  Tue, 19 Aug 2014 14:44:00 +0700
+
 ugh (0.1.7-3) unstable; urgency=high
 
   * fixed default next_upstream setting
