@@ -112,10 +112,18 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 	{
 		if (r->content_length != UGH_RESPONSE_CLOSE_AFTER_BODY)
 		{
+			/*
+			 * NOTE: recv(2) will never fail with EPIPE, so I'm using it here
+			 * to get meaningful error message in ugh_subreq_del'
+			 */
 			log_warn("upstream prematurely closed connection");
+			ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR, EPIPE);
+		}
+		else
+		{
+			ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF, 0);
 		}
 
-		ugh_subreq_del(r, UGH_UPSTREAM_FT_OFF, 0);
 		return;
 	}
 
