@@ -1,3 +1,9 @@
+ugh (0.1.7-5) unstable; urgency=high
+
+  * reinit http parser state during failover
+
+ -- bachan <bachan@farm.itim.vn>  Thu,  4 Sep 2014 18:10:00 +0700
+
 ugh (0.1.7-4) unstable; urgency=high
 
   * fixed failover in case of connections prematurely closed by upstream
