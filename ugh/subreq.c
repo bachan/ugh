@@ -949,6 +949,8 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno)
 			goto ok;
 		}
 
+		r->state = 0; /* XXX maybe here we should reinit the whole subreq structure? */
+
 		r->body.data = NULL;
 		r->body.size = 0;
 
