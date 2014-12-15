@@ -406,6 +406,9 @@ int ugh_subreq_connect(void *data, in_addr_t addr)
 		r->response_time = ev_now(loop);
 	}
 
+	/* reset connection_time */
+	r->connection_time = 0;
+
 	if (INADDR_NONE == addr)
 	{
 		ugh_subreq_del(r, UGH_UPSTREAM_FT_ERROR, ENXIO);
