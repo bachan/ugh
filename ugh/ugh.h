@@ -318,6 +318,7 @@ struct ugh_subreq
 
 	size_t content_length; /* UGH_RESPONSE_* may be encoded here */
 
+	ev_tstamp connection_time;
 	ev_tstamp response_time;
 	uint32_t ft_type;
 

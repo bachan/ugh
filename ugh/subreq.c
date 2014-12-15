@@ -36,6 +36,8 @@ void ugh_subreq_wcb_connect(EV_P_ ev_io *w, int tev)
 	ev_io_stop(loop, &r->wev_connect);
 	ev_timer_stop(loop, &r->wev_timeout_connect);
 
+	r->connection_time = ev_now(loop) - r->response_time;
+
 	ev_io_start(loop, &r->wev_send);
 }
 
@@ -971,6 +973,11 @@ ok:
 
 	r->ft_type = ft_type;
 	r->response_time = ev_now(loop) - r->response_time;
+
+	if (r->connection_time == 0)
+	{
+		r->connection_time = r->response_time;
+	}
 
 	if (/* NULL == r->handle &&*/ (r->flags & UGH_SUBREQ_WAIT))
 	{
