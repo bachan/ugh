@@ -75,6 +75,16 @@ $cl_... - last char of value of variable with "..." name.
 $var_... - value of custom variable with "..." name (can be set by module, this
 might be removed in later versions in favor of more flexible mechanism).
 
+COMPILE AND INSTALL
+
+Any Unix/Linux system:
+$ cmake .
+$ make
+$ make install
+
+Debial/Ubuntu package:
+$ dpkg-buildpackage -rfakeroot
+
 WRITING MODULES
 
 See module example in repository.
