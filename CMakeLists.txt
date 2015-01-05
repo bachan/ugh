@@ -15,7 +15,7 @@ ADD_LIBRARY (aux STATIC ${SRC_AUX})
 #ADD_DEFINITIONS (-DCORO_UCONTEXT)
 #ADD_LIBRARY (coro ugh/coro/coro.c)
 
-ADD_LIBRARY (coro_ucontext ugh/coro_ucontext/coro_ucontext.c)
+ADD_LIBRARY (coro_ucontext STATIC ugh/coro_ucontext/coro_ucontext.c)
 
 #ADD_EXECUTABLE (test_coro tmp/coro.c)
 #TARGET_LINK_LIBRARIES (test_coro coro)

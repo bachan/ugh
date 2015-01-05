@@ -2,11 +2,11 @@ Summary:	UGH http server
 Name:		ugh	
 Version:	0.1.8
 Release:	1%{?dist}
-
 Group:		Networking/Daemons
 License:	GPL
 Source:		ugh-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires:  Judy-devel libev-devel cmake gcc-c++
 
 %package devel
 Summary:        Header files and development documentation for %{name}
