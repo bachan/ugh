@@ -1,0 +1,5 @@
+usr/bin/ugh
+usr/etc/ugh.cfg
+usr/lib*/ugh/libugh_example.so
+usr/etc/ugh_example/config.cfg
+
