@@ -186,14 +186,13 @@ struct ugh_header
 ugh_header_t *ugh_client_header_get_nt(ugh_client_t *c, const char *data);
 ugh_header_t *ugh_client_header_get(ugh_client_t *c, const char *data, size_t size);
 ugh_header_t *ugh_client_header_set(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size);
-
 ugh_header_t *ugh_client_header_out_set(ugh_client_t *c, const char *data, size_t size, char *value_data, size_t value_size);
 #define ugh_client_header_out_set_nt(c, data, value_data) ugh_client_header_out_set((c), (data), strlen(data), (char *) (value_data), strlen(value_data))
 
 strp ugh_client_cookie_get(ugh_client_t *c, const char *name, size_t size);
 #define ugh_client_cookie_get_nt(c, name) ugh_client_cookie_get((c), (name), strlen(name))
-
 strp ugh_client_cookie_out_set(ugh_client_t *c, char *data, size_t size);
+strp ugh_client_cookie_out_set_va(ugh_client_t *c, const char *fmt, ...) AUX_FORMAT(printf, 2, 3);
 
 strp ugh_client_getvar(ugh_client_t *c, const char *data, size_t size);
 strp ugh_client_getvar_nt(ugh_client_t *c, const char *data);
@@ -354,7 +353,6 @@ struct ugh_subreq
 
 ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags);
 int ugh_subreq_set_method(ugh_subreq_t *r, unsigned char method);
-int ugh_subreq_set_header(ugh_subreq_t *r, char *key, size_t key_size, char *value, size_t value_size);
 int ugh_subreq_set_body(ugh_subreq_t *r, char *body, size_t body_size);
 int ugh_subreq_set_timeout(ugh_subreq_t *r, ev_tstamp timeout, int timeout_type);
 int ugh_subreq_set_timeout_connect(ugh_subreq_t *r, ev_tstamp timeout);
