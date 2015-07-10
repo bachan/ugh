@@ -41,6 +41,7 @@ struct ugh_resolver_rec
 	void *wait_hash; /* Judy (ugh_resolver_ctx_t *) */
 
 	unsigned tries;
+	unsigned current;
 };
 
 typedef struct ugh_resolver

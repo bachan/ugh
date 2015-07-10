@@ -154,7 +154,14 @@ int ugh_resolver_init(ugh_resolver_t *r, ugh_config_t *cfg)
 
 int ugh_resolver_free(ugh_resolver_t *r)
 {
-	/* TODO free wait array for each resolver_rec */
+	void **vptr;
+	Word_t idx = 0;
+
+	for (vptr = JudyLFirst(r->name_hash, &idx, PJE0); vptr; vptr = JudyLNext(r->name_hash, &idx, PJE0))
+	{
+		ugh_resolver_rec_t *rec = *vptr;
+		Judy1FreeArray(&rec->wait_hash, PJE0);
+	}
 
 	JudyLFreeArray(&r->name_hash, PJE0);
 
@@ -199,8 +206,6 @@ int ugh_resolver_addq(ugh_resolver_t *r, char *name, size_t size, ugh_resolver_c
 				rec->naddrs = 0;
 				rec->tries = 0;
 
-				/* ev_io_init(&rec->wev_send, ugh_resolver_wcb_send, r->wev_recv.fd, EV_WRITE); */
-				/* ev_timer_init(&rec->wev_timeout, ugh_resolver_wcb_timeout, 0, r->cfg->resolver_timeout); */
 				ev_timer_again(loop, &rec->wev_timeout);
 				ev_io_start(loop, &rec->wev_send);
 
@@ -209,7 +214,10 @@ int ugh_resolver_addq(ugh_resolver_t *r, char *name, size_t size, ugh_resolver_c
 				return 0;
 			}
 
-			return ctx->handle(ctx->data, rec->addrs[0]); /* TODO round-robin through naddrs */
+			rec->current += 1;
+			rec->current %= rec->naddrs;
+
+			return ctx->handle(ctx->data, rec->addrs[rec->current]);
 		}
 		else if (NULL != rec->wait_hash) /* result is empty, but someone is already waiting for result */
 		{
@@ -217,22 +225,15 @@ int ugh_resolver_addq(ugh_resolver_t *r, char *name, size_t size, ugh_resolver_c
 		}
 		else /* result is empty and noone waiting for it (which means, that there was a resolve error) */
 		{
-			if (0 == r->cfg->resolver_cache)
-			{
-				rec->naddrs = 0;
-				rec->tries = 0;
+			rec->naddrs = 0;
+			rec->tries = 0;
 
-				/* ev_io_init(&rec->wev_send, ugh_resolver_wcb_send, r->wev_recv.fd, EV_WRITE); */
-				/* ev_timer_init(&rec->wev_timeout, ugh_resolver_wcb_timeout, 0, r->cfg->resolver_timeout); */
-				ev_timer_again(loop, &rec->wev_timeout);
-				ev_io_start(loop, &rec->wev_send);
+			ev_timer_again(loop, &rec->wev_timeout);
+			ev_io_start(loop, &rec->wev_send);
 
-				Judy1Set(&rec->wait_hash, (uintptr_t) ctx, PJE0); /* add wait */
+			Judy1Set(&rec->wait_hash, (uintptr_t) ctx, PJE0); /* add wait */
 
-				return 0;
-			}
-
-			return ctx->handle(ctx->data, INADDR_NONE);
+			return 0;
 		}
 	}
 	else
