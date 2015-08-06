@@ -1,3 +1,10 @@
+ugh (0.1.9-1) unstable; urgency=low
+
+  * fixed resolver cache
+  * added cookie_va function
+
+ -- bachan <bachan@farm.itim.vn>  Thu, 06 Aug 2015 19:14:18 +0700
+
 ugh (0.1.8-1) unstable; urgency=low
 
   * added connection_time field
