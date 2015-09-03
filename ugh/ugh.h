@@ -220,9 +220,6 @@ int ugh_parser_url(ugh_url_t *u, char *data, size_t size);
 
 #define UGH_MAX_UPSTREAM_ELEMENTS 1024
 
-#define UGH_UPSTREAM_CHOOSE_RR 0
-#define UGH_UPSTREAM_CHOOSE_RANDOM 1
-
 typedef struct ugh_upstream_server
 	ugh_upstream_server_t;
 
@@ -250,8 +247,6 @@ struct ugh_upstream
 	ugh_upstream_server_t backup_values [UGH_MAX_UPSTREAM_ELEMENTS];
 	size_t backup_values_size;
 	size_t backup_values_curr;
-
-	unsigned choose:1;
 };
 
 ugh_upstream_t *ugh_upstream_add(ugh_config_t *cfg, const char *name, size_t size);
