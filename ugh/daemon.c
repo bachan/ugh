@@ -68,6 +68,10 @@ int ugh_daemon_exec(const char *cfg_filename, unsigned daemon)
 
 	aux_clrptr(&d);
 
+	/* XXX this is temporary call for the function to avoid linking
+	 * problems when modules try to use it */
+	aux_random_init();
+
 	loop = ev_default_loop(0);
 
 	/* TODO make it possible to set default values for each module config and
