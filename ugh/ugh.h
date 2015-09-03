@@ -230,6 +230,12 @@ struct ugh_upstream_server
 {
 	strt host;
 	in_port_t port;
+
+	unsigned max_fails;
+	unsigned fails;
+
+	ev_tstamp fail_timeout;
+	ev_tstamp fail_start;
 };
 
 typedef struct ugh_upstream

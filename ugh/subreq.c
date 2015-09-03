@@ -609,13 +609,51 @@ int ugh_subreq_run(ugh_subreq_t *r)
 
 	if (NULL != r->upstream)
 	{
-		r->upstream_current = r->upstream->values_curr;
-		r->upstream_tries = 1;
+		r->upstream_tries = 0;
 
-		r->upstream->values_curr += 1;
-		r->upstream->values_curr %= r->upstream->values_size;
+		while (r->upstream_tries < r->upstream->values_size)
+		{
+			r->upstream_current = r->upstream->values_curr;
 
-		u_host = &r->upstream->values[r->upstream_current].host;
+			r->upstream->values_curr += 1;
+			r->upstream->values_curr %= r->upstream->values_size;
+
+			ugh_upstream_server_t *us = &r->upstream->values[r->upstream_current];
+
+			if (us->max_fails == 0 || us->fails < us->max_fails)
+			{
+				break;
+			}
+
+			if (ev_now(loop) - us->fail_start >= us->fail_timeout)
+			{
+				us->fails = 0;
+				us->fail_start = 0;
+				break;
+			}
+
+			r->upstream_tries++;
+		}
+
+		if (r->upstream_tries == r->upstream->values_size)
+		{
+			if (0 < r->upstream->backup_values_size)
+			{
+				r->upstream->backup_values_curr += 1;
+				r->upstream->backup_values_curr %= r->upstream->backup_values_size;
+
+				u_host = &r->upstream->backup_values[r->upstream->backup_values_curr].host;
+			}
+			else
+			{
+				aux_pool_free(r->c->pool);
+				return -1;
+			}
+		}
+		else
+		{
+			u_host = &r->upstream->values[r->upstream_current].host;
+		}
 	}
 
 	/* generate request */
@@ -763,7 +801,7 @@ strp ugh_subreq_get_host(ugh_subreq_t *r)
 		return &r->u.host;
 	}
 
-	if (r->upstream_tries <= r->upstream->values_size)
+	if (r->upstream_tries < r->upstream->values_size)
 	{
 		return &r->upstream->values[r->upstream_current].host;
 	}
@@ -778,7 +816,7 @@ in_port_t ugh_subreq_get_port(ugh_subreq_t *r)
 		return atoi(r->u.port.data);
 	}
 
-	if (r->upstream_tries <= r->upstream->values_size)
+	if (r->upstream_tries < r->upstream->values_size)
 	{
 		return r->upstream->values[r->upstream_current].port;
 	}
@@ -885,49 +923,65 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno)
 		goto ok;
 	}
 
-	if (r->upstream && r->upstream_tries <= r->upstream->values_size
+	if (r->upstream && r->upstream_tries < r->upstream->values_size
 		&& (r->c->s->cfg->next_upstream & ft_type))
 	{
+		ugh_upstream_server_t *us = &r->upstream->values[r->upstream_current];
+
+		if (us->max_fails != 0 && ++us->fails == us->max_fails)
+		{
+			us->fail_start = ev_now(loop);
+		}
+
 		strp u_host;
 
-		if (r->upstream_tries < r->upstream->values_size)
+		r->upstream_tries++;
+
+		while (r->upstream_tries < r->upstream->values_size)
 		{
 			r->upstream_current += 1;
+			r->upstream_current %= r->upstream->values_size;
 
-			/*
-			 * XXX MEGA HACK for antmat, if upstream has choose random
-			 * directive, we add additional (upstreams_count - 1) to current
-			 * upstream to imitate choosing random upstream right after FIRST
-			 * failure
-			 */
+			us = &r->upstream->values[r->upstream_current];
 
-			if (r->upstream->choose == UGH_UPSTREAM_CHOOSE_RANDOM && r->upstream_tries == 1)
+			if (us->max_fails == 0 || us->fails < us->max_fails)
 			{
-				r->upstream_current += aux_random() % (r->upstream->values_size - 1);
+				break;
 			}
 
-			r->upstream_current %= r->upstream->values_size;
-			r->upstream_tries++;
+			if (ev_now(loop) - us->fail_start >= us->fail_timeout)
+			{
+				us->fails = 0;
+				us->fail_start = 0;
+				break;
+			}
 
+			r->upstream_tries++;
+		}
+
+		if (r->upstream_tries == r->upstream->values_size)
+		{
+			if (0 < r->upstream->backup_values_size)
+			{
+				r->upstream->backup_values_curr += 1;
+				r->upstream->backup_values_curr %= r->upstream->backup_values_size;
+
+				r->addr.sin_family = AF_INET;
+				r->addr.sin_port = htons(r->upstream->backup_values[r->upstream->backup_values_curr].port);
+
+				u_host = &r->upstream->backup_values[r->upstream->backup_values_curr].host;
+			}
+			else
+			{
+				goto ok;
+			}
+		}
+		else
+		{
 			r->addr.sin_family = AF_INET;
 			r->addr.sin_port = htons(r->upstream->values[r->upstream_current].port);
 
 			u_host = &r->upstream->values[r->upstream_current].host;
-		}
-		else if (0 < r->upstream->backup_values_size)
-		{
-			r->upstream->backup_values_curr += 1;
-			r->upstream->backup_values_curr %= r->upstream->backup_values_size;
-			r->upstream_tries++;
-
-			r->addr.sin_family = AF_INET;
-			r->addr.sin_port = htons(r->upstream->backup_values[r->upstream->backup_values_curr].port);
-
-			u_host = &r->upstream->backup_values[r->upstream->backup_values_curr].host;
-		}
-		else
-		{
-			goto ok;
 		}
 
 		r->state = 0; /* XXX maybe here we should reinit the whole subreq structure? */

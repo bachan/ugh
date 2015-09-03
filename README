@@ -41,8 +41,13 @@ map { ... }
   Just like nginx's map (doesn't support hostnames flag, though).
 
 upstream { ... }
-  Just like nginx's upstream, but doesn't support server's options and backup
-  is not an option, but is different directive. See config example.
+  Just like nginx's upstream, but doesn't support all server's options and
+  backup is not an option, but is different directive. See config example.
+  Supported options are max_fails and fail_timeout, but there's an importante
+  difference between nginx and ugh in how they work:
+    a) in ugh max_fails / fail_timeout work even for one-server upstream;
+    b) max_fails is counted as consequtive failures, not as failures for
+       fail_timeout period of time.
 
 proxy_pass url;
   Just like nginx's proxy_pass, but do not use scheme in its argument.
