@@ -627,6 +627,11 @@ int ugh_subreq_run(ugh_subreq_t *r)
 
 			if (ev_now(loop) - us->fail_start >= us->fail_timeout)
 			{
+				log_info("upstream %.*s:%u is marked as working again"
+					, (int) us->host.size, us->host.data
+					, us->port
+				);
+
 				us->fails = 0;
 				us->fail_start = 0;
 				break;
@@ -931,6 +936,13 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno)
 		if (us->max_fails != 0 && ++us->fails == us->max_fails)
 		{
 			us->fail_start = ev_now(loop);
+
+			log_warn("upstream %.*s:%u is marked as non working for %.3f seconds after %u tries"
+				, (int) us->host.size, us->host.data
+				, us->port
+				, us->fail_timeout
+				, us->max_fails
+			);
 		}
 
 		strp u_host;
@@ -951,6 +963,11 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno)
 
 			if (ev_now(loop) - us->fail_start >= us->fail_timeout)
 			{
+				log_info("upstream %.*s:%u is marked as working again"
+					, (int) us->host.size, us->host.data
+					, us->port
+				);
+
 				us->fails = 0;
 				us->fail_start = 0;
 				break;
