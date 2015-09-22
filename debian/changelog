@@ -1,3 +1,9 @@
+ugh (0.1.10-1) unstable; urgency=low
+
+  * support max_fails / fail_timeout (meaning is different from nginx)
+
+ -- bachan <bachan@farm.itim.vn>  Tue, 22 Sep 2015 12:38:02 +0700
+
 ugh (0.1.9-1) unstable; urgency=low
 
   * fixed resolver cache
