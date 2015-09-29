@@ -928,6 +928,11 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno)
 		goto ok;
 	}
 
+	if (r->upstream && !(r->c->s->cfg->next_upstream & ft_type))
+	{
+		r->upstream->values[r->upstream_current].fails = 0;
+	}
+
 	if (r->upstream && r->upstream_tries < r->upstream->values_size
 		&& (r->c->s->cfg->next_upstream & ft_type))
 	{
