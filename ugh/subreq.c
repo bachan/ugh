@@ -928,9 +928,23 @@ int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno)
 		goto ok;
 	}
 
-	if (r->upstream && !(r->c->s->cfg->next_upstream & ft_type))
+	if (r->upstream && !(r->c->s->cfg->next_upstream & ft_type)) /* successful response */
 	{
-		r->upstream->values[r->upstream_current].fails = 0;
+		ugh_upstream_server_t *us = &r->upstream->values[r->upstream_current];
+
+		if (us->max_fails != 0 && (us->fails < us->max_fails || ev_now(loop) - us->fail_start >= us->fail_timeout))
+		{
+			if (us->fails >= us->max_fails) /* log this line only for upstreams, which were marked as non working */
+			{
+				log_info("upstream %.*s:%u is marked as working again"
+					, (int) us->host.size, us->host.data
+					, us->port
+				);
+			}
+
+			us->fails = 0;
+			us->fail_start = 0;
+		}
 	}
 
 	if (r->upstream && r->upstream_tries < r->upstream->values_size
