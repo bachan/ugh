@@ -10,6 +10,11 @@ SET (FLAGS_DEBUG    "-ggdb")
 # -fno-strict-aliasing: removes following optimizations
 # -Wno-strict-aliasing: removes warning
 
+# This is needed because debian package builder sets -DCMAKE_BUILD_TYPE=None
+IF (CMAKE_BUILD_TYPE STREQUAL None)
+  SET (CMAKE_BUILD_TYPE Release)
+ENDIF ()
+
 SET (CMAKE_C_FLAGS_DEBUG     "${FLAGS_DEFAULT} ${FLAGS_WARNING} ${FLAGS_DEBUG}")
 SET (CMAKE_C_FLAGS_RELEASE   "${FLAGS_DEFAULT} ${FLAGS_WARNING} ${FLAGS_DEBUG} ${FLAGS_RELEASE}")
 
