@@ -37,6 +37,9 @@ ENDIF (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 # Enable printf format macros from <inttypes.h> in C++ code.
 ADD_DEFINITIONS (-D__STDC_FORMAT_MACROS)
 
+# Enable type limit macros from <stdint.h> in C++ code.
+ADD_DEFINITIONS (-D__STDC_LIMIT_MACROS)
+
 # Enable 64-bit off_t type to work with big files.
 ADD_DEFINITIONS (-D_FILE_OFFSET_BITS=64)
 
