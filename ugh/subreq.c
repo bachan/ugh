@@ -761,9 +761,9 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 				, (int) u_host->size, u_host->data
 			);
 		}
-		else if (14 == h->key.size && aux_hash_key_lc_header("Content-Length", 14) == aux_hash_key_lc_header(h->key.data, h->key.size) && r->method == UGH_HTTP_GET)
+		else if (14 == h->key.size && aux_hash_key_lc_header("Content-Length", 14) == aux_hash_key_lc_header(h->key.data, h->key.size))
 		{
-			continue; /* remove Content-Length header if it was in original request, but this request is GET */
+			continue; /* remove Content-Length header if it was in original request */
 		}
 		else
 		{
@@ -776,12 +776,9 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 
 	if (NULL != r->request_body.data)
 	{
-		if (r->c->method != UGH_HTTP_POST) /* don't write new Content-Length if it was in original request */
-		{
-			aux_buffer_printf(&r->b_send, c->pool, "Content-Length: %"PRIuMAX CRLF
-				, (uintmax_t) r->request_body.size
-			);
-		}
+		aux_buffer_printf(&r->b_send, c->pool, "Content-Length: %"PRIuMAX CRLF
+			, (uintmax_t) r->request_body.size
+		);
 
 		/* TODO Content-Type */
 
