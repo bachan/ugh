@@ -1,3 +1,9 @@
+ugh (0.1.10-5) unstable; urgency=low
+
+  * always write correct content-length for POST subrequests
+
+ -- Sergey Bochenkov <ba4an@yandex.ru>  Mon, 16 May 2016 15:23:05 +0700
+
 ugh (0.1.10-4) unstable; urgency=low
 
   * fixed max_fails / fail_timeout logic
