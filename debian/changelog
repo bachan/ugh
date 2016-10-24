@@ -1,3 +1,9 @@
+ugh (0.1.10-6) unstable; urgency=low
+
+  * support failover for close-after-body responses
+
+ -- Sergey Bochenkov <ba4an@yandex.ru>  Mon, 24 Oct 2016 17:54:05 +0700
+
 ugh (0.1.10-5) unstable; urgency=low
 
   * always write correct content-length for POST subrequests
