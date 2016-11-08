@@ -1,3 +1,9 @@
+ugh (0.1.10-7) unstable; urgency=low
+
+  * support 204 and 304 responses properly
+
+ -- Sergey Bochenkov <ba4an@yandex.ru>  Mon, 08 Nov 2016 14:54:05 +0700
+
 ugh (0.1.10-6) unstable; urgency=low
 
   * support failover for close-after-body responses

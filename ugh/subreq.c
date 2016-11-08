@@ -209,7 +209,14 @@ void ugh_subreq_wcb_recv(EV_P_ ev_io *w, int tev)
 
 		ugh_header_t *hdr_content_length = ugh_subreq_header_get_nt(r, "Content-Length");
 
-		if (0 != hdr_content_length->value.size)
+		// 1xx, 204 and 304 responses MUST NOT contain message body
+		if ((r->status >= 100 && r->status < 200) || r->status == 204 || r->status == 304)
+		{
+			r->content_length = 0;
+			r->body.data = r->request_end;
+			r->body.size = 0;
+		}
+		else if (0 != hdr_content_length->value.size)
 		{
 			r->content_length = atoi(hdr_content_length->value.data);
 
