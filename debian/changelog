@@ -1,3 +1,9 @@
+ugh (0.1.10-9) unstable; urgency=medium
+
+  * fixed bug in ugh_subreq_set_method
+
+ -- Sergey Bochenkov <ba4an@yandex.ru>  Wed, 30 Nov 2016 16:08:58 +0700
+
 ugh (0.1.10-8) unstable; urgency=medium
 
   * version bump

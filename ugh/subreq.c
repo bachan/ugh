@@ -551,7 +551,7 @@ int ugh_subreq_set_method(ugh_subreq_t *r, unsigned char method)
 {
 	r->method = method;
 
-	if (method != UGH_HTTP_POST);
+	if (method != UGH_HTTP_POST)
 	{
 		r->request_body.data = NULL;
 		r->request_body.size = 0;
