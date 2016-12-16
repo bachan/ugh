@@ -75,6 +75,8 @@ int ugh_command_proxy_next_upstream(ugh_config_t *cfg, int argc, char **argv, ug
 {
 	int i;
 
+	cfg->next_upstream = UGH_UPSTREAM_FT_OFF; /* clear default value */
+
 	for (i = 1; i < argc; ++i)
 	{
 		if (0 == strcmp(argv[i], "error"))
