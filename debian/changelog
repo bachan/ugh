@@ -1,3 +1,9 @@
+ugh (0.1.11-1) unstable; urgency=medium
+
+  * support setting out headers for subrequest
+
+ -- Sergey Bochenkov <ba4an@yandex.ru>  Tue, 20 Dec 2016 00:38:58 +0700
+
 ugh (0.1.10-10) unstable; urgency=medium
 
   * clear next_upstream value if user sets it from config
