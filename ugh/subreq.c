@@ -1117,6 +1117,7 @@ ok:
 	}
 
 	JudyLFreeArray(&r->headers_hash, PJE0);
+	JudyLFreeArray(&r->headers_out_hash, PJE0);
 
 	aux_pool_free(r->c->pool);
 
