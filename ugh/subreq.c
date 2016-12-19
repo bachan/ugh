@@ -760,15 +760,46 @@ int ugh_subreq_gen(ugh_subreq_t *r, strp u_host)
 		);
 	}
 
-	/* copy original request headers, change host header with new value */
+	/* set headers overloaded by module */
 
 	Word_t idx = 0;
 	void **vptr;
+
+	for (vptr = JudyLFirst(r->headers_out_hash, &idx, PJE0); NULL != vptr;
+		 vptr = JudyLNext (r->headers_out_hash, &idx, PJE0))
+	{
+		ugh_header_t *h = *vptr;
+
+		/* we explicitly remove headers which were overloaded by empty value */
+		if (h->value.size == 0)
+		{
+			continue;
+		}
+
+		/* we don't allow overloading Content-Length header' */
+		if (14 == h->key.size && aux_hash_key_lc_header("Content-Length", 14) == aux_hash_key_lc_header(h->key.data, h->key.size))
+		{
+			continue;
+		}
+
+		aux_buffer_printf(&r->b_send, c->pool, "%.*s: %.*s" CRLF
+			, (int) h->key.size, h->key.data
+			, (int) h->value.size, h->value.data
+		);
+	}
+
+	/* copy original request headers, change host header with new value */
+
+	idx = 0;
 
 	for (vptr = JudyLFirst(c->headers_hash, &idx, PJE0); NULL != vptr;
 		 vptr = JudyLNext (c->headers_hash, &idx, PJE0))
 	{
 		ugh_header_t *h = *vptr;
+
+		/* check if header was overloaded */
+		void **dest = JudyLGet(r->headers_out_hash, aux_hash_key_lc_header(h->key.data, h->key.size), PJE0);
+		if (PJERR != dest && NULL != dest) continue;
 
 		if (4 == h->key.size && aux_hash_key_lc_header("Host", 4) == aux_hash_key_lc_header(h->key.data, h->key.size))
 		{
@@ -1127,6 +1158,40 @@ ugh_header_t *ugh_subreq_header_get(ugh_subreq_t *r, const char *data, size_t si
 ugh_header_t *ugh_subreq_header_set(ugh_subreq_t *r, const char *data, size_t size, char *value_data, size_t value_size)
 {
 	void **dest = JudyLIns(&r->headers_hash, aux_hash_key_lc_header(data, size), PJE0);
+	if (PJERR == dest) return NULL;
+
+	ugh_header_t *vptr = aux_pool_malloc(r->c->pool, sizeof(*vptr));
+	if (NULL == vptr) return NULL;
+
+	*dest = vptr;
+
+	vptr->key.data = (char *) data;
+	vptr->key.size = size;
+	vptr->value.data = value_data;
+	vptr->value.size = value_size;
+
+	return vptr;
+}
+
+ugh_header_t *ugh_subreq_header_out_get_nt(ugh_subreq_t *r, const char *data)
+{
+	void **dest = JudyLGet(r->headers_out_hash, aux_hash_key_lc_header_nt(data), PJE0);
+	if (PJERR == dest || NULL == dest) return &ugh_empty_header;
+
+	return *dest;
+}
+
+ugh_header_t *ugh_subreq_header_out_get(ugh_subreq_t *r, const char *data, size_t size)
+{
+	void **dest = JudyLGet(r->headers_out_hash, aux_hash_key_lc_header(data, size), PJE0);
+	if (PJERR == dest || NULL == dest) return &ugh_empty_header;
+
+	return *dest;
+}
+
+ugh_header_t *ugh_subreq_header_out_set(ugh_subreq_t *r, const char *data, size_t size, char *value_data, size_t value_size)
+{
+	void **dest = JudyLIns(&r->headers_out_hash, aux_hash_key_lc_header(data, size), PJE0);
 	if (PJERR == dest) return NULL;
 
 	ugh_header_t *vptr = aux_pool_malloc(r->c->pool, sizeof(*vptr));

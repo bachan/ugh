@@ -310,7 +310,11 @@ struct ugh_subreq
 	unsigned char version;
 	unsigned status;
 
+	/* headers received from backend */
 	void*headers_hash;
+
+	/* headers to send to backend */
+	void*headers_out_hash;
 
 	char*buf_recv_data;
 	strt buf_recv; /* UGH_SUBREQ_BUF */
@@ -385,9 +389,15 @@ in_port_t ugh_subreq_get_port(ugh_subreq_t *r);
 
 void ugh_subreq_wait(ugh_client_t *c);
 
+/* headers received from backend */
 ugh_header_t *ugh_subreq_header_get_nt(ugh_subreq_t *r, const char *data);
 ugh_header_t *ugh_subreq_header_get(ugh_subreq_t *r, const char *data, size_t size);
 ugh_header_t *ugh_subreq_header_set(ugh_subreq_t *r, const char *data, size_t size, char *value_data, size_t value_size);
+
+/* headers to send to backend */
+ugh_header_t *ugh_subreq_header_out_get_nt(ugh_subreq_t *r, const char *data);
+ugh_header_t *ugh_subreq_header_out_get(ugh_subreq_t *r, const char *data, size_t size);
+ugh_header_t *ugh_subreq_header_out_set(ugh_subreq_t *r, const char *data, size_t size, char *value_data, size_t value_size);
 
 /* ### parser ### */
 
