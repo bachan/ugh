@@ -288,11 +288,8 @@ struct ugh_subreq
 
 	ugh_url_t u;
 	strt request_body;
-
 	unsigned char method;
-
-	/* void *headers_out_hash; */
-
+	void *headers_out_hash; /* headers to send to backend */
 	aux_buffer_t b_send;
 
 	/* recv */
@@ -310,11 +307,7 @@ struct ugh_subreq
 	unsigned char version;
 	unsigned status;
 
-	/* headers received from backend */
-	void *headers_hash;
-
-	/* headers to send to backend */
-	void *headers_out_hash;
+	void *headers_hash; /* headers received from backend */
 
 	char *buf_recv_data;
 	strt buf_recv; /* UGH_SUBREQ_BUF */
