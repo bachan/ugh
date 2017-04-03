@@ -118,14 +118,14 @@ struct ugh_client
 
 	/* request */
 
-	char*key_b;
-	char*key_e;
-	char*val_b;
-	char*val_e;
+	char *key_b;
+	char *key_e;
+	char *val_b;
+	char *val_e;
 
-	char*request_beg;
-	char*headers_beg;
-	char*request_end;
+	char *request_beg;
+	char *headers_beg;
+	char *request_end;
 
 	unsigned char state;
 	unsigned char method;
@@ -133,11 +133,11 @@ struct ugh_client
 
 	strt uri;
 	strt args;
-	void*args_hash;
-	void*headers_hash;
-	void*body_hash; /* posted args (application/x-www-form-urlencoded) */
+	void *args_hash;
+	void *headers_hash;
+	void *body_hash; /* posted args (application/x-www-form-urlencoded) */
 #if 1
-	void*vars_hash;
+	void *vars_hash;
 #endif
 
 	strt body;
@@ -145,8 +145,8 @@ struct ugh_client
 
 	/* response */
 
-	void*headers_out_hash;
-	void*cookies_out_hash;
+	void *headers_out_hash;
+	void *cookies_out_hash;
 	strp bufs;
 	size_t bufs_sumlen;
 
@@ -291,32 +291,32 @@ struct ugh_subreq
 
 	unsigned char method;
 
-	/* void*headers_out_hash; */
+	/* void *headers_out_hash; */
 
 	aux_buffer_t b_send;
 
 	/* recv */
 
-	char*key_b;
-	char*key_e;
-	char*val_b;
-	char*val_e;
+	char *key_b;
+	char *key_e;
+	char *val_b;
+	char *val_e;
 
-	char*request_beg;
-	char*headers_beg;
-	char*request_end;
+	char *request_beg;
+	char *headers_beg;
+	char *request_end;
 
 	unsigned char state;
 	unsigned char version;
 	unsigned status;
 
 	/* headers received from backend */
-	void*headers_hash;
+	void *headers_hash;
 
 	/* headers to send to backend */
-	void*headers_out_hash;
+	void *headers_out_hash;
 
-	char*buf_recv_data;
+	char *buf_recv_data;
 	strt buf_recv; /* UGH_SUBREQ_BUF */
 	strt body;
 
@@ -328,7 +328,7 @@ struct ugh_subreq
 
 	/* chunks */
 
-	char*chunk_start;
+	char *chunk_start;
 	size_t chunk_size;
 	size_t chunk_body_size;
 
