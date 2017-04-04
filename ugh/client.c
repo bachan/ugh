@@ -339,6 +339,26 @@ int ugh_client_add(ugh_server_t *s, int sd, struct sockaddr_in *addr)
 	return 0;
 }
 
+int ugh_client_add_subreq(ugh_client_t *c, ugh_subreq_t *r)
+{
+	Judy1Set(&c->subreqs_hash, (uintptr_t) r, PJE0);
+	return 0;
+}
+
+int ugh_client_del_subreqs(ugh_client_t *c)
+{
+	int rc;
+	Word_t idx = 0;
+
+	for (rc = Judy1First(c->subreqs_hash, &idx, PJE0); 0 != rc;
+		rc = Judy1Next(c->subreqs_hash, &idx, PJE0))
+	{
+		ugh_subreq_del_after_module((ugh_subreq_t *) idx);
+	}
+
+	return 0;
+}
+
 int ugh_client_del(ugh_client_t *c)
 {
 	ev_io_stop(loop, &c->wev_recv);
@@ -354,6 +374,10 @@ int ugh_client_del(ugh_client_t *c)
 #if 1
 	JudyLFreeArray(&c->vars_hash, PJE0);
 #endif
+
+	ugh_client_del_subreqs(c);
+	Judy1FreeArray(&c->subreqs_hash, PJE0);
+
 	aux_pool_free(c->pool);
 
 	return 0;

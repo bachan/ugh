@@ -521,6 +521,8 @@ ugh_subreq_t *ugh_subreq_add(ugh_client_t *c, char *url, size_t size, int flags)
 		return NULL;
 	}
 
+	ugh_client_add_subreq(c, r);
+
 	r->c = c;
 
 	r->flags = flags;
@@ -1116,11 +1118,17 @@ ok:
 		ugh_channel_add_message(r->ch, &r->body, &h_content_type->value, r);
 	}
 
-	JudyLFreeArray(&r->headers_hash, PJE0);
+	/* JudyLFreeArray(&r->headers_hash, PJE0); [> this should be cleaned after module <] */
 	JudyLFreeArray(&r->headers_out_hash, PJE0);
 
 	aux_pool_free(r->c->pool);
 
+	return 0;
+}
+
+int ugh_subreq_del_after_module(ugh_subreq_t *r)
+{
+	JudyLFreeArray(&r->headers_hash, PJE0);
 	return 0;
 }
 

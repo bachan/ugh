@@ -1,3 +1,9 @@
+ugh (0.1.12-1) unstable; urgency=medium
+
+  * fixed subreq headers reading
+
+ -- Sergey Bochenkov <ba4an@yandex.ru>  Tue, 04 Apr 2017 12:38:58 +0700
+
 ugh (0.1.11-1) unstable; urgency=medium
 
   * support setting out headers for subrequest

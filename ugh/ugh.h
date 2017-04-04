@@ -102,6 +102,12 @@ extern const char *ugh_version_string [UGH_HTTP_VERSION_MAX];
 typedef struct ugh_client
 	ugh_client_t;
 
+typedef struct ugh_subreq
+	ugh_subreq_t;
+
+typedef struct ugh_channel
+	ugh_channel_t;
+
 struct ugh_client
 {
 	ugh_server_t *s;
@@ -143,6 +149,8 @@ struct ugh_client
 	strt body;
 	size_t content_length;
 
+	void *subreqs_hash; /* Judy1 (ugh_subreq_t *) */
+
 	/* response */
 
 	void *headers_out_hash;
@@ -163,6 +171,9 @@ struct ugh_client
 
 int ugh_client_add(ugh_server_t *s, int sd, struct sockaddr_in *addr);
 int ugh_client_del(ugh_client_t *c);
+
+int ugh_client_add_subreq(ugh_client_t *c, ugh_subreq_t *r);
+int ugh_client_del_subreqs(ugh_client_t *c);
 
 int ugh_client_send(ugh_client_t *c, int status);
 
@@ -253,12 +264,6 @@ ugh_upstream_t *ugh_upstream_add(ugh_config_t *cfg, const char *name, size_t siz
 ugh_upstream_t *ugh_upstream_get(ugh_config_t *cfg, const char *name, size_t size);
 
 /* ### subreq ### */
-
-typedef struct ugh_subreq
-	ugh_subreq_t;
-
-typedef struct ugh_channel
-	ugh_channel_t;
 
 typedef int (*ugh_subreq_handle_fp)(ugh_subreq_t *r, char *data, size_t size);
 
@@ -363,6 +368,7 @@ int ugh_subreq_set_channel(ugh_subreq_t *r, ugh_channel_t *ch, unsigned tag);
 int ugh_subreq_run(ugh_subreq_t *r);
 int ugh_subreq_gen(ugh_subreq_t *r, strp u_host);
 int ugh_subreq_del(ugh_subreq_t *r, uint32_t ft_type, int ft_errno);
+int ugh_subreq_del_after_module(ugh_subreq_t *r);
 
 strp ugh_subreq_get_host(ugh_subreq_t *r);
 in_port_t ugh_subreq_get_port(ugh_subreq_t *r);
