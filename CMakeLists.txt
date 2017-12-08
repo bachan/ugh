@@ -3,7 +3,6 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 INCLUDE (CMakeMacro.cmake)
 
 USE_PACKAGE (ev ev.h) 
-USE_PACKAGE (m math.h)
 USE_PACKAGE (Judy Judy.h)
 
 SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -export-dynamic")
@@ -34,7 +33,7 @@ SET (UGH_VERSION "0.1.1")
 
 AUX_SOURCE_DIRECTORY (ugh SRC_ugh)
 ADD_EXECUTABLE (ugh ${SRC_ugh})
-TARGET_LINK_LIBRARIES (ugh aux coro_ucontext ${LIB_Judy} ${LIB_ev} ${LIB_m} pthread)
+TARGET_LINK_LIBRARIES (ugh aux coro_ucontext ${LIB_Judy} ${LIB_ev} pthread m)
 
 IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
   TARGET_LINK_LIBRARIES (ugh dl)
