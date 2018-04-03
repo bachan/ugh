@@ -35,7 +35,7 @@ resolver host;
 
 import module_name [path/to/module.so];
   Import third-party module from .so-library. By default ugh searches inside
-  PREFIX/LIBDIR/ugh/ for library named libugh_module_name.so.
+  PREFIX/lib/ugh/ for library named libugh_module_name.so.
 
 map { ... }
   Just like nginx's map (doesn't support hostnames flag, though).

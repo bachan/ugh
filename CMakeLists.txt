@@ -48,6 +48,6 @@ INSTALL_TEMPLATE (ugh/autoconf.h.in DESTINATION include/ugh)
 
 AUX_SOURCE_DIRECTORY (ugh_example SRC_UGH_EXAMPLE)
 ADD_LIBRARY (ugh_example MODULE ${SRC_UGH_EXAMPLE})
-INSTALL (TARGETS ugh_example DESTINATION ${LIBDIR}/ugh)
+INSTALL (TARGETS ugh_example DESTINATION lib/ugh)
 INSTALL_TEMPLATE (ugh_example/config.cfg.in DESTINATION etc/ugh_example)
 

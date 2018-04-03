@@ -1,14 +1,8 @@
-#IF (CMAKE_COMPILER_IS_GNUCC)
 SET (FLAGS_DEFAULT  "-fPIC -pipe")
 SET (FLAGS_WARNING  "-Wall -Werror -Wno-long-long -Wno-variadic-macros -Wno-strict-aliasing")# -Wextra -pedantic")
 SET (FLAGS_CXX_LANG "-Wno-deprecated")
 SET (FLAGS_RELEASE  "-O3 -DNDEBUG") # -fomit-frame-pointer -funroll-loops
 SET (FLAGS_DEBUG    "-ggdb")
-
-# TODO
-# -pedantic: stupid gcc-4.4 warning about empty macro arguments
-# -fno-strict-aliasing: removes following optimizations
-# -Wno-strict-aliasing: removes warning
 
 # This is needed because debian package builder sets -DCMAKE_BUILD_TYPE=None
 IF (CMAKE_BUILD_TYPE STREQUAL None)
@@ -20,12 +14,6 @@ SET (CMAKE_C_FLAGS_RELEASE   "${FLAGS_DEFAULT} ${FLAGS_WARNING} ${FLAGS_DEBUG} $
 
 SET (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   ${FLAGS_CXX_LANG}")
 SET (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${FLAGS_CXX_LANG}")
-
-# Debug options to prevent buffer overflows, see:
-# http://gcc.gnu.org/ml/gcc-patches/2004-09/msg02055.html
-# ADD_DEFINITIONS (-D_FORTIFY_SOURCE=2)
-# ADD_DEFINITIONS (-fstack-protector)
-#ENDIF ()
 
 IF (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   SET (CMAKE_BUILD_TYPE RELEASE)
@@ -43,19 +31,6 @@ ADD_DEFINITIONS (-D__STDC_LIMIT_MACROS)
 # Enable 64-bit off_t type to work with big files.
 ADD_DEFINITIONS (-D_FILE_OFFSET_BITS=64)
 
-# Enable ignore errors mode in Judy macros.
-#ADD_DEFINITIONS (-DJUDYERROR_NOTEST)
-
-SET (LIBDIR lib)
-#IF (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-#  SET (LIBDIR lib64)
-#ENDIF (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-
-# Don't know if this is needed with one monolith CMakeLists.txt file.
-#SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-#SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-#SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
 # Make FIND_LIBRARY search for static libs first and make it search inside lib64/
 # directory in addition to the usual lib/ one.
 
@@ -70,7 +45,6 @@ SET (LINK_SEARCH_END_STATIC TRUE)
 
 INCLUDE_DIRECTORIES (${PROJECT_BINARY_DIR})
 INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR})
-#INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
 
 ###############################################################################
 # USE_PROGRAM (bin)
@@ -232,22 +206,6 @@ MACRO (INSTALL_TEMPLATE sub)
   CONFIGURE_FILE (${sub} ${PROJECT_BINARY_DIR}/auto/${${sub}_NOIN})
   INSTALL (FILES ${PROJECT_BINARY_DIR}/auto/${${sub}_NOIN} ${ARGN})
 ENDMACRO (INSTALL_TEMPLATE)
-
-###############################################################################
-# GET_LOCALTIME (var [format [tmzone]])
-# -----------------------------------------------------------------------------
-# Print system date and time regarding to specified [format] and [tmzone]. If
-# either [format] or [tmzone] is omitted, the default settings for the current
-# locale will take the place.
-# TODO make variadic.
-
-#MACRO (GET_LOCALTIME var format tmzone)
-#  SET_IF_NOT_SET (o_format "${format}")
-#  SET_IF_NOT_SET (o_format "%c")
-#  SET_IF_NOT_SET (o_tmzone "${tmzone}")
-#  SET_IF_NOT_NIL (o_tmzone "-d'now GMT${o_tmzone}'")
-#  ADD_CUSTOM_COMMAND (OUTPUT var COMMAND "date +'${o_format}' ${o_tmzone}")
-#ENDMACRO (GET_LOCALTIME)
 
 ###############################################################################
 

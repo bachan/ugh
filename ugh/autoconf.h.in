@@ -4,7 +4,7 @@
 #define UGH_VERSION "@UGH_VERSION@"
 
 #define UGH_PREFIX "@CMAKE_INSTALL_PREFIX@"
-#define UGH_MODULE_PREFIX UGH_PREFIX"/@LIBDIR@/ugh/libugh_"
+#define UGH_MODULE_PREFIX UGH_PREFIX"/lib/ugh/libugh_"
 #define UGH_MODULE_SUFFIX ".so"
 
 #endif /* __UGH_AUTOCONF_H__ */
