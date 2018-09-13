@@ -1,3 +1,9 @@
+ugh (0.1.14-1) unstable; urgency=medium
+
+  * supported templates of unlimited length
+
+ -- Sergey Bochenkov <ba4an@yandex.ru>  Thu, 13 Sep 2018 15:45:03 +0700
+
 ugh (0.1.13-1) unstable; urgency=medium
 
   * Fixed dependency to library 'm' for Debian 9
