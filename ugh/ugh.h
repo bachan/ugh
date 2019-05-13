@@ -497,15 +497,17 @@ int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, ugh_channel_mess
 #define UGH_HTTP_UNSUPPORTED_MEDIA_TYPE             0x1F /* 415 */
 #define UGH_HTTP_REQUESTED_RANGE_NOT_SATISFIABLE    0x20 /* 416 */
 #define UGH_HTTP_EXPECTATION_FAILED                 0x21 /* 417 */
-#define UGH_HTTP_INTERNAL_SERVER_ERROR              0x22 /* 500 */
-#define UGH_HTTP_METHOD_NOT_IMPLEMENTED             0x23 /* 501 */
-#define UGH_HTTP_BAD_GATEWAY                        0x24 /* 502 */
-#define UGH_HTTP_SERVICE_TEMPORARILY_UNAVAILABLE    0x25 /* 503 */
-#define UGH_HTTP_GATEWAY_TIME_OUT                   0x26 /* 504 */
-#define UGH_HTTP_HTTP_VERSION_NOT_SUPPORTED         0x27 /* 505 */
-#define UGH_HTTP_VARIANT_ALSO_NEGOTIATES            0x28 /* 506 */
-#define UGH_HTTP_INSUFFICIENT_STORAGE               0x29 /* 507 */
-#define UGH_HTTP_STATUS_MAX                         0x2A
+#define UGH_HTTP_TOO_MANY_REQUESTS                  0x22 /* 429 */
+#define UGH_HTTP_UNAVAILABLE_FOR_LEGAL_REASONS      0x23 /* 451 */
+#define UGH_HTTP_INTERNAL_SERVER_ERROR              0x24 /* 500 */
+#define UGH_HTTP_METHOD_NOT_IMPLEMENTED             0x25 /* 501 */
+#define UGH_HTTP_BAD_GATEWAY                        0x26 /* 502 */
+#define UGH_HTTP_SERVICE_TEMPORARILY_UNAVAILABLE    0x27 /* 503 */
+#define UGH_HTTP_GATEWAY_TIME_OUT                   0x28 /* 504 */
+#define UGH_HTTP_HTTP_VERSION_NOT_SUPPORTED         0x29 /* 505 */
+#define UGH_HTTP_VARIANT_ALSO_NEGOTIATES            0x2A /* 506 */
+#define UGH_HTTP_INSUFFICIENT_STORAGE               0x2B /* 507 */
+#define UGH_HTTP_STATUS_MAX                         0x2C
 
 extern const char *ugh_status_header [UGH_HTTP_STATUS_MAX];
 
