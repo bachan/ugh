@@ -505,7 +505,9 @@ int ugh_channel_get_message(ugh_channel_t *ch, ugh_client_t *c, ugh_channel_mess
 #define UGH_HTTP_HTTP_VERSION_NOT_SUPPORTED         0x27 /* 505 */
 #define UGH_HTTP_VARIANT_ALSO_NEGOTIATES            0x28 /* 506 */
 #define UGH_HTTP_INSUFFICIENT_STORAGE               0x29 /* 507 */
-#define UGH_HTTP_STATUS_MAX                         0x2A
+#define UGH_HTTP_TOO_MANY_REQUESTS                  0x2A /* 429 */
+#define UGH_HTTP_UNAVAILABLE_FOR_LEGAL_REASONS      0x2B /* 451 */
+#define UGH_HTTP_STATUS_MAX                         0x2C
 
 extern const char *ugh_status_header [UGH_HTTP_STATUS_MAX];
 

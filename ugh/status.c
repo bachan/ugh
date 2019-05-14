@@ -57,5 +57,7 @@ const char *ugh_status_header [UGH_HTTP_STATUS_MAX] = {
 	"505 HTTP Version Not Supported",
 	"506 Variant Also Negotiates",
 	"507 Insufficient Storage",
+	"429 Too Many Requests",
+	"451 Unavailable For Legal Reasons",
 };
 

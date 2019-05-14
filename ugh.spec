@@ -1,6 +1,6 @@
 Summary:	UGH http server
 Name:		ugh	
-Version:	0.1.8
+Version:	0.1.15
 Release:	1%{?dist}
 Group:		Networking/Daemons
 License:	GPL
@@ -69,6 +69,10 @@ rm -rf %{buildroot}
 %{_includedir}/ugh/ugh.h
 
 %changelog
+
+* Mon Sep 13 2019 Ruslan Osmanov <rrosmanov@gmail.com> - 0.1.15-1
++ Added support for HTTP statuses 417 and 451
+
 * Mon Jan 05 2015 Alexander Pankov <pianist@usrsrc.ru> - 0.1.8-1
 + First RPM build
 
