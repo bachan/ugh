@@ -49,8 +49,6 @@ const char *ugh_status_header [UGH_HTTP_STATUS_MAX] = {
 	"415 Unsupported Media Type",
 	"416 Requested Range Not Satisfiable",
 	"417 Expectation Failed",
-	"429 Too Many Requests",
-	"451 Unavailable For Legal Reasons",
 	"500 Internal Server Error",
 	"501 Method Not Implemented",
 	"502 Bad Gateway",
@@ -59,5 +57,7 @@ const char *ugh_status_header [UGH_HTTP_STATUS_MAX] = {
 	"505 HTTP Version Not Supported",
 	"506 Variant Also Negotiates",
 	"507 Insufficient Storage",
+	"429 Too Many Requests",
+	"451 Unavailable For Legal Reasons",
 };
 
