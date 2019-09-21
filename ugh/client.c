@@ -145,7 +145,7 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 			return;
 		}
 
-		if (UGH_HTTP_POST == c->method)
+		if (UGH_HTTP_POST == c->method || UGH_HTTP_PUT == c->method)
 		{
 			ugh_header_t *hdr_content_length = ugh_client_header_get_nt(c, "Content-Length");
 
@@ -176,7 +176,7 @@ void ugh_client_wcb_recv(EV_P_ ev_io *w, int tev)
 			}
 		}
 	}
-	else if (UGH_HTTP_POST == c->method)
+	else if (UGH_HTTP_POST == c->method || UGH_HTTP_PUT == c->method)
 	{
 		c->body.size += nb;
 
